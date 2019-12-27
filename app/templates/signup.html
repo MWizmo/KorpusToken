@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2> Регистрация </h2>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.email.label }} <br>
+            {{ form.email(size=32) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.login.label }} <br>
+            {{ form.login(size=32) }}
+            {% for error in form.login.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+       <p>
+            {{ form.password.label }} <br>
+            {{ form.password(size=32) }}
+            {% for error in form.password.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }} <br>
+            {{ form.password2(size=32) }}
+            {% for error in form.password2.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.tg_nickname.label }} <br>
+            {{ form.tg_nickname(size=32) }}
+            {% for error in form.tg_nickname.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.courses.label }} <br>
+            {{ form.courses(size=64) }}
+            {% for error in form.courses.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.participate.label }}
+            {{ form.participate }} <br>
+            {{ form.team.label }}
+            {{ form.team }}
+            {{ form.role.label }}
+            {{ form.role }}
+        </p>
+        <p>
+            {{ form.birthday.label }} <br>
+            {{ form.birthday }}
+        </p>
+        <p>
+            {{ form.sex.label }} <br>
+            {{ form.sex }}
+        </p>
+        <p>
+            {{ form.education.label }} <br>
+            {{ form.education }}
+        </p>
+        <p>
+            {{ form.work_exp.label }} <br>
+            {{ form.work_exp }}
+        </p>
+        <p>
+            {{ form.vk_url.label }} <br>
+            {{ form.vk_url }}
+        </p>
+        <p>
+            {{ form.fb_url.label }} <br>
+            {{ form.fb_url }}
+        </p>
+        <p>
+            {{ form.inst_url.label }} <br>
+            {{ form.inst_url }}
+        </p>
+        <p>
+            {{ form.submit }}
+        </p>
+    </form>
+{% endblock %}

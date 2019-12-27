@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if tittle %}
+    <title> {{ tittle }} </title>
+    {% else %}
+    <title> KorpusToken </title>
+    {% endif %}
+</head>
+<body>
+    <div> KorpusToken: {{ current_user.username }}
+        <a href="{{ url_for('home') }}">На главную</a>
+        {% if current_user.is_anonymous %}
+        <a href="{{ url_for('login') }}">Войти</a>
+        {% else %}
+        <a href="{{ url_for('logout') }}">Выйти</a>
+        {% endif %}
+        <a href="{{ url_for('signup') }}">Регистрация</a>
+    </div>
+    <hr>
+    {% block content %} {% endblock %}
+</body>
+</html>
