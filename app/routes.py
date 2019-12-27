@@ -49,7 +49,7 @@ def signup():
             birthday=form.birthday.data,
             education=form.education.data,
             work_exp=form.work_exp.data,
-            ses=form.sex.data)
+            sex=form.sex.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()

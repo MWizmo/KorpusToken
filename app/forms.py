@@ -30,7 +30,7 @@ class SignupForm(FlaskForm):
     education = StringField('Место учебы: ')
     submit = SubmitField('Зарегистрироваться')
 
-    def validate_username(self, login):
+    def validate_login(self, login):
         user = User.query.filter_by(login=login.data).first()
         if user is not None:
             raise ValidationError('Логин занят')
