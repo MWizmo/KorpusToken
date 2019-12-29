@@ -36,15 +36,17 @@ def login():
 def signup():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
+
     form = SignupForm()
+
     if form.validate_on_submit():
         user = User(
             email=form.email.data,
             login=form.login.data,
             tg_nickname=form.tg_nickname.data,
             username=form.tg_nickname.data,
-            team=form.team.data,
-            role=form.role.data,
+            team=str(form.team.data),
+            role=str(form.role.data),
             courses=form.courses.data,
             birthday=form.birthday.data,
             education=form.education.data,
@@ -54,6 +56,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('login'))
+    print(form.errors)
     return render_template('signup.html', tittle='Регистрация', form=form)
 
 

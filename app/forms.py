@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField
-from wtforms.validators import DataRequired, InputRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app.models import User
+from config import Config
 
 
 class LoginForm(FlaskForm):
@@ -19,8 +20,8 @@ class SignupForm(FlaskForm):
     password2 = PasswordField('Повторите пароль: ', validators=[DataRequired(), EqualTo('password')])
     courses = StringField('Пройденные курсы в IT-Korpus:')
     participate = BooleanField('Членство в IT-Korpus ')
-    team = StringField('Название команды:', validators=[DataRequired()])
-    role = StringField('Роль в команде:', validators=[DataRequired()])
+    team = SelectField('Название команды:', choices=[*Config.TEAMS])
+    role = SelectField('Роль в команде:', choices=[*Config.ROLES])
     birthday = DateField('Дата рождения: ')
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
     vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
