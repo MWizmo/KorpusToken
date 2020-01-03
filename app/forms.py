@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app.models import User
 from config import Config
@@ -22,7 +22,7 @@ class SignupForm(FlaskForm):
     participate = BooleanField('Членство в IT-Korpus ')
     team = SelectField('Название команды:', choices=[*Config.TEAMS])
     role = SelectField('Роль в команде:', choices=[*Config.ROLES])
-    birthday = DateField('Дата рождения: ')
+    birthday = DateField('Дата рождения: ',render_kw={"placeholder": "YYYY-MM-DD"})
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
     vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
     fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])
@@ -40,3 +40,12 @@ class SignupForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Email занят')
+
+
+class QuestionnairePersonal(FlaskForm):
+    # qst_fio = StringField('ФИО', validators=[DataRequired()])
+    qst_personal_growth = TextAreaField('Личностный рост ', validators=[DataRequired()])
+    qst_controllability = TextAreaField('Управляемость ', validators=[DataRequired()])
+    qst_selfcontrol = TextAreaField('Самоуправление ', validators=[DataRequired()])
+    qst_strategy = TextAreaField('Стратегия ', validators=[DataRequired()])
+    submit = SubmitField('Отправить')

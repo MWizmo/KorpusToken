@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h3>Заявка на оценку</h3>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token() }}
+
+
+
+        <p>
+            {{ form.qst_personal_growth.label }}<br>
+            <label>{{ q1 }}</label><br>
+            {{ form.qst_personal_growth }}
+            {% for error in form.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.qst_controllability.label }}<br>
+            <label>{{ q2 }}</label><br>
+            {{ form.qst_controllability }}
+            {% for error in form.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.qst_selfcontrol.label }}<br>
+            <label>{{ q3 }}</label><br>
+            {{ form.qst_selfcontrol }}
+            {% for error in form.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.qst_strategy.label }}<br>
+            <label>{{ q4 }}</label><br>
+            {{ form.qst_strategy }}
+            {% for error in form.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.submit }}
+        </p>
+
+
+    </form>
+{% endblock %}
