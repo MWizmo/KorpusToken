@@ -18,6 +18,9 @@
             <span style="color: red;"> {{error}} </span>
             {% endfor %}
         </p>
+        {% if err %}
+        <p> Неправильный логин или пароль </p>
+        {% endif %}
         <p> {{ form.remember_me() }} {{ form.remember_me.label }}</p>
         <p> {{ form.submit }} </p>
     </form>

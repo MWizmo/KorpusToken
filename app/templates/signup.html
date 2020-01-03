@@ -70,6 +70,9 @@
         <p>
             {{ form.birthday.label }} <br>
             {{ form.birthday }}
+            {% for error in form.birthday.errors %}
+            <span style="color: red;"> {{error}} </span>
+            {% endfor %}
         </p>
         <p>
             {{ form.sex.label }} <br>
