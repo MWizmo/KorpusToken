@@ -1,10 +1,4 @@
 {% extends "base.html" %}
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-    <h1>Добро пожаловать в KorpusToken, </h1>
-        <h2>{{ user.username }}!</h2>
-        {% if messages %}
-        <label> {{ messages }}</label>
-        {% endif %}
-    {% endwith %}
+    <h2>Добро пожаловать в KorpusToken, {{ user.name }}!</h2>
 {% endblock %}

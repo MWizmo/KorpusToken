@@ -1,8 +1,19 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from app.models import User
+from app.models import User, Teams
 from config import Config
+
+
+class SuppClass:
+    @staticmethod
+    def get_teams():
+        teams = []
+
+        for team in Teams.query.all():
+            teams.append((str(team.id), team.name))
+        print(teams)
+        return teams
 
 
 class LoginForm(FlaskForm):
@@ -12,15 +23,17 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 
-class SignupForm(FlaskForm):
+class SignupForm(FlaskForm, SuppClass):
     email = StringField('Почта:', validators=[DataRequired(), Email()])
     tg_nickname = StringField('Ник в Telegram:', validators=[DataRequired()])
+    name = StringField('Имя', validators=[DataRequired()])
+    surname = StringField('Фамилия', validators=[DataRequired()])
     login = StringField('Логин для авторизации:', validators=[DataRequired()])
     password = PasswordField('Пароль: ', validators=[DataRequired()])
     password2 = PasswordField('Повторите пароль: ', validators=[DataRequired(), EqualTo('password')])
     courses = StringField('Пройденные курсы в IT-Korpus:')
     participate = BooleanField('Членство в IT-Korpus ')
-    team = SelectField('Название команды:', choices=[*Config.TEAMS])
+    team = SelectField('Название команды:', choices=[*SuppClass.get_teams()])
     role = SelectField('Роль в команде:', choices=[*Config.ROLES])
     birthday = DateField('Дата рождения: ',render_kw={"placeholder": "YYYY-MM-DD"})
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
@@ -43,9 +56,17 @@ class SignupForm(FlaskForm):
 
 
 class QuestionnairePersonal(FlaskForm):
-    # qst_fio = StringField('ФИО', validators=[DataRequired()])
     qst_personal_growth = TextAreaField('Личностный рост ', validators=[DataRequired()])
     qst_controllability = TextAreaField('Управляемость ', validators=[DataRequired()])
     qst_selfcontrol = TextAreaField('Самоуправление ', validators=[DataRequired()])
     qst_strategy = TextAreaField('Стратегия ', validators=[DataRequired()])
+    submit = SubmitField('Отправить')
+
+
+class QuestionnaireTeam(FlaskForm):
+    qst_q1 = StringField('', validators=[DataRequired()])
+    qst_q2 = StringField('', validators=[DataRequired()])
+    qst_q3 = StringField('', validators=[DataRequired()])
+    qst_q4 = StringField('', validators=[DataRequired()])
+    qst_q5 = StringField('', validators=[DataRequired()])
     submit = SubmitField('Отправить')

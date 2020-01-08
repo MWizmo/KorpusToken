@@ -42,6 +42,24 @@
             {% endfor %}
         </p>
         <p>
+            {{ form.name.label }} <br>
+            {{ form.name(size=32) }}
+            {% for error in form.name.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.surname.label }} <br>
+            {{ form.surname(size=32) }}
+            {% for error in form.surname.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
             {{ form.tg_nickname.label }} <br>
             {{ form.tg_nickname(size=32) }}
             {% for error in form.tg_nickname.errors %}
@@ -92,11 +110,13 @@
         </p>
         <p>
             {{ form.fb_url.label }} <br>
-            {{ form.fb_url }}
+            {{ form.fb_url }}<br>
+            <label>если нет, оставить -</label>
         </p>
         <p>
             {{ form.inst_url.label }} <br>
-            {{ form.inst_url }}
+            {{ form.inst_url }}<br>
+            <label>если нет, оставить -</label>
         </p>
         <p>
             {{ form.submit }}
