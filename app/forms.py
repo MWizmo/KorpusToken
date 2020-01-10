@@ -36,7 +36,7 @@ class SignupForm(FlaskForm, SuppClass):
     participate = BooleanField('Членство в IT-Korpus ')
     team = SelectField('Название команды:', choices=[*SuppClass.get_teams()])
     role = SelectField('Роль в команде:', choices=[*Config.ROLES])
-    birthday = DateField('Дата рождения: ',render_kw={"placeholder": "YYYY-MM-DD"})
+    birthday = DateField('Дата рождения: ', render_kw={"placeholder": "YYYY-MM-DD"})
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
     vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
     fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])

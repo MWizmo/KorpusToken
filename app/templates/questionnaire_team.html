@@ -1,88 +1,90 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-    <h3>Тиммейт 1</h3>
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.csrf_token() }}
-
-
-        <p>
-            {{ form.qst_q1.label }}<br>
-            <label>{{ q1 }}</label><br>
-            {% for teammate in teammates %}
-                <input type="radio" name="qst_q1" value="{{ teammate.id }}">
-                <label>{{ teammate.name }} </label> <br>
-            {% endfor %}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_q2.label }}<br>
-            <label>{{ q2 }}</label><br>
-            {% for teammate in teammates %}
-                <input type="radio" name="qst_q2" value="{{ teammate.id }}">
-                <label>{{ teammate.name }} </label> <br>
-            {% endfor %}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_q3.label }}<br>
-            <label>{{ q3 }}</label><br>
-            {% for teammate in teammates %}
-                <input type="radio" name="qst_q3" value="{{ teammate.id }}">
-                <label>{{ teammate.name }} </label> <br>
-            {% endfor %}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_q4.label }}<br>
-            <label>{{ q4 }}</label><br>
-            {% for teammate in teammates %}
-                <input type="radio" name="qst_q4" value="{{ teammate.id }}">
-                <label>{{ teammate.name }} </label> <br>
-            {% endfor %}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_q5.label }}<br>
-            <label>{{ q5 }}</label><br>
-            {% for teammate in teammates %}
-                <input type="radio" name="qst_q5" value="{{ teammate.id }}">
-                <label>{{ teammate.name }} </label> <br>
-            {% endfor %}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.submit }}
-        </p>
+<div class="container">
+    <div class="questionnaire">
+        <h2>Тиммейт 1</h2>
+        <form action="" method="post" class="form">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token() }}
 
 
-    </form>
+            <p>
+                {{ form.qst_q1.label }}<br>
+                <label><p class="question">{{ q1 }}</p></label>
+                {% for teammate in teammates %}
+                    <input type="radio" name="qst_q1" value="{{ teammate.id }}">
+                    <label><span class="teammate_name">{{ teammate.name }}</span></label> <br>
+                {% endfor %}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
 
+            <p>
+                {{ form.qst_q2.label }}<br>
+                <label><p class="question">{{ q2 }}</p></label>
+                {% for teammate in teammates %}
+                    <input type="radio" name="qst_q2" value="{{ teammate.id }}">
+                    <label><span class="teammate_name">{{ teammate.name }}</span></label> <br>
+                {% endfor %}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_q3.label }}<br>
+                <label><p class="question">{{ q3 }}</p></label>
+                {% for teammate in teammates %}
+                    <input type="radio" name="qst_q3" value="{{ teammate.id }}">
+                    <label><span class="teammate_name">{{ teammate.name }}</span></label> <br>
+                {% endfor %}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_q4.label }}<br>
+                <label><p class="question">{{ q4 }}</p></label>
+                {% for teammate in teammates %}
+                    <input type="radio" name="qst_q4" value="{{ teammate.id }}">
+                    <label><span class="teammate_name">{{ teammate.name }}</span></label> <br>
+                {% endfor %}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_q5.label }}<br>
+                <label><p class="question">{{ q5 }}</p></label>
+                {% for teammate in teammates %}
+                    <input type="radio" name="qst_q5" value="{{ teammate.id }}">
+                    <label><span class="teammate_name">{{ teammate.name }}</span></label> <br>
+                {% endfor %}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.submit(class_="submit") }}
+            </p>
+
+
+        </form>
+    </div>
+</div>
 {% endblock %}

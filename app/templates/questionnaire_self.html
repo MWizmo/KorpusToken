@@ -1,61 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>Заявка на оценку</h3>
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.csrf_token() }}
+<div class="container">
+    <div class="questionnaire">
+        <h2>Заявка на оценку</h3>
+        <form action="" method="post" class="form">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token() }}
+
+            <p>
+                {{ form.qst_personal_growth.label(class_="question_type") }}<br>
+                <label><p class="question">{{ q1 }}</p></label>
+                {{ form.qst_personal_growth(class_="text_field", rows='15',cols='75') }}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_controllability.label(class_="question_type") }}<br>
+                <label><p class="question">{{ q2 }}</p></label>
+                {{ form.qst_controllability(class_="text_field", rows='15',cols='75')}}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_selfcontrol.label(class_="question_type") }}<br>
+                <label><p class="question">{{ q3 }}</p></label>
+                {{ form.qst_selfcontrol(class_="text_field", rows='15',cols='75') }}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.qst_strategy.label(class_="question_type") }}<br>
+                <label><p class="question">{{ q4 }}</p></label>
+                {{ form.qst_strategy(class_="text_field", rows='15',cols='75') }}
+                {% for error in form.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+
+            <p>
+                {{ form.submit(class_='submit') }}
+            </p>
 
 
-
-        <p>
-            {{ form.qst_personal_growth.label }}<br>
-            <label>{{ q1 }}</label><br>
-            {{ form.qst_personal_growth }}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_controllability.label }}<br>
-            <label>{{ q2 }}</label><br>
-            {{ form.qst_controllability }}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_selfcontrol.label }}<br>
-            <label>{{ q3 }}</label><br>
-            {{ form.qst_selfcontrol }}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.qst_strategy.label }}<br>
-            <label>{{ q4 }}</label><br>
-            {{ form.qst_strategy }}
-            {% for error in form.errors %}
-                <span style="color: red;">
-                    {{ error }}
-                </span>
-            {% endfor %}
-        </p>
-
-        <p>
-            {{ form.submit }}
-        </p>
-
-
-    </form>
+        </form>
+    </div>
+</div>
 {% endblock %}
