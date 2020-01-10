@@ -126,6 +126,15 @@ h1, h2, h3, h4, h5, h6{
 	padding-top: 35px;
 }
 
+/* Login */
+.signup{
+    width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+	padding-top: 35px;
+}
+
 /* Form */
 .form{
 	width: 100%;
