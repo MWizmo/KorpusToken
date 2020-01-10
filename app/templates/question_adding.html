@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h2>Конструктор вопросов</h2>
+    <form method="post", action="">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token() }}
+        <p>
+        <h3>{{ form.question_form.label }}</h3>
+            {{ form.question_form }}
+            {% for error in form.question_form.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        <p>
+        <h3>{{ form.question_type.label }}</h3>
+            {{ form.question_type }}
+            {% for error in form.question_type.errors %}
+                <span style="color: red;">
+                    {{ error }}
+                </span>
+            {% endfor %}
+        </p>
+        {{ form.submit }}
+        {% if successful %}
+            <label style="color: green;">Вопрос добавлен</label>
+        {% endif %}
+    </form>
+
+{% endblock %}
