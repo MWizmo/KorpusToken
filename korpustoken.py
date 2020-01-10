@@ -13,4 +13,4 @@ from app import app
 #     pass
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)

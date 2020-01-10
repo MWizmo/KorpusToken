@@ -1,29 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2> Вход </h2>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.login.label }} <br>
-            {{ form.login(size=32) }}
-            {% for error in form.login.errors %}
-            <span style="color: red;"> {{error}} </span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }} <br>
-            {{ form.password(size=32) }}
-            {% for error in form.password.errors %}
-            <span style="color: red;"> {{error}} </span>
-            {% endfor %}
-        </p>
-        {% if err %}
-        <p> Неправильный логин или пароль </p>
-        {% endif %}
-        <p> {{ form.remember_me() }} {{ form.remember_me.label }}</p>
-        <p> {{ form.submit }} </p>
-    </form>
-    <p>Не зарегистрированы? <a href="{{ url_for('signup') }}">Зарегистрироваться!</a></p>
-
+<div class="container">
+    <div class="login">
+        <h2> Вход </h2>
+            <form action="" method="post" novalidate class="form">
+                {{ form.csrf_token() }}
+                {{ form.hidden_tag() }}
+                <p>
+                    <span class="main_text">{{ form.login.label }}</span> <br>
+                    {{ form.login(size=32) }}
+                    {% for error in form.login.errors %}
+                    <span style="color: red;"> {{error}} </span>
+                    {% endfor %}
+                </p>
+                <p>
+                    <span class="main_text">{{ form.password.label }}</span> <br>
+                    {{ form.password(size=32) }}
+                    {% for error in form.password.errors %}
+                    <span style="color: red;"> {{error}} </span>
+                    {% endfor %}
+                </p>
+                {% if err %}
+                <p> Неправильный логин или пароль </p>
+                {% endif %}
+                <p> {{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                <p> {{ form.submit(class_="submit") }} </p>
+            </form>
+            <p>Не зарегистрированы? <a class="nav__link" href="{{ url_for('signup') }}">Зарегистрироваться!</a></p>
+    </div>
+</div>
 {% endblock %}

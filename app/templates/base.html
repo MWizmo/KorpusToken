@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext" rel="stylesheet">
     {% if title %}
     <title> {{ title }} </title>
     {% else %}
@@ -9,25 +12,32 @@
     {% endif %}
 </head>
 <body>
-    <div> KorpusToken: {{ current_user.login }}
-        <a href="{{ url_for('home') }}">На главную</a>
-        {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login') }}">Войти</a>
-        <a href="{{ url_for('signup') }}">Регистрация</a>
-        {% else %}
-        {% if responsibilities.cadet %}
-            <a href="{{ url_for('questionnaire_self') }}">Личная анкета</a>
-            {% if team %}
-                <a href="{{ url_for('questionnaire_team') }}">Командная анкета</a>
-                {% endif %}
-        {% endif %}
-        {% if responsibilities.admin %}
-            <a href="{{ url_for('question_adding') }}">Конструктор вопросов</a>
-            {% endif %}
-            <a href="{{ url_for('logout') }}">Выйти</a>
-        {% endif %}
-    </div>
-    <hr>
+    <header class="header">
+        <div class="container">
+            <div class="header__inner">
+                <div class="logo"><a href="{{ url_for('home') }}"><img class="logo_gif" src="./static/gif/logo.gif"></a></div>
+                <nav class="nav">
+                    {% if current_user.is_anonymous %}
+                    <a class="nav__link" href="{{ url_for('login') }}">Войти</a>
+                    <a class="nav__link" href="{{ url_for('signup') }}">Регистрация</a>
+                    {% else %}
+                    <a class="nav__link" href="{{ url_for('home') }}">На главную</a>
+                    {% if responsibilities.cadet %}
+                        <a class="nav__link" href="{{ url_for('questionnaire_self') }}">Личная анкета</a>
+                        {% if team %}
+                            <a class="nav__link" href="{{ url_for('questionnaire_team') }}">Командная анкета</a>
+                            {% endif %}
+                    {% endif %}
+                    {% if responsibilities.admin %}
+                        <a class="nav__link" href="{{ url_for('question_adding') }}">Конструктор вопросов</a>
+                        {% endif %}
+                        <a class="nav__link" href="{{ url_for('logout') }}">Выйти</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+
+    <header>
     {% block content %} {% endblock %}
 </body>
 </html>

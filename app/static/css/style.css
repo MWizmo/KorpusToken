@@ -1,0 +1,208 @@
+body{
+	margin: 0;
+	font-family: 'Share Tech Mono', monospace;
+
+	font-size: 15px;
+	color:#333;
+	line-height: 1.6;
+
+	/*background: url("../images/main.jpg") center no-repeat;
+	background-size: cover;
+	-webkit-background-size: cover;
+	*/
+	background-color: #fff;
+}
+*,
+*:before
+*:after{
+	box-sizing: border-box;
+}
+
+/* intro */
+
+.intro{
+	width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+}
+.intro_title{
+	font-size: 25px;
+	font-weight: 700;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+/* Container */
+
+.container{
+	display: block;
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+h1, h2, h3, h4, h5, h6{
+	margin: 0;
+	text-transform: uppercase;
+}
+
+/* logo */
+.logo_gif{
+	width: 75px;
+	height: 75px;
+}
+
+/* Header */
+.header{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1000;
+	width: 100%;
+}
+.header__inner{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+/* Navigation */
+.nav{
+	text-transform: uppercase;
+	font-size: 16px;
+}
+.nav__link{
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 10px;
+	position: relative;
+
+	color: #000000;
+	text-decoration: none;
+	transition: color .2s linear;
+	font-family: 'Share Tech Mono', monospace;
+}
+.nav__link:hover{
+	 color: #fff;
+	 background-color: #000000;
+}
+.nav__link:after{
+	content: "";
+	display: block;
+	width: 100%;
+	height: 3px;
+	display: none;
+
+	background-color: #fff;
+	opacity: 0;
+
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 1;
+
+	transition: opacity .2s linear;
+}
+.nav__link:hover:after{
+	opacity: 1;
+}
+
+/* Login */
+
+.login{
+	width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+	padding-top: 35px;
+}
+
+/* Form */
+.form{
+	width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+	font-family: 'Share Tech Mono', monospace;
+}
+
+/* Button */
+.submit{
+	font-family: 'Share Tech Mono', monospace;
+}
+.submit:hover{
+	 color: #fff;
+	 background-color: #000000;
+}
+.submit:active{
+	color: rgb(255, 0, 0);
+	background-color: #000000;
+}
+.submit_sex:hover{
+	color: #fff;
+	background-color: #000000;
+}
+.submit_team:hover{
+	color: #fff;
+	background-color: #000000;
+}
+
+/* Questionnaire */
+.questionnaire{
+	width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+	padding-top: 35px;
+}
+.question_type{
+	text-transform: uppercase;
+	font-weight: 800;
+}
+.question{
+	background-color: #000000;
+	width: auto;
+	color: #fff;
+	padding-bottom: auto;
+}
+.teammate_name{
+	text-transform: uppercase;
+	font-weight: 650;
+}
+
+/* Text */
+.main_text{
+	font-weight: 550;
+}
+.text_field{
+	border: 1px solid #000000; //цвет рамки
+    border-radius: 100px; //закругление углов (общее)
+   -webkit-border-radius: 100px; //закругление углов (Google Chrome)
+   -moz-border-radius: 3px; //закругление углов (FireFox)
+   -khtml-border-radius: 3px; //закругление углов (Safari)
+    background: #ffffff !important; // желательно прописывать, так как в Chrome при сохранных данных оно может быть желтым
+    outline: none; // удаляет обводку в браузерах хром(желтая) и сафари(синяя)
+    height: 100px; // высота на свое усмотрение
+    width: 200px; // ширина на свое усмотрение
+    color: #000000; //цвет шрифта в обычном состоянии
+    font-size: 14px; // Размер шрифта
+	font-family: 'Share Tech Mono', monospace;
+}
+
+/* Construktor */
+.construktor{
+	width: 100%;
+	height: 100vh%;
+	flex-direction: column;
+	justify-content: center;
+	padding-top: 35px;
+}
+/*
+font-family: 'Montserrat', sans-serif;
+font-family: 'Monoton', cursive;
+font-family: 'Monofett', cursive;
+font-family: 'Share Tech Mono', monospace;
+*/
