@@ -15,9 +15,16 @@
         <a href="{{ url_for('login') }}">Войти</a>
         <a href="{{ url_for('signup') }}">Регистрация</a>
         {% else %}
-        <a href="{{ url_for('questionnaire_self') }}">Личная анкета</a>
-        <a href="{{ url_for('questionnaire_team') }}">Командная анкета</a>
-        <a href="{{ url_for('logout') }}">Выйти</a>
+        {% if responsibilities.cadet %}
+            <a href="{{ url_for('questionnaire_self') }}">Личная анкета</a>
+            {% if team %}
+                <a href="{{ url_for('questionnaire_team') }}">Командная анкета</a>
+                {% endif %}
+        {% endif %}
+        {% if responsibilities.admin %}
+            <a href="{{ url_for('question_adding') }}">Конструктор вопросов</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Выйти</a>
         {% endif %}
     </div>
     <hr>

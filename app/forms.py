@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, SelectField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
+                    DateField, SelectField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app.models import User, Teams
 from config import Config
@@ -70,3 +71,9 @@ class QuestionnaireTeam(FlaskForm):
     qst_q4 = StringField('', validators=[DataRequired()])
     qst_q5 = StringField('', validators=[DataRequired()])
     submit = SubmitField('Отправить')
+
+
+class QuestionAdding(FlaskForm):
+    question_form = TextAreaField('Вопрос', validators=[DataRequired()])
+    question_type = IntegerField('Тип вопроса', validators=[DataRequired()])
+    submit = SubmitField('Создать')

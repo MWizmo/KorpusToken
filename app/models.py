@@ -3,14 +3,44 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 
-"""
-Переделать логику регистрации, из User убрать role, team 
-и настроить занесение этих данных в бд teams/membership
-Разобраться с username
-"""
-
-
 class User(UserMixin, db.Model):
+    @staticmethod
+    def check_cadet(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        for status in statuses:
+            if status.status_id == 3:
+                return True
+        return False
+
+    @staticmethod
+    def check_admin(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        for status in statuses:
+            if status.status_id == 1:
+                return True
+        return False
+
+    @staticmethod
+    def check_teamlead(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        for status in statuses:
+            if status.status_id == 4:
+                return True
+        return False
+
+    @staticmethod
+    def check_chieftain(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        for status in statuses:
+            if status.status_id == 2:
+                return True
+        return False
+
+    @staticmethod
+    def dict_of_responsibilities(current_user_id):
+        return dict(admin=User.check_admin(current_user_id), cadet=User.check_cadet(current_user_id),
+                    chieftain=User.check_chieftain(current_user_id), teamlead=User.check_teamlead(current_user_id))
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     surname = db.Column(db.String(64))
@@ -54,6 +84,12 @@ class Teams(db.Model):
 
 
 class Membership(db.Model):
+    @staticmethod
+    def team_participation(current_user_id):
+        if Membership.query.filter_by(user_id=current_user_id).first():
+            return True
+        return False
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     team_id = db.Column(db.Integer)
@@ -85,6 +121,17 @@ class QuestionnaireInfo(db.Model):
     question_id = db.Column(db.Integer)
     question_num = db.Column(db.Integer)
     question_answ = db.Column(db.Text)
+
+
+class Statuses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(64), unique=True)
+
+
+class UserStatuses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    status_id = db.Column(db.Integer)
 
 
 @login.user_loader

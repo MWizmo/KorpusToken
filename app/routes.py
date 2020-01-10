@@ -1,10 +1,10 @@
 import datetime
 
 from app import app, db
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses
 from flask import render_template, redirect, url_for, request
 from werkzeug.urls import url_parse
-from app.forms import LoginForm, SignupForm, QuestionnairePersonal, QuestionnaireTeam
+from app.forms import LoginForm, SignupForm, QuestionnairePersonal, QuestionnaireTeam, QuestionAdding
 from flask_login import current_user, login_user, logout_user, login_required
 
 
@@ -13,7 +13,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 @login_required
 def home():
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
-    return render_template('homepage.html', title='KorpusToken', user=user)
+    return render_template('homepage.html', title='KorpusToken', user=user,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -54,10 +56,13 @@ def signup():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        user_team = Membership(user_id=User.query.filter_by(email=form.email.data).first().id,
-                               team_id=form.team.data,
-                               role_id=int(form.role.data))
-        db.session.add(user_team)
+        if form.participate.data:
+            user_team = Membership(user_id=User.query.filter_by(email=form.email.data).first().id,
+                                   team_id=form.team.data,
+                                   role_id=int(form.role.data))
+            db.session.add(user_team)
+        statuses = UserStatuses(user_id=User.query.filter_by(email=form.email.data).first().id, status_id=3)
+        db.session.add(statuses)
         db.session.commit()
         return redirect(url_for('login'))
     print(form.errors)
@@ -78,7 +83,9 @@ def questionnaire_self():
         last = str(db_date.year) + '-' + str(db_date.month)
         print(last, td)
         if last == td:
-            return render_template('questionnaire_error.html')
+            return render_template('questionnaire_error.html',
+                                   responsibilities=User.dict_of_responsibilities(current_user.id),
+                                   team=Membership.team_participation(current_user.id))
     except:
         with open('logs/log-{}.txt'.format(datetime.datetime.today()), 'w') as file:
             file.write('Ошибка при проверке лимита голосования или пользователь проголосовал впервые')
@@ -94,7 +101,8 @@ def questionnaire_self():
     if form.validate_on_submit():
         q = Questionnaire(user_id=current_user.id,
                           team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id,
-                          date=datetime.datetime.today(),
+                          date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                             datetime.datetime.now().day),
                           type=1)
         db.session.add(q)
         db.session.commit()
@@ -102,7 +110,7 @@ def questionnaire_self():
                  form.qst_selfcontrol.data, form.qst_strategy.data]
         i = 0
 
-        for question in questions:
+        for question in questions[:4]:
             answ = QuestionnaireInfo(question_id=question.id,
                                      questionnaire_id=Questionnaire.query.all()[-1].id,
                                      question_num=i+1,
@@ -113,7 +121,9 @@ def questionnaire_self():
         return redirect(url_for('home'))
 
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
-                           q2=questions[1].text, q3=questions[2].text, q4=questions[3].text)
+                           q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
 
 
 @app.route('/questionnaire_team', methods=['GET', 'POST'])
@@ -130,12 +140,12 @@ def questionnaire_team():
         last = str(db_date.year) + '-' + str(db_date.month)
         print(last, td)
         if last == td:
-            return render_template('questionnaire_error.html')
+            return render_template('questionnaire_error.html',
+                                   responsibilities=User.dict_of_responsibilities(current_user.id),
+                                   team=Membership.team_participation(current_user.id))
     except:
-        with open('log-{}.txt'.format(datetime.datetime.today()), 'w') as file:
+        with open('logs/log-{}.txt'.format(datetime.datetime.today()), 'w') as file:
             file.write('Ошибка при проверке лимита голосования')
-
-
 
     teammates = []
     lst_teammates_bd = Membership.query.filter_by(
@@ -154,7 +164,8 @@ def questionnaire_team():
     if form.validate_on_submit():
         q = Questionnaire(user_id=current_user.id,
                           team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id,
-                          date=datetime.datetime.today(),
+                          date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                             datetime.datetime.now().day),
                           type=2)
 
         db.session.add(q)
@@ -163,7 +174,7 @@ def questionnaire_team():
         answs = [form.qst_q1.data, form.qst_q2.data, form.qst_q3.data, form.qst_q4.data, form.qst_q5.data]
         i = 0
 
-        for question in questions[:4]:
+        for question in questions[:5]:
             answ = QuestionnaireInfo(question_id=question.id,
                                      questionnaire_id=Questionnaire.query.all()[-1].id,
                                      question_num=i+1,
@@ -175,10 +186,30 @@ def questionnaire_team():
 
     return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
                            q1=questions[0].text, q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
-                           q5=questions[4].text)
+                           q5=questions[4].text, responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
 
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route('/question_adding', methods=['POST', 'GET'])
+def question_adding():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    form = QuestionAdding()
+
+    if form.validate_on_submit():
+        q = Questions(type=form.question_type.data, text=form.question_form.data)
+        db.session.add(q)
+        db.session.commit()
+        return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=True,
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
