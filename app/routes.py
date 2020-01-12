@@ -1,10 +1,11 @@
 import datetime
 
 from app import app, db
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses
 from flask import render_template, redirect, url_for, request
 from werkzeug.urls import url_parse
-from app.forms import LoginForm, SignupForm, QuestionnairePersonal, QuestionnaireTeam, QuestionAdding
+from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
+    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
 
 
@@ -76,25 +77,16 @@ def questionnaire_self():
 
     # Проверка на лимит голосования
 
-    try:
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).first()
+
+    if db_date:
         now = datetime.datetime.now()
         td = str(now.year) + '-' + str(now.month)
-        db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).first().date
-        last = str(db_date.year) + '-' + str(db_date.month)
-        print(last, td)
+        last = str(db_date.date.year) + '-' + str(db_date.date.month)
         if last == td:
             return render_template('questionnaire_error.html',
                                    responsibilities=User.dict_of_responsibilities(current_user.id),
                                    team=Membership.team_participation(current_user.id))
-    except:
-        with open('logs/log-{}.txt'.format(datetime.datetime.today()), 'w') as file:
-            file.write('Ошибка при проверке лимита голосования или пользователь проголосовал впервые')
-            file.write('user_id={}, name={}, surname={}, login={}'.format(
-                current_user.id,
-                User.query.filter_by(id=current_user.id).first().name,
-                User.query.filter_by(id=current_user.id).first().surname,
-                User.query.filter_by(id=current_user.id).first().login
-                       ))
 
     form = QuestionnairePersonal()
     questions = Questions.query.filter_by(type=1)       # type=1 - вопросы 1-го типа, т. е. личные
@@ -133,19 +125,16 @@ def questionnaire_team():
 
     # Проверка на лимит голосования
 
-    try:
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).first()
+
+    if db_date:
         now = datetime.datetime.now()
         td = str(now.year) + '-' + str(now.month)
-        db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).first().date
-        last = str(db_date.year) + '-' + str(db_date.month)
-        print(last, td)
+        last = str(db_date.date.year) + '-' + str(db_date.date.month)
         if last == td:
             return render_template('questionnaire_error.html',
                                    responsibilities=User.dict_of_responsibilities(current_user.id),
                                    team=Membership.team_participation(current_user.id))
-    except:
-        with open('logs/log-{}.txt'.format(datetime.datetime.today()), 'w') as file:
-            file.write('Ошибка при проверке лимита голосования')
 
     teammates = []
     lst_teammates_bd = Membership.query.filter_by(
@@ -213,3 +202,162 @@ def question_adding():
     return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id))
+
+
+@app.route('/questionnaire_progress', methods=['POST', 'GET'])
+def questionnaire_progress():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    questionnaire = dict(
+        max_particip=0,
+        already_self=0,
+        already_team=0,
+        all_team_particip=0,
+        participaters=[],
+        participaters_self_ids=[],
+        participaters_team_ids=[],
+        participated_self=[],
+        participated_team=[],
+        )
+    if User.query.all():
+        for user in User.query.all():
+            if UserStatuses.query.filter_by(user_id=user.id):
+                for status in UserStatuses.query.filter_by(user_id=user.id):
+                    if status.status_id == 3:
+                        questionnaire['participaters'].append(user.id)
+                        questionnaire['participaters_self_ids'].append(user.id)
+                        questionnaire['max_particip'] += 1
+
+            if Questionnaire.query.filter_by(user_id=user.id, type=1):
+                for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
+                    if qst.date.month == datetime.datetime.now().month:
+                        questionnaire['already_self'] += 1
+                        questionnaire['participated_self'].append(user.id)
+
+            if Questionnaire.query.filter_by(user_id=user.id, type=2):
+                for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
+                    if qst.date.month == datetime.datetime.now().month:
+                        questionnaire['already_team'] += 1
+                        questionnaire['participated_team'].append(user.id)
+
+            if Membership.query.all():
+                membship_ids = [user_ids.user_id for user_ids in Membership.query.all()]
+                if user.id in membship_ids:
+                    questionnaire['all_team_particip'] += 1
+                    questionnaire['participaters_team_ids'].append(user.id)
+
+    not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
+                                                           if user not in questionnaire['participated_self']]
+    not_participated_self_names = [User.query.filter_by(id=user).first().name
+                                                             for user in questionnaire['participaters_self_ids']
+                                                             if user not in questionnaire['participated_self']]
+    not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
+                                                                for user in questionnaire['participaters_self_ids']
+                                                                if user not in questionnaire['participated_self']]
+    not_participated_self_statuses = [Statuses.query.filter_by(
+                                                       id=UserStatuses.query.filter_by(user_id=user).first().status_id).first().status
+                                                               for user in questionnaire['participaters_self_ids']
+                                                               if user not in questionnaire['participated_self']]
+
+    not_participated_self_info = []
+
+    for i in range(len(not_participated_self_ids)):
+        not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
+                                           not_participated_self_surnames[i], not_participated_self_statuses[i]])
+
+    not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
+                                                           if user not in questionnaire['participated_team']]
+    not_participated_team_names = [User.query.filter_by(id=user).first().name
+                                                             for user in questionnaire['participaters_team_ids']
+                                                             if user not in questionnaire['participated_team']]
+    not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
+                                                                for user in questionnaire['participaters_team_ids']
+                                                                if user not in questionnaire['participated_team']]
+    not_participated_team_teams = [Teams.query.filter_by(
+                                                       id=Membership.query.filter_by(user_id=user).first().team_id
+                                                   ).first().name
+                                                               for user in questionnaire['participaters_team_ids']
+                                                               if user not in questionnaire['participated_team']]
+
+    not_participated_team_info = []
+
+    for i in range(len(not_participated_team_ids)):
+        not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
+                                           not_participated_team_surnames[i], not_participated_team_teams[i]])
+
+    return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           questionnaire=questionnaire, not_participated_self=not_participated_self_info,
+                           not_participated_team=not_participated_team_info)
+
+@app.route('/teams_list', methods=['POST', 'GET'])
+def teams_list():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    form = TeamAdding()
+    if form.validate_on_submit():
+        team = Teams(name=form.title.data)
+        db.session.add(team)
+        db.session.commit()
+    return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
+@app.route('/delete_team', methods=['GET'])
+def delete_team():
+    tid = request.args.get('tid')
+    Teams.query.filter_by(id=tid).delete()
+    db.session.commit()
+    return redirect('teams_list')
+
+
+def get_cref_of_team(team_id):
+    return db.session.query(User.id, User.name, User.surname)\
+        .outerjoin(Membership, User.id == Membership.user_id)\
+        .filter(Membership.team_id == team_id).all()
+
+
+@app.route('/teams_crew', methods=['POST', 'GET'])
+def teams_crew():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    teams = Teams.query.all()
+    info = list()
+    for team in teams:
+        info.append((team, get_cref_of_team(team.id)))
+    return render_template('teams_crew.html', title='Текущие составы команд', info=info,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
+@app.route('/edit_team', methods=['GET', 'POST'])
+def edit_team():
+    tid = int(request.args.get('tid'))
+    form = MemberAdding()
+    if form.validate_on_submit():
+        new_member_id = int(form.name.data)
+        if new_member_id > 0:
+            new_member = Membership(user_id=new_member_id, team_id=tid)
+            db.session.add(new_member)
+            db.session.commit()
+    title = Teams.query.filter_by(id=tid).first().name
+    members = get_cref_of_team(tid)
+    users = User.query.all()
+    return render_template('edit_team.html', title='Редактировать состав команды',
+                           team_title=title, members=members, tid=tid, form=form, users=users,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
+@app.route('/delete_member', methods=['GET'])
+def delete_member():
+    tid = request.args.get('tid')
+    uid = request.args.get('uid')
+    Membership.query.filter_by(team_id=tid, user_id=uid).delete()
+    db.session.commit()
+    return redirect('edit_team?tid=' + str(tid))

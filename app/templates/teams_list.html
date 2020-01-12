@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <table cellspacing="0" cellpadding="0" class="team_table">
+        <thead>
+            <tr><td>Название команды</td><td>Действия</td></tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr><td>{{team.name}}</td><td><a class="nav__link" href="/delete_team?tid={{team.id}}">Удалить</a></td></tr>
+            {% endfor %}
+            <tr><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
+            <tr>
+                <form  action="" method="post" class="form">
+                    {{ form.hidden_tag() }}
+                    {{ form.csrf_token() }}
+                    <td>{{form.title}}</td>
+                    <td>{{form.submit(class_='submit')}}</td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

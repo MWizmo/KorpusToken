@@ -84,7 +84,9 @@ h1, h2, h3, h4, h5, h6{
 	text-decoration: none;
 	transition: color .2s linear;
 	font-family: 'Share Tech Mono', monospace;
+	cursor:pointer;
 }
+
 .nav__link:hover{
 	 color: #fff;
 	 background-color: #000000;
@@ -190,7 +192,8 @@ h1, h2, h3, h4, h5, h6{
 
 /* Text */
 .main_text{
-	font-weight: 550;
+	font-weight: 900;
+	text-transform: uppercase;
 }
 .text_field{
 	border: 1px solid #000000; //цвет рамки
@@ -207,14 +210,74 @@ h1, h2, h3, h4, h5, h6{
 	font-family: 'Share Tech Mono', monospace;
 }
 
-/* Construktor */
-.construktor{
+/* Constructor */
+
+.constructor{
 	width: 100%;
 	height: 100vh%;
 	flex-direction: column;
 	justify-content: center;
 	padding-top: 35px;
 }
+
+/* Table */
+
+.table{
+    border: 3px solid black;
+    width: 650px;
+
+}
+
+.th{
+    border: 1px solid black;
+}
+
+.team_table{
+    width:50%;
+    margin-left:25%;
+    font-size:20px;
+    padding-top: 30px;
+}
+
+thead{
+    background-color: black;
+    color: white;
+    border:black;
+}
+
+td_main{
+    padding:5px;
+
+}
+
+.no_padding{
+    padding:0;
+}
+
+hr{
+    border: 0.6px solid black;
+}
+
+.crew_div{
+    padding:20px;
+    padding-top: 30px;
+}
+
+.team_title{
+    margin-top:10px;
+    font-size: 16px;
+}
+
+.home_text{
+    width:80%;
+    margin-left:10%;
+    margin-top:50px;
+}
+
+.tr{
+    font-weight: 900;
+	text-transform: uppercase;
+	}
 /*
 font-family: 'Montserrat', sans-serif;
 font-family: 'Monoton', cursive;

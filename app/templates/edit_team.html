@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="crew_div">
+    <button class="nav__link" onclick="document.location='/teams_crew'">Назад</button>
+    <h2 class="team_title">{{team_title}}</h2>
+    {% if members %}
+    <table cellspacing="0" cellpadding="0" class="team_table">
+        <thead>
+            <tr><td>Участник команды</td><td>Действия</td></tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+                <tr><td>{{member.name}}  {{member.surname}}</td><td><a href="/delete_member?tid={{tid}}&uid={{member.id}}">Удалить</a></td></tr>
+            {% endfor %}
+            <tr><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
+        </tbody>
+    </table>
+    {% else %}
+    <p>На данный момент нет участников</p>
+    {% endif %}
+     <form  action="" method="post">
+         {{ form.hidden_tag() }}
+         {{ form.csrf_token() }}
+         <p>
+                {{ form.name.label }}<br>
+                <select name="name">
+                    <option value="0" selected></option>
+                    {% for u in users %}
+                        <option value="{{u.id}}">{{u.name}} {{u.surname}}</option>
+                    {% endfor %}
+            </select>
+         </p>
+         {{form.submit}}
+     </form>
+
+</div>
+{% endblock %}

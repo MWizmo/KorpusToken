@@ -54,6 +54,9 @@ class User(UserMixin, db.Model):
     education = db.Column(db.String(64))
     work_exp = db.Column(db.String(64))
     sex = db.Column(db.String(16))
+    chat_id = db.Column(db.String(64))
+    state = db.Column(db.Integer)
+    photo = db.String(db.String(512))
 
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education, work_exp, sex, name, surname):

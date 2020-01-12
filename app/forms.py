@@ -77,3 +77,14 @@ class QuestionAdding(FlaskForm):
     question_form = TextAreaField('Вопрос', validators=[DataRequired()])
     question_type = IntegerField('Тип вопроса', validators=[DataRequired()])
     submit = SubmitField('Создать')
+
+
+class TeamAdding(FlaskForm):
+    title = StringField('Название команды', validators=[DataRequired()],
+                        render_kw={"placeholder": "Название новой команды"})
+    submit = SubmitField('Добавить')
+
+
+class MemberAdding(FlaskForm):
+    name = StringField('Новый участник команды', validators=[DataRequired()])
+    submit = SubmitField('Добавить')
