@@ -116,6 +116,7 @@ h1, h2, h3, h4, h5, h6{
 	text-transform: uppercase;
 	font-size: 16px;
 	font-weight: 650;
+	color: black;
 }
 
 /* Login */
@@ -149,6 +150,7 @@ h1, h2, h3, h4, h5, h6{
 /* Button */
 .submit{
 	font-family: 'Share Tech Mono', monospace;
+	text-transform: uppercase;
 }
 .submit:hover{
 	 color: #fff;
@@ -164,6 +166,24 @@ h1, h2, h3, h4, h5, h6{
 }
 .submit_team:hover{
 	color: #fff;
+	background-color: #000000;
+	flex-direction: column;
+	justify-content: center;
+
+}
+.submit_adding{
+	font-family: 'Share Tech Mono', monospace;
+	text-transform: uppercase;
+	position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+.submit_adding:hover{
+	 color: #fff;
+	 background-color: #000000;
+}
+.submit_adding:active{
+	color: rgb(255, 0, 0);
 	background-color: #000000;
 }
 
@@ -233,10 +253,12 @@ h1, h2, h3, h4, h5, h6{
 }
 
 .team_table{
-    width:50%;
+    width: 50%;
     margin-left:25%;
+    margin-right: 25%;
     font-size:20px;
     padding-top: 30px;
+    text-align: center;
 }
 
 thead{
@@ -254,10 +276,11 @@ td_main{
     padding:0;
 }
 
-hr{
+.hr{
     border: 0.6px solid black;
 }
 
+/* Crew */
 .crew_div{
     padding:20px;
     padding-top: 30px;
@@ -265,7 +288,7 @@ hr{
 
 .team_title{
     margin-top:10px;
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .home_text{
@@ -277,7 +300,7 @@ hr{
 .tr{
     font-weight: 900;
 	text-transform: uppercase;
-	}
+}
 /*
 font-family: 'Montserrat', sans-serif;
 font-family: 'Monoton', cursive;

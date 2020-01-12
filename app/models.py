@@ -88,6 +88,12 @@ class Teams(db.Model):
 
 class Membership(db.Model):
     @staticmethod
+    def get_crew_of_team(team_id):
+        return db.session.query(User.id, User.name, User.surname) \
+            .outerjoin(Membership, User.id == Membership.user_id) \
+            .filter(Membership.team_id == team_id).all()
+
+    @staticmethod
     def team_participation(current_user_id):
         if Membership.query.filter_by(user_id=current_user_id).first():
             return True
@@ -132,6 +138,15 @@ class Statuses(db.Model):
 
 
 class UserStatuses(db.Model):
+    # Допилить функцию и связать c questionnaire_info
+    @staticmethod
+    def get_user_statuses(user_id):
+        user_statuses = UserStatuses.query.filter_by(user_id=user_id)
+        if len(user_statuses) > 1:
+            statuses = []
+            for user_status in user_statuses:
+                statuses.append(user_status.status)
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     status_id = db.Column(db.Integer)

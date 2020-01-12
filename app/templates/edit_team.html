@@ -1,38 +1,44 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="crew_div">
-    <button class="nav__link" onclick="document.location='/teams_crew'">Назад</button>
-    <h2 class="team_title">{{team_title}}</h2>
-    {% if members %}
-    <table cellspacing="0" cellpadding="0" class="team_table">
-        <thead>
-            <tr><td>Участник команды</td><td>Действия</td></tr>
-        </thead>
-        <tbody>
-            {% for member in members %}
-                <tr><td>{{member.name}}  {{member.surname}}</td><td><a href="/delete_member?tid={{tid}}&uid={{member.id}}">Удалить</a></td></tr>
-            {% endfor %}
-            <tr><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
-        </tbody>
-    </table>
-    {% else %}
-    <p>На данный момент нет участников</p>
-    {% endif %}
-     <form  action="" method="post">
-         {{ form.hidden_tag() }}
-         {{ form.csrf_token() }}
-         <p>
-                {{ form.name.label }}<br>
-                <select name="name">
-                    <option value="0" selected></option>
-                    {% for u in users %}
-                        <option value="{{u.id}}">{{u.name}} {{u.surname}}</option>
-                    {% endfor %}
-            </select>
-         </p>
-         {{form.submit}}
-     </form>
+<div class="container">
+    <div class="crew_div">
+        <h2 class="team_title">{{team_title}}</h2>
+        {% if members %}
+        <table cellspacing="0" cellpadding="0" class="team_table">
+            <thead>
+                <tr><td>Участник команды</td><td>Действия</td></tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                    <tr><td class="main_text" style="font-size: 19px;">{{member.name}}  {{member.surname}}</td><td><a class="nav__link" style="text-transform: uppercase;" href="/delete_member?tid={{tid}}&uid={{member.id}}">Удалить</a></td></tr>
+                {% endfor %}
+                <tr class="tr"><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
+            </tbody>
+        </table>
+        {% else %}
+        <h2 style="text-align: center" class="main_text">На данный момент нет участников</h2>
+        {% endif %}
+         <form  action="" method="post" class="form" style="margin: 0 auto; text-align: center;">
+             {{ form.hidden_tag() }}
+             {{ form.csrf_token() }}
+             <p>
+                 {% if users %}
+                 <span class="main_text">{{ form.name.label }}</span><br>
+                    <select name="name">
+                        <option value="0" selected></option>
+                        {% for u in users %}
+                            <option class="main_text" value="{{u.id}}">{{u.name}} {{u.surname}}</option>
+                        {% endfor %}
+                </select>
 
+             </p>
+             {{ form.submit(class_='submit') }}
+             {% else %}
+                 <span class="main_text" style="text-align: center;">Список доступных пользователей пуст</span>
+             {% endif %}
+         </form>
+        <button class="submit_adding" style="margin-left: 0 auto;" onclick="document.location='/teams_crew'">Назад</button>
+    </div>
 </div>
 {% endblock %}
