@@ -292,6 +292,7 @@ def questionnaire_progress():
                            questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                            not_participated_team=not_participated_team_info)
 
+
 @app.route('/teams_list', methods=['POST', 'GET'])
 def teams_list():
     if not current_user.is_authenticated:
@@ -315,12 +316,6 @@ def delete_team():
     return redirect('teams_list')
 
 
-def get_cref_of_team(team_id):
-    return db.session.query(User.id, User.name, User.surname)\
-        .outerjoin(Membership, User.id == Membership.user_id)\
-        .filter(Membership.team_id == team_id).all()
-
-
 @app.route('/teams_crew', methods=['POST', 'GET'])
 def teams_crew():
     if not current_user.is_authenticated:
@@ -329,7 +324,7 @@ def teams_crew():
     teams = Teams.query.all()
     info = list()
     for team in teams:
-        info.append((team, get_cref_of_team(team.id)))
+        info.append((team, Membership.get_crew_of_team(team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id))
@@ -337,6 +332,9 @@ def teams_crew():
 
 @app.route('/edit_team', methods=['GET', 'POST'])
 def edit_team():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     tid = int(request.args.get('tid'))
     form = MemberAdding()
     if form.validate_on_submit():
@@ -346,8 +344,15 @@ def edit_team():
             db.session.add(new_member)
             db.session.commit()
     title = Teams.query.filter_by(id=tid).first().name
-    members = get_cref_of_team(tid)
+    members = Membership.get_crew_of_team(tid)
     users = User.query.all()
+    for team_member in members:
+        if team_member[0] in [user.id for user in users]:
+            print('yes')
+            for user in users:
+                if user.id == team_member[0]:
+                    users.remove(user)
+
     return render_template('edit_team.html', title='Редактировать состав команды',
                            team_title=title, members=members, tid=tid, form=form, users=users,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
