@@ -62,8 +62,8 @@ def signup():
         db.session.commit()
         if form.participate.data:
             user_team = Membership(user_id=User.query.filter_by(email=form.email.data).first().id,
-                                   team_id=form.team.data,
-                                   role_id=int(form.role.data))
+                                   team_id=form.team.data)
+                                   #role_id=int(form.role.data))
             db.session.add(user_team)
         statuses = UserStatuses(user_id=User.query.filter_by(email=form.email.data).first().id, status_id=3)
         db.session.add(statuses)
