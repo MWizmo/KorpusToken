@@ -52,7 +52,7 @@ def signup():
             tg_nickname=tg,
             courses=form.courses.data,
             birthday=form.birthday.data,
-            education=form.education.data,
+            education='Unknown',#form.education.data,
             work_exp=form.work_exp.data,
             sex=form.sex.data,
             name=form.name.data,
