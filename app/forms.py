@@ -42,7 +42,7 @@ class SignupForm(FlaskForm, SuppClass):
     fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])
     inst_url = StringField('Ссылка на профиль Инстаграм:', validators=[DataRequired()])
     work_exp = StringField('Опыт работы: ')
-    education = StringField('Место учебы: ')
+    education = StringField('Образование: ')
     submit = SubmitField('Зарегистрироваться')
 
     def validate_login(self, login):
