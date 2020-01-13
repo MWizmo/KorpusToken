@@ -43,9 +43,9 @@ def signup():
 
     form = SignupForm()
     if form.validate_on_submit():
-	      tg = form.tg_nickname.data
-	      if tg[0] == '@':
-		    tg = tg[1:]
+        tg = form.tg_nickname.data
+        if tg[0] == '@':
+            tg = tg[1:]
         user = User(
             email=form.email.data,
             login=form.login.data,
