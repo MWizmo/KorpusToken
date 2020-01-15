@@ -41,7 +41,7 @@ class SignupForm(FlaskForm, SuppClass):
     vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
     fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])
     inst_url = StringField('Ссылка на профиль Инстаграм:', validators=[DataRequired()])
-    work_exp = StringField('Опыт работы: ')
+    work_exp = TextAreaField('Опыт работы: ')
     education = StringField('Образование: ')
     submit = SubmitField('Зарегистрироваться')
 
