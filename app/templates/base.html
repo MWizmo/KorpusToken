@@ -7,6 +7,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu_style.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext" rel="stylesheet">
+    <script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
+    {% block scripts %} {% endblock %}
     {% if title %}
     <title> {{ title }} </title>
     {% else %}
@@ -27,14 +29,14 @@
                     {% else %}
                         <li><a class="nav__link" href="{{ url_for('home') }}">На главную</a></li>
                     {% if responsibilities.cadet %}
-                        <!--<li><a class="nav__link" href=#>Анкеты</a>
+                        <li><a class="nav__link" href=#>Анкеты</a>
                             <ul class="submenu">
                                 <li><a class="nav__link" href="{{ url_for('questionnaire_self') }}">Личная анкета</a></li>
                                 {% if team %}
                                     <li><a class="nav__link" href="{{ url_for('questionnaire_team') }}">Командная анкета</a></li>
                                 {% endif %}
                             </ul>
-                        </li>-->
+                        </li>
                     {% endif %}
                     {% if responsibilities.admin %}
 

@@ -70,7 +70,7 @@ def signup():
         db.session.commit()
         return redirect(url_for('login'))
     print(form.errors)
-    return render_template('signup.html', title='Регистрация', form=form)
+    return render_template('signup.html', title='Регистрация', form=form, script='signup.js')
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<script src="{{url_for('static', filename='js/signup.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.maskedinput.min.js')}}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="signup">
@@ -81,12 +86,14 @@
             </p>
             <p>
                 <span class="main_text">{{ form.participate.label }}</span>
-                {{ form.participate(class_="submit", id_='participate') }} <br> 
-                {{ form.team(class_="submit_team") }}
+                {{ form.participate(class_="submit", id_='participate') }} <br>
+                <div id="teams" style="display: none;">
+                    {{ form.team(class_="submit_team") }}
+                </div>
             </p>
             <p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
-                {{ form.birthday }}
+                {{ form.birthday(id="date") }}
                 {% for error in form.birthday.errors %}
                 <span style="color: red;"> {{error}} </span>
                 {% endfor %}
@@ -101,7 +108,7 @@
             </p-->
             <p>
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
-                {{ form.work_exp }}
+                {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
             </p>
             <p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
@@ -123,4 +130,13 @@
         </form>
     </div>
 </div>
+<script>
+$( document ).ready(function() {
+    $("#date").mask("9999-99-99");
+});
+
+    $('#participate').click(function(){
+        $('#teams').slideToggle(300);
+    });
+</script>
 {% endblock %}
