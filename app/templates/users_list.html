@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <table cellspacing="0" cellpadding="0" class="team_table">
+        <thead>
+        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td></tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr><td>{{loop.index0+1}}</td><td>{{user[0]}} {{user[1]}}</td><td>
+                    {% if user[2] %}
+                        {{user[2]}}
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

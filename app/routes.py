@@ -296,6 +296,17 @@ def questionnaire_progress():
                            not_participated_team=not_participated_team_info)
 
 
+@app.route('/users_list', methods=['POST', 'GET'])
+def users_list():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    info = db.session.query(User.name, User.surname, Teams.name).outerjoin(Membership, User.id == Membership.user_id)\
+        .outerjoin(Teams, Teams.id == Membership.team_id).all()
+    return render_template('users_list.html', title='Список пользователей', users=info,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
 @app.route('/teams_list', methods=['POST', 'GET'])
 def teams_list():
     if not current_user.is_authenticated:
