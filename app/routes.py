@@ -259,7 +259,8 @@ def questionnaire_progress():
                                                                 for user in questionnaire['participaters_self_ids']
                                                                 if user not in questionnaire['participated_self']]
     not_participated_self_statuses = [Statuses.query.filter_by(
-                                                       id=UserStatuses.query.filter_by(user_id=user).first().status_id).first().status
+                                                       id=UserStatuses.query.filter_by(
+                                                           user_id=user).first().status_id).first().status
                                                                for user in questionnaire['participaters_self_ids']
                                                                if user not in questionnaire['participated_self']]
 
