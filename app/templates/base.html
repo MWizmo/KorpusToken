@@ -28,7 +28,8 @@
                         <li><a class="nav__link" href="{{ url_for('signup') }}">Регистрация</a></li>
                     {% else %}
                         <li><a class="nav__link" href="{{ url_for('home') }}">На главную</a></li>
-                    <!--{% if responsibilities.cadet %}-->
+                    {% if responsibilities.cadet %}
+                        {% endif %}
                         {% if responsibilities.admin %}
                         <li><a class="nav__link" href=#>Анкеты</a>
                             <ul class="submenu">
