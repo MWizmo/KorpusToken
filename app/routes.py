@@ -207,6 +207,7 @@ def question_adding():
                            team=Membership.team_participation(current_user.id))
 
 
+# Решить трабл с отображением атаманов, админов и тимлидов в общем отображении участвующих в личных анкетах
 @app.route('/questionnaire_progress', methods=['POST', 'GET'])
 def questionnaire_progress():
     if not current_user.is_authenticated:

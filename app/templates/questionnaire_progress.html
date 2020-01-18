@@ -12,64 +12,57 @@
             <span> Всего анкетируемых: <span class="main_text">{{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено личных анкет: <span class="main_text"> {{ questionnaire.already_self }} из {{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено командных анкет: <span class="main_text">{{ questionnaire.already_team }} из {{ questionnaire.all_team_particip }}</span></span><br>
-            <p>
-            <tbody>
-                <table class="table">
-                    <th colspan="4" class="th">Не прошли личную анкету:</th>
-                    <tr class="tr">
-                        <th class="th">ID</th>
-                        <th class="th">NAME</th>
-                        <th class="th">SURNAME</th>
-                        <th class="th">STATUS</th>
-                    </tr>
+            {% if not_participated_self %}
+                <p>
+                <tbody>
+                    <table class="table">
+                        <th colspan="4" class="th">Не прошли личную анкету:</th>
+                        <tr class="tr">
+                            <th class="th">ID</th>
+                            <th class="th">NAME</th>
+                            <th class="th">SURNAME</th>
+                            <th class="th">STATUS</th>
+                        </tr>
 
-                    {% for user in not_participated_self %}
-                    <tr class="tr">
-                        {% for user_info in user %}
-                        <td class="td_main">
-                           {{ user_info }}
-                        </td>
+                        {% for user in not_participated_self %}
+                        <tr class="tr">
+                            {% for user_info in user %}
+                            <td class="td_main">
+                               {{ user_info }}
+                            </td>
+                            {% endfor %}
+                        </tr>
                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </table>
-            </tbody>
-            </p>
-            <p>
-            <tbody>
-                <table class="table">
-                    <th colspan="4" class="th">Не прошли командную анкету</th>
-                    <tr class="tr">
-                        <th class="th">ID</th>
-                        <th class="th">NAME</th>
-                        <th class="th">SURNAME</th>
-                        <th class="th">TEAM</th>
-                    </tr>
+                    </table>
+                </tbody>
+                </p>
+            {% endif %}
+            {% if not_participated_team %}
+                <p>
+                <tbody>
+                    <table class="table">
+                        <th colspan="4" class="th">Не прошли командную анкету</th>
+                        <tr class="tr">
+                            <th class="th">ID</th>
+                            <th class="th">NAME</th>
+                            <th class="th">SURNAME</th>
+                            <th class="th">TEAM</th>
+                        </tr>
 
-                    {% for user in not_participated_team %}
-                    <tr class="tr">
-                        {% for user_info in user %}
-                        <td class="td_main">
-                           {{ user_info }}
-                        </td>
+                        {% for user in not_participated_team %}
+                        <tr class="tr">
+                            {% for user_info in user %}
+                            <td class="td_main">
+                               {{ user_info }}
+                            </td>
+                            {% endfor %}
+                        </tr>
                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </table>
-            </tbody>
-            </p>
+                    </table>
+                </tbody>
+                </p>
+            {% endif %}
         </p>
-
-        <!--<div class="div-progressbar", role="progressbar", aria-valuenow="{{ questionnaire.already }}" aria-valuemin="0" aria-valuemax="{{ questionnaire.max }}">
-            <progress id="progressbar" value="{{ questionnaire.already }}" max="{{ questionnaire.max }}">
-                <div class="-webkit-progress-bar">
-                    <div class="-webkit-progress-values">
-
-                    </div>
-                </div>
-            </progress>
-        </div>
-        -->
     </div>
 
 

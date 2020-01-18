@@ -13,7 +13,6 @@ class SuppClass:
 
         for team in Teams.query.all():
             teams.append((str(team.id), team.name))
-        print(teams)
         return teams
 
 
