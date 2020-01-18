@@ -94,11 +94,18 @@ def questionnaire_self():
     form = QuestionnairePersonal()
     questions = Questions.query.filter_by(type=1)       # type=1 - вопросы 1-го типа, т. е. личные
     if form.validate_on_submit():
-        q = Questionnaire(user_id=current_user.id,
-                          team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id,
+        membership = Membership.query.filter_by(user_id=current_user.id).first()
+        if membership:
+            q = Questionnaire(user_id=current_user.id,
+                          team_id=membership.team_id,
                           date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
                                              datetime.datetime.now().day),
                           type=1)
+        else:
+            q = Questionnaire(user_id=current_user.id,
+                              date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                                 datetime.datetime.now().day),
+                              type=1)
         db.session.add(q)
         db.session.commit()
         answs = [form.qst_personal_growth.data, form.qst_controllability.data,
