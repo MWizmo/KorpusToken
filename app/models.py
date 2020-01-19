@@ -6,7 +6,7 @@ from flask_login import UserMixin
 class User(UserMixin, db.Model):
     @staticmethod
     def check_cadet(current_user_id):
-        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 3:
                 return True
@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def check_admin(current_user_id):
-        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 1:
                 return True
@@ -22,15 +22,27 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def check_teamlead(current_user_id):
-        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 4:
                 return True
         return False
 
     @staticmethod
+    def check_can_be_marked(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 3:
+                teams = Membership.query.filter_by(user_id=current_user_id).all()
+                for t in teams:
+                    team = Teams.query.filter_by(id=t.team_id).first()
+                    if team.type and team.type == 1:
+                        return True
+        return False
+
+    @staticmethod
     def check_chieftain(current_user_id):
-        statuses = UserStatuses.query.filter_by(user_id=current_user_id)
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 2:
                 return True
@@ -39,7 +51,8 @@ class User(UserMixin, db.Model):
     @staticmethod
     def dict_of_responsibilities(current_user_id):
         return dict(admin=User.check_admin(current_user_id), cadet=User.check_cadet(current_user_id),
-                    chieftain=User.check_chieftain(current_user_id), teamlead=User.check_teamlead(current_user_id))
+                    chieftain=User.check_chieftain(current_user_id), teamlead=User.check_teamlead(current_user_id),
+                    can_be_marked=User.check_can_be_marked(current_user_id))
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -84,6 +97,7 @@ class User(UserMixin, db.Model):
 class Teams(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
+    type = db.Column(db.Integer)
 
 
 class Membership(db.Model):
