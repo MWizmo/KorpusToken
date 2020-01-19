@@ -23,7 +23,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 
-class SignupForm(FlaskForm, SuppClass):
+class SignupForm(FlaskForm):
     email = StringField('Почта:', validators=[DataRequired(), Email()])
     tg_nickname = StringField('Ник в Telegram:', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
@@ -87,3 +87,7 @@ class TeamAdding(FlaskForm):
 class MemberAdding(FlaskForm):
     name = StringField('Новый участник команды', validators=[DataRequired()])
     submit = SubmitField('Добавить')
+
+
+class Assessment(FlaskForm):
+    pass
