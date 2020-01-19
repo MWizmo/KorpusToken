@@ -1,7 +1,7 @@
 import datetime
 
 from app import app, db
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis
 from flask import render_template, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -200,6 +200,11 @@ def question_adding():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
 
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
     form = QuestionAdding()
 
     if form.validate_on_submit():
@@ -219,6 +224,11 @@ def question_adding():
 def questionnaire_progress():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
 
     questionnaire = dict(
         max_particip=0,
@@ -309,6 +319,12 @@ def questionnaire_progress():
 def users_list():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
     info = db.session.query(User.name, User.surname, Teams.name).outerjoin(Membership, User.id == Membership.user_id)\
         .outerjoin(Teams, Teams.id == Membership.team_id).all()
     return render_template('users_list.html', title='Список пользователей', users=info,
@@ -320,6 +336,11 @@ def users_list():
 def teams_list():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
 
     form = TeamAdding()
     if form.validate_on_submit():
@@ -333,6 +354,13 @@ def teams_list():
 
 @app.route('/delete_team', methods=['GET'])
 def delete_team():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
     tid = request.args.get('tid')
     Teams.query.filter_by(id=tid).delete()
     db.session.commit()
@@ -343,6 +371,11 @@ def delete_team():
 def teams_crew():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
 
     teams = Teams.query.all()
     info = list()
@@ -358,6 +391,11 @@ def edit_team():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
 
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
     tid = int(request.args.get('tid'))
     form = MemberAdding()
     if form.validate_on_submit():
@@ -368,7 +406,7 @@ def edit_team():
             db.session.commit()
     title = Teams.query.filter_by(id=tid).first().name
     members = Membership.get_crew_of_team(tid)
-    users = User.query.all()
+    users = User.query.order_by(User.name).all()
     for team_member in members:
         if team_member[0] in [user.id for user in users]:
             print('yes')
@@ -384,8 +422,113 @@ def edit_team():
 
 @app.route('/delete_member', methods=['GET'])
 def delete_member():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
     tid = request.args.get('tid')
     uid = request.args.get('uid')
     Membership.query.filter_by(team_id=tid, user_id=uid).delete()
     db.session.commit()
+
     return redirect('edit_team?tid=' + str(tid))
+
+
+@app.route('/assessment', methods=['GET', 'POST'])
+def assessment():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
+            + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1:
+        return redirect(url_for('assessment_axis'))
+
+    if User.check_expert(current_user.id) or User.check_tracker(current_user.id):
+        return redirect(url_for('assessment_team', axis_id=2))
+
+    if User.check_top_cadet(current_user.id):
+        return redirect(url_for('assessment_team', axis_id=1))
+
+    if User.check_chieftain(current_user.id):
+        return redirect(url_for('assessment_team', axis_id=3))
+
+    return render_template('assessment.html', title='Оценка',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
+@app.route('/assessment_axis', methods=['GET', 'POST'])
+def assessment_axis():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
+
+    return render_template('assessment_axis.html', title='Выбор оси',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id), axises=axises)
+
+
+@app.route('/assessment_team', methods=['GET', 'POST'])
+def assessment_team():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    first_type_team_ids = [(team.id, team.name) for team in Teams.query.filter_by(type=1)]
+
+    axis_id = request.args.get('axis_id')
+
+    return render_template('assessment_team.html', title='Выбор команды',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           team_lst=first_type_team_ids,
+                           axis_id=axis_id)
+
+
+@app.route('/assessment_users', methods=['GET', 'POST'])
+def assessment_users():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    team_id = request.args.get('team_id')
+
+    team_members = [(member.user_id,
+                     User.query.filter_by(id=member.user_id).first().name,
+                     User.query.filter_by(id=member.user_id).first().surname)
+                    for member in Membership.query.filter_by(team_id=team_id)
+                    if current_user.id != member.id]
+
+    axis = (request.args.get('axis_id'), Axis.query.filter_by(id=3).first().name)
+
+    return render_template('assessment_users.html', title='Оценка',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           team_members=team_members, axis=axis)

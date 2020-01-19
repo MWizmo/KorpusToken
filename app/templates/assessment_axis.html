@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="qustionnaire">
+        <form class="form" style="padding-top: 15%; padding-left: 0%">
+            <h2>Выберите ось</h2>
+            {% for axis in axises %}
+                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axis[0]) }}" style="width: auto%; height: auto%;">{{ axis[1] }}</a>
+            {% endfor %}
+        </form>
+    </div>
+</div>
+
+{% endblock %}

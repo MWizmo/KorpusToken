@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div>
+        <form class="form">
+        {% for team in team_lst %}
+
+            <a class='submit' href="{{ url_for('assessment_users', axis_id=axis, team_id=team[0]) }}">{{ team[1] }}</a>
+
+        {% endfor %}
+        </form>
+    </div>
+</div>
+{% endblock %}

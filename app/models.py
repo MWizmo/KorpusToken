@@ -49,10 +49,36 @@ class User(UserMixin, db.Model):
         return False
 
     @staticmethod
+    def check_tracker(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 5:
+                return True
+        return False
+
+    @staticmethod
+    def check_expert(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 6:
+                return True
+        return False
+
+    @staticmethod
+    def check_top_cadet(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 7:
+                return True
+        return False
+
+    @staticmethod
     def dict_of_responsibilities(current_user_id):
         return dict(admin=User.check_admin(current_user_id), cadet=User.check_cadet(current_user_id),
                     chieftain=User.check_chieftain(current_user_id), teamlead=User.check_teamlead(current_user_id),
-                    can_be_marked=User.check_can_be_marked(current_user_id))
+                    can_be_marked=User.check_can_be_marked(current_user_id),
+                    tracker=User.check_tracker(current_user_id), expert=User.check_tracker(current_user_id),
+                    top_cadet=User.check_top_cadet(current_user_id))
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -164,6 +190,11 @@ class UserStatuses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     status_id = db.Column(db.Integer)
+
+
+class Axis(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
 
 
 @login.user_loader
