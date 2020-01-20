@@ -151,10 +151,11 @@ def questionnaire_team():
         team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
 
     for teammate in lst_teammates_bd:
-        if teammate.user_id == current_user.id:
+        if teammate.user_id == current_user.id or not(User.check_cadet(teammate.user_id)):
             continue
-        name = User.query.filter_by(id=teammate.user_id).first().name
-        surname = User.query.filter_by(id=teammate.user_id).first().surname
+        cur_user = User.query.filter_by(id=teammate.user_id).first()
+        name = cur_user.name
+        surname = cur_user.surname
         teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
 
     form = QuestionnaireTeam()
