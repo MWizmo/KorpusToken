@@ -267,8 +267,12 @@ def questionnaire_progress():
             if Membership.query.all():
                 membship_ids = [user_ids.user_id for user_ids in Membership.query.all()]
                 if user.id in membship_ids:
-                    questionnaire['all_team_particip'] += 1
-                    questionnaire['participaters_team_ids'].append(user.id)
+                    teams = [team.team_id for team in Membership.query.filter_by(user_id=user.id).all()]
+                    for t_id in teams:
+                        team = Teams.query.filter_by(id=t_id).first()
+                        if team.type and team.type==1:
+                            questionnaire['all_team_particip'] += 1
+                            questionnaire['participaters_team_ids'].append(user.id)
 
     not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
                                                            if user not in questionnaire['participated_self']]
