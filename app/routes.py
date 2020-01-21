@@ -244,9 +244,10 @@ def questionnaire_progress():
         )
     if User.query.all():
         for user in User.query.all():
-            if UserStatuses.query.filter_by(user_id=user.id):
-                for status in UserStatuses.query.filter_by(user_id=user.id):
-                    if status.status_id == 3:
+            if User.check_can_be_marked(user.id):
+            #if UserStatuses.query.filter_by(user_id=user.id):
+                #for status in UserStatuses.query.filter_by(user_id=user.id):
+                   # if status.status_id == 3:
                         questionnaire['participaters'].append(user.id)
                         questionnaire['participaters_self_ids'].append(user.id)
                         questionnaire['max_particip'] += 1
