@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import datetime
-
 from app import app, db
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
+    Criterion, Voting, VotingInfo
 from flask import render_template, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -251,6 +252,8 @@ def questionnaire_progress():
                         questionnaire['participaters'].append(user.id)
                         questionnaire['participaters_self_ids'].append(user.id)
                         questionnaire['max_particip'] += 1
+                        questionnaire['all_team_particip'] += 1
+                        questionnaire['participaters_team_ids'].append(user.id)
 
             if Questionnaire.query.filter_by(user_id=user.id, type=1):
                 for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
@@ -264,15 +267,15 @@ def questionnaire_progress():
                         questionnaire['already_team'] += 1
                         questionnaire['participated_team'].append(user.id)
 
-            if Membership.query.all():
-                membship_ids = [user_ids.user_id for user_ids in Membership.query.all()]
-                if user.id in membship_ids:
-                    teams = [team.team_id for team in Membership.query.filter_by(user_id=user.id).all()]
-                    for t_id in teams:
-                        team = Teams.query.filter_by(id=t_id).first()
-                        if team.type and team.type==1:
-                            questionnaire['all_team_particip'] += 1
-                            questionnaire['participaters_team_ids'].append(user.id)
+            # if Membership.query.all():
+            #     membship_ids = [user_ids.user_id for user_ids in Membership.query.all()]
+            #     if user.id in membship_ids:
+            #         teams = [team.team_id for team in Membership.query.filter_by(user_id=user.id).all()]
+            #         for t_id in teams:
+            #             team = Teams.query.filter_by(id=t_id).first()
+            #             if team.type and team.type==1:
+            #                 questionnaire['all_team_particip'] += 1
+            #                 questionnaire['participaters_team_ids'].append(user.id)
 
     not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
                                                            if user not in questionnaire['participated_self']]
@@ -466,7 +469,7 @@ def assessment():
         return redirect(url_for('assessment_team', axis_id=1))
 
     if User.check_chieftain(current_user.id):
-        return redirect(url_for('assessment_team', axis_id=3))
+        return redirect(url_for('assessment_users', axis_id=3, team_id=0))
 
     return render_template('assessment.html', title='Оценка',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -501,16 +504,16 @@ def assessment_team():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
     first_type_team_ids = [(team.id, team.name) for team in Teams.query.filter_by(type=1)]
-
     axis_id = request.args.get('axis_id')
-
+    axis = ''
+    if Axis.query.filter_by(id=axis_id).first():
+        axis = Axis.query.filter_by(id=axis_id).first().name
     return render_template('assessment_team.html', title='Выбор команды',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            team_lst=first_type_team_ids,
-                           axis_id=axis_id)
+                           axis_id=axis_id, axis=axis)
 
 
 @app.route('/assessment_users', methods=['GET', 'POST'])
@@ -525,16 +528,27 @@ def assessment_users():
                                team=Membership.team_participation(current_user.id))
 
     team_id = request.args.get('team_id')
+    axis_id = request.args.get('axis_id')
+    criterions = Criterion.query.filter_by(axis_id=axis_id).all()
+    axis = Axis.query.filter_by(id=axis_id).first().name
+    if axis_id == '3':
+        cadets = [(user.id,
+                    User.query.filter_by(id=user.id).first().name,
+                    User.query.filter_by(id=user.id).first().surname)
+                  for user in User.query.all() if User.check_can_be_marked(user.id)]
+        return render_template('assessment_users.html', title='Оценка',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               team_members=cadets, criterions=criterions, axis=axis)
+    else:
+        team_members = [(member.user_id,
+                         User.query.filter_by(id=member.user_id).first().name,
+                         User.query.filter_by(id=member.user_id).first().surname)
+                        for member in Membership.query.filter_by(team_id=team_id)
+                        if current_user.id != member.id and User.check_cadet(member.id)]
 
-    team_members = [(member.user_id,
-                     User.query.filter_by(id=member.user_id).first().name,
-                     User.query.filter_by(id=member.user_id).first().surname)
-                    for member in Membership.query.filter_by(team_id=team_id)
-                    if current_user.id != member.id]
-
-    axis = (request.args.get('axis_id'), Axis.query.filter_by(id=3).first().name)
-
-    return render_template('assessment_users.html', title='Оценка',
-                           responsibilities=User.dict_of_responsibilities(current_user.id),
-                           team=Membership.team_participation(current_user.id),
-                           team_members=team_members, axis=axis)
+        team = Teams.query.filter_by(id=team_id).first().name
+        return render_template('assessment_users.html', title='Оценка',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
