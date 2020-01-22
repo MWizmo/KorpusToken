@@ -334,11 +334,38 @@ def users_list():
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    info = db.session.query(User.name, User.surname, Teams.name).outerjoin(Membership, User.id == Membership.user_id)\
+    info = db.session.query(User.name, User.surname, Teams.name, User.id).outerjoin(Membership, User.id == Membership.user_id)\
         .outerjoin(Teams, Teams.id == Membership.team_id).all()
     return render_template('users_list.html', title='Список пользователей', users=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id))
+
+
+@app.route('/delete_user', methods=['GET'])
+def delete_user():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    uid = request.args.get('uid')
+    User.query.filter_by(id=uid).delete()
+    Membership.query.filter_by(user_id=uid).delete()
+    UserStatuses.query.filter_by(user_id=uid).delete()
+    if len(Questionnaire.query.filter_by(user_id=uid).all()) > 0:
+        q_list = Questionnaire.query.filter_by(user_id=uid).all()
+        for q in q_list:
+            QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).delete()
+            Questionnaire.query.filter_by(id=q.id).delete()
+    if len(Voting.query.filter_by(user_id=uid).all()) > 0:
+        v_list = Voting.query.filter_by(user_id=uid).all()
+        for v in v_list:
+            VotingInfo.query.filter_by(voting_id=v.id).delete()
+            Voting.query.filter_by(id=v.id).delete()
+    db.session.commit()
+    return redirect('users_list')
 
 
 @app.route('/teams_list', methods=['POST', 'GET'])
