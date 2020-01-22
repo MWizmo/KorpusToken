@@ -3,10 +3,12 @@
 {% block content %}
 <div class="container">
     <div>
+        <h2>Ось {{axis}}</h2>
+        <h3>Выберите команду для оценки</h3>
         <form class="form">
         {% for team in team_lst %}
 
-            <a class='submit' href="{{ url_for('assessment_users', axis_id=axis, team_id=team[0]) }}">{{ team[1] }}</a>
+            <a class='submit' href="{{ url_for('assessment_users', axis_id=axis_id, team_id=team[0]) }}">{{ team[1] }}</a><br>
 
         {% endfor %}
         </form>

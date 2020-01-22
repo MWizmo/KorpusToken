@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -200,3 +201,25 @@ class Axis(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+
+class Criterion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
+    axis_id = db.Column(db.Integer)
+
+
+class Voting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    team_id = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    axis_id = db.Column(db.Integer)
+
+
+class VotingInfo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    voting_id = db.Column(db.Integer)
+    cadet_id = db.Column(db.Integer)
+    criterion_id = db.Column(db.Integer)
+    mark = db.Column(db.Integer)

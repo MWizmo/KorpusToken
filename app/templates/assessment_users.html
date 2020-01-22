@@ -1,7 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container">
+    <div>
+        {% if team_title %}
+            <h3>Команда «{{team_title}}»</h3>
+        {% endif %}
+        <h3>Ось {{axis}}</h3>
+        <br>
+        <form class="form">
+            {% for c in criterions %}
+                <h4>{{c.name}}</h4>
+                    {% for member in team_members %}
+                        {{member[1]}} {{member[2]}}<br>
+                    {% endfor %}
+            <br><br>
+            {% endfor %}
 
+        </form>
+    </div>
+</div>
 
 
 {% endblock %}
