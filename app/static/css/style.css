@@ -315,3 +315,12 @@ font-family: 'Share Tech Mono', monospace;
     opacity:0.9;
     cursor:pointer;
 }
+
+.horiz{
+	display:flex;
+	flex-direction: row;
+	justify-content: space-around;
+	width:50%;
+	align-items: center;
+	margin-left: 10%;
+}

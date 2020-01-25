@@ -7,7 +7,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu_style.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext" rel="stylesheet">
-    <script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
     {% block scripts %} {% endblock %}
     {% if title %}
     <title> {{ title }} </title>
@@ -39,8 +38,8 @@
                             </li>
                         {% endif %}
                         {% if responsibilities.expert or responsibilities.tracker or responsibilities.top_cadet or responsibilities.chieftain%}
-                            <!--li><a class="nav__link" href="{{ url_for('assessment') }}">Оценка</a>
-                            </li-->
+                            <li><a class="nav__link" href="{{ url_for('assessment') }}">Оценка</a>
+                            </li>
                         {% endif %}
                         {% if responsibilities.admin %}
                             <li><a class="nav__link" href=#>Специальные Функции</a>

@@ -3,11 +3,12 @@ import datetime
 from app import app, db
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, jsonify
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
+import json
 
 
 @app.route('/')
@@ -557,7 +558,7 @@ def assessment_users():
     team_id = request.args.get('team_id')
     axis_id = request.args.get('axis_id')
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
-    axis = Axis.query.filter_by(id=axis_id).first().name
+    axis = Axis.query.filter_by(id=axis_id).first()
     if axis_id == '3':
         cadets = [(user.id,
                     User.query.filter_by(id=user.id).first().name,
@@ -566,7 +567,7 @@ def assessment_users():
         return render_template('assessment_users.html', title='Оценка',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id),
-                               team_members=cadets, criterions=criterions, axis=axis)
+                               team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -577,5 +578,44 @@ def assessment_users():
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
-                               team=Membership.team_participation(current_user.id),
+                               team=Membership.team_participation(current_user.id), team_id=team_id,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
+
+
+@app.route('/get_members_of_team', methods=['GET', 'POST'])
+def get_members_of_team():
+    team_id = int(request.args.get('team_id'))
+    if team_id == 0:
+        team_members = [(user.id,
+                         User.query.filter_by(id=user.id).first().name,
+                         User.query.filter_by(id=user.id).first().surname)
+                        for user in User.query.all() if User.check_can_be_marked(user.id)]
+    else:
+        team_members = [(member.user_id,
+                         User.query.filter_by(id=member.user_id).first().name,
+                         User.query.filter_by(id=member.user_id).first().surname)
+                        for member in Membership.query.filter_by(team_id=team_id)
+                        if current_user.id != member.id and User.check_cadet(member.id)]
+    return jsonify({'members': team_members})
+
+
+@app.route('/finish_vote', methods=['POST'])
+def finish_vote():
+    data = request.json
+    team_id = int(data['team_id'])
+    axis_id = int(data['axis'])
+    results = data['results']
+    voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
+                    date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                       datetime.datetime.now().day)
+                    )
+    db.session.add(voting)
+    db.session.commit()
+    voting_id = voting.id
+    for i in range(len(results)):
+        if not (results[i] is None):
+            for j in range(3 * (axis_id - 1), 3 * (axis_id - 1) + 3):
+                vote_info = VotingInfo(voting_id=voting_id, criterion_id=j + 1, cadet_id=i, mark=results[i][j])
+                db.session.add(vote_info)
+                db.session.commit()
+    return redirect('/assessment')
