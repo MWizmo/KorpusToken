@@ -1,24 +1,35 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/vote.js')}}"></script>
+{% endblock %}
+
 {% block content %}
-<div class="container">
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});">
     <div>
         {% if team_title %}
             <h3>Команда «{{team_title}}»</h3>
         {% endif %}
-        <h3>Ось {{axis}}</h3>
+        <h3>Ось {{axis.name}}</h3>
         <br>
-        <form class="form">
+        <div class="form">
             {% for c in criterions %}
                 <h4>{{c.name}}</h4>
                     {% for member in team_members %}
-                        {{member[1]}} {{member[2]}}<br>
+                        <div class="horiz">
+                            <p class="name"><b>{{member[1]}} {{member[2]}}</b></p>
+                            <p><input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},1)"> Да </p>
+                            <p><input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"> Нет </p>
+                        </div>
                     {% endfor %}
-            <br><br>
+            <br><hr><br>
             {% endfor %}
-
-        </form>
+        <button class="nav__link" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
+        </div>
     </div>
+
 </div>
 
 
