@@ -324,3 +324,13 @@ font-family: 'Share Tech Mono', monospace;
 	align-items: center;
 	margin-left: 10%;
 }
+
+/* Error */
+
+.error{
+	font-size: 25px;
+	font-weight: 700;
+	text-transform: uppercase;
+	text-align: center;
+	padding-top: 15%;
+}

@@ -10,7 +10,11 @@
 <div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});">
     <div>
         {% if team_title %}
-            <h3>Команда «{{team_title}}»</h3>
+            {% if is_all %}
+                <h3>«{{team_title}}»</h3>
+            {% else %}
+                <h3>Команда «{{team_title}}»</h3>
+            {% endif %}
         {% endif %}
         <h3>Ось {{axis.name}}</h3>
         <br>
