@@ -577,11 +577,23 @@ def assessment_users():
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
     if axis_id == 3:
+        questions = Questions.query.filter_by(type=1)[1:4]
         cadets = [(user.id,
                     User.query.filter_by(id=user.id).first().name,
                     User.query.filter_by(id=user.id).first().surname)
                   for user in User.query.all() if User.check_can_be_marked(user.id)]
-        return render_template('assessment_users.html', title='Оценка',
+        answers = dict()
+        for i, q in enumerate(criterions):
+            answers[q.id] = list()
+            for c in cadets:
+                questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).first()
+                if questionnaire:
+                    answers[q.id].append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
+                                                                        QuestionnaireInfo.questionnaire_id ==
+                                                                        questionnaire.id).first().question_answ)
+                else:
+                    answers[q.id].append('Нет ответа')
+        return render_template('assessment_users.html', title='Оценка', answers=answers,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id),
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
