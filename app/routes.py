@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
-
+import threading
 from app import app, db
-from app.scripts import assessment_graphs
+from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
 from flask import render_template, redirect, url_for, request, jsonify
@@ -10,7 +10,6 @@ from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
-import json
 
 
 @app.route('/')
@@ -569,16 +568,11 @@ def assessment_users():
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    team_id = int(request.args.get('team_id'))
-    axis_id = int(request.args.get('axis_id'))
-
-    if int(team_id) == 0 and int(axis_id) == 3:
-        if not Voting.check_on_assessment(current_user.id, 0, 3):
-            return redirect(url_for('assessment_error'))
-
+    team_id = request.args.get('team_id')
+    axis_id = request.args.get('axis_id')
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
-    if axis_id == 3:
+    if axis_id == '3':
         questions = Questions.query.filter_by(type=1)[1:4]
         cadets = [(user.id,
                     User.query.filter_by(id=user.id).first().name,
@@ -591,32 +585,49 @@ def assessment_users():
                 questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).first()
                 if questionnaire:
                     answers[q.id].append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
-                                                                        QuestionnaireInfo.questionnaire_id ==
-                                                                        questionnaire.id).first().question_answ)
+                                                                        QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
                 else:
                     answers[q.id].append('Нет ответа')
         return render_template('assessment_users.html', title='Оценка', answers=answers,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id),
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
+    elif axis_id == '2':
+        team_members = [(member.user_id,
+                         User.query.filter_by(id=member.user_id).first().name,
+                         User.query.filter_by(id=member.user_id).first().surname)
+                        for member in Membership.query.filter_by(team_id=team_id)
+                        if current_user.id != member.id and User.check_cadet(member.id)]
+
+        team = Teams.query.filter_by(id=team_id).first().name
+        return render_template('assessment_users.html', title='Оценка',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id), team_id=team_id,
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
-                        for member in Membership.query.filter_by(team_id=team_id).all()
-                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
-
-        if team_id != 0:
-            team = Teams.query.filter_by(id=team_id).first().name
-            is_all = False
-        else:
-            team = 'Все пользователи'
-            is_all = True
-        return render_template('assessment_users.html', title='Оценка',
+                        for member in Membership.query.filter_by(team_id=team_id)
+                        if current_user.id != member.id and User.check_cadet(member.id)]
+        question = Questions.query.filter_by(type=1).first()
+        answers = list()
+        for member in team_members:
+            questionnaire = Questionnaire.query.filter(Questionnaire.user_id == member[0], Questionnaire.type == 1).first()
+            if questionnaire:
+                answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
+                                                                    QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
+            else:
+                answers.append('Нет ответа')
+        texts = Questions.query.filter_by(type=2).all()
+        images = [
+            {'text': texts[i-1].text, 'src': url_for('static', filename='graphs/graph_{}_20201_{}.png'.format(team_id, i))}
+            for i in range(1, 6)]
+        team = Teams.query.filter_by(id=team_id).first().name
+        return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id), team_id=team_id,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team,
-                               is_all=is_all)
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
 
 
 @app.route('/get_members_of_team', methods=['GET', 'POST'])
@@ -703,11 +714,15 @@ def make_graphs():
             user_res.append(User.get_full_name(int(answer.question_answ)))
         res.append(user_res)
 
-    assessment_graphs.Forms_and_graphs.command_form([], res, team_id, str(datetime.datetime.now().year) +
-                                                    str(datetime.datetime.now().month))
-
+    t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, str(datetime.datetime.now().year) +
+                                                    str(datetime.datetime.now().month)))
+    t.setDaemon(True)
+    t.start()
+    # graphs.Forms.command_form([], res, team_id, str(datetime.datetime.now().year) +
+    #                                                 str(datetime.datetime.now().month))
+    t.join()
     return render_template('graphs_teams.html', title='Выбор команды для графов',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id),
-                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()]
-                           )
+                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()],
+                           message='Графы для команды успешно сформированы')

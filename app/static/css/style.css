@@ -368,3 +368,84 @@ font-family: 'Share Tech Mono', monospace;
 .vote_frame{
     width:80%;
 }
+
+
+.vote_block2{
+    display:flex;
+    flex-direction:row;
+    margin-bottom: 20px;
+}
+
+/* Slider style */
+    .slide {
+        width: 500px;
+        height: 300px;
+        border: 1px solid #888;
+        position: relative;
+        text-align: center;
+        margin-left:10%;
+    }
+	.slide  input {
+        display: none;
+    }
+
+    .slide  input + label {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 8px;
+        background: rgba(90, 90, 90, 0.8);
+        border: 2px solid rgba(190, 190, 190, 0.8);
+
+        cursor: pointer;
+
+        z-index: 100;
+        position: relative;
+
+        margin-right: 4px;
+        top: 90%;
+
+        transition: background 0.8s ease-out 0s;
+    }
+
+    .slide  input + label:hover {
+        background: rgba(250, 250, 250, 0.8);
+    }
+
+    .slide  input:checked + label {
+        background: rgba(220, 220, 220, 0.8);
+    }
+
+    .slide  div {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        z-index: 0;
+    }
+
+    .slide  div {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.8s ease-out 0.1s, visibility 0.1s ease-out 0.9s;
+    }
+
+    img {
+        width:500px;
+		height:300px;
+    }
+
+    .slide  input:checked + label + div {
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.8s ease-out 0.1s, visibility 0.1s ease-out 0s;
+    }
+
+    .slide  div  p {
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        text-align: center;
+    }
+
