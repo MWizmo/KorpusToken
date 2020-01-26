@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -210,6 +212,31 @@ class Criterion(db.Model):
 
 
 class Voting(db.Model):
+    @staticmethod
+    def check_on_assessment(current_user_id, team_id, axis_id):
+        if axis_id == 3:
+            last_time_voting_date = Voting.query.filter_by(
+                user_id=current_user_id, team_id=0, axis_id=axis_id
+            ).first()
+            if last_time_voting_date:
+                last_time_voting_date = last_time_voting_date.date
+            else:
+                return True
+        else:
+            last_time_voting_date = Voting.query.filter_by(
+                user_id=current_user_id, team_id=team_id, axis_id=axis_id
+            ).first()
+            if last_time_voting_date:
+                last_time_voting_date = last_time_voting_date.date
+            else:
+                return True
+        now = datetime.datetime.now()
+        if last_time_voting_date:
+            if str(now.year) + str(now.month) == str(last_time_voting_date.year) + str(last_time_voting_date.month):
+                return False
+        else:
+            return True
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     team_id = db.Column(db.Integer)

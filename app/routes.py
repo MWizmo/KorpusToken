@@ -99,10 +99,10 @@ def questionnaire_self():
         membership = Membership.query.filter_by(user_id=current_user.id).first()
         if membership:
             q = Questionnaire(user_id=current_user.id,
-                          team_id=membership.team_id,
-                          date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                              team_id=membership.team_id,
+                              date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
                                              datetime.datetime.now().day),
-                          type=1)
+                              type=1)
         else:
             q = Questionnaire(user_id=current_user.id,
                               date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
@@ -532,15 +532,27 @@ def assessment_team():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
-    first_type_team_ids = [(team.id, team.name) for team in Teams.query.filter_by(type=1)]
+
     axis_id = request.args.get('axis_id')
+
+    if int(axis_id) == 3:
+        if Voting.check_on_assessment(current_user.id, 0, 3):
+            return redirect(url_for('assessment_users', axis_id=3, team_id=0))
+        else:
+            return redirect(url_for('assessment_error'))
+
+    first_type_teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+                           Voting.check_on_assessment(current_user.id, team.id, int(axis_id))]
+    if not first_type_teams:
+        return redirect(url_for('assessment_error'))
+
     axis = ''
     if Axis.query.filter_by(id=axis_id).first():
         axis = Axis.query.filter_by(id=axis_id).first().name
     return render_template('assessment_team.html', title='Выбор команды',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id),
-                           team_lst=first_type_team_ids,
+                           team_lst=first_type_teams,
                            axis_id=axis_id, axis=axis)
 
 
@@ -555,11 +567,16 @@ def assessment_users():
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    team_id = request.args.get('team_id')
-    axis_id = request.args.get('axis_id')
+    team_id = int(request.args.get('team_id'))
+    axis_id = int(request.args.get('axis_id'))
+
+    if int(team_id) == 0 and int(axis_id) == 3:
+        if not Voting.check_on_assessment(current_user.id, 0, 3):
+            return redirect(url_for('assessment_error'))
+
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
-    if axis_id == '3':
+    if axis_id == 3:
         cadets = [(user.id,
                     User.query.filter_by(id=user.id).first().name,
                     User.query.filter_by(id=user.id).first().surname)
@@ -572,14 +589,20 @@ def assessment_users():
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
-                        for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.id and User.check_cadet(member.id)]
+                        for member in Membership.query.filter_by(team_id=team_id).all()
+                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
 
-        team = Teams.query.filter_by(id=team_id).first().name
+        if team_id != 0:
+            team = Teams.query.filter_by(id=team_id).first().name
+            is_all = False
+        else:
+            team = 'Все пользователи'
+            is_all = True
         return render_template('assessment_users.html', title='Оценка',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id), team_id=team_id,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team,
+                               is_all=is_all)
 
 
 @app.route('/get_members_of_team', methods=['GET', 'POST'])
@@ -615,7 +638,14 @@ def finish_vote():
     for i in range(len(results)):
         if not (results[i] is None):
             for j in range(3 * (axis_id - 1), 3 * (axis_id - 1) + 3):
-                vote_info = VotingInfo(voting_id=voting_id, criterion_id=j + 1, cadet_id=i, mark=results[i][j])
+                vote_info = VotingInfo(voting_id=voting_id, criterion_id=j+1, cadet_id=i, mark=results[i][j])
                 db.session.add(vote_info)
                 db.session.commit()
-    return redirect('/assessment')
+    return redirect(url_for('assessment'))
+
+
+@app.route('/assessment_error', methods=['GET'])
+def assessment_error():
+    return render_template('assessment_error.html', title='Лимит исчерпан',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id))

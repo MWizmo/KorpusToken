@@ -37,6 +37,7 @@ app.controller("ctrl", function ($scope, $http) {
                 data: user_data,
                 async: false
             }).then(function success (response) {
+                document.location.href = "assessment";
                 console.log(1214);
             });
 
