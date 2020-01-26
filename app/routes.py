@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
+
 from app import app, db
+from app.scripts import assessment_graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
 from flask import render_template, redirect, url_for, request, jsonify
@@ -661,3 +663,51 @@ def assessment_error():
     return render_template('assessment_error.html', title='Лимит исчерпан',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id))
+
+
+@app.route('/graphs_teams')
+def graphs_teams():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    return render_template('graphs_teams.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()]
+                           )
+
+
+@app.route('/make_graphs')
+def make_graphs():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    team_id = int(request.args.get('team_id'))
+
+    questionarries = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2).all()
+    res = list()
+    for q in questionarries:
+        user_res = [User.get_full_name(q.user_id)]
+        user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
+        for answer in user_answers:
+            user_res.append(User.get_full_name(int(answer.question_answ)))
+        res.append(user_res)
+
+    assessment_graphs.Forms_and_graphs.command_form([], res, team_id, str(datetime.datetime.now().year) +
+                                                    str(datetime.datetime.now().month))
+
+    return render_template('graphs_teams.html', title='Выбор команды для графов',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()]
+                           )

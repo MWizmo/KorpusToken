@@ -83,6 +83,11 @@ class User(UserMixin, db.Model):
                     tracker=User.check_tracker(current_user_id), expert=User.check_tracker(current_user_id),
                     top_cadet=User.check_top_cadet(current_user_id))
 
+    @staticmethod
+    def get_full_name(user_id):
+        user = User.query.filter_by(id=user_id).first()
+        return user.name + ' ' + user.surname
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     surname = db.Column(db.String(64))
