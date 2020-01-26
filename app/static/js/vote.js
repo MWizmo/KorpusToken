@@ -14,7 +14,6 @@ app.controller("ctrl", function ($scope, $http) {
                 for(let i=0;i<$scope.members.length;i++){
                     $scope.results[$scope.members[i][0]] = [0,0,0,0,0,0,0,0,0];
                 }
-                console.log($scope.results);
             });
 	}
 
@@ -38,7 +37,6 @@ app.controller("ctrl", function ($scope, $http) {
                 async: false
             }).then(function success (response) {
                 document.location.href = "assessment";
-                console.log(1214);
             });
 
         }

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div>
+        <h3>Выберите команду для создания графа</h3>
+        <form class="form">
+        {% for team in teams %}
+
+            <a class='submit' href="{{ url_for('make_graphs', team_id=team[0]) }}">{{ team[1] }}</a><br>
+
+        {% endfor %}
+        </form>
+    </div>
+</div>
+
+{% endblock %}
