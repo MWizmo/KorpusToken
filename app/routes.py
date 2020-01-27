@@ -544,7 +544,7 @@ def assessment_users():
         cadets = [(user.id,
                     User.query.filter_by(id=user.id).first().name,
                     User.query.filter_by(id=user.id).first().surname)
-                  for user in User.query.all() if User.check_can_be_marked(user.id)]
+                  for user in User.query.all() if User.check_can_be_marked(user.id) and current_user.id != user.id]
         answers = dict()
         for i, q in enumerate(criterions):
             answers[q.id] = list()
