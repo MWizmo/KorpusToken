@@ -15,9 +15,6 @@
             {% if axis.id == 3 %}
                 <div class="vote_block">
                     <table class="vote_table2" cellpadding="0">
-                    {% if team_title %}
-                        <tr><td><h3>Команда «{{team_title}}»</h3></td></tr>
-                    {% endif %}
                     <tr><td><h3>Ось {{axis.name}}</h3></td></tr>
                         <tr><td><br></td></tr>
                     {% for c in criterions %}
