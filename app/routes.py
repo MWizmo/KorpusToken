@@ -535,8 +535,8 @@ def assessment_users():
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    team_id = request.args.get('team_id')
-    axis_id = request.args.get('axis_id')
+    team_id = int(request.args.get('team_id'))
+    axis_id = int(request.args.get('axis_id'))
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
     if axis_id == '3':
@@ -564,7 +564,7 @@ def assessment_users():
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.id and User.check_cadet(member.id)]
+                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
 
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка',
@@ -576,7 +576,7 @@ def assessment_users():
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.id and User.check_cadet(member.id)]
+                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
