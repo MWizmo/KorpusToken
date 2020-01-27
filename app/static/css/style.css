@@ -376,6 +376,10 @@ font-family: 'Share Tech Mono', monospace;
     margin-bottom: 20px;
 }
 
+.tip{
+    margin-left: 5%;
+}
+
 /* Slider style */
     .slide {
         width: 500px;

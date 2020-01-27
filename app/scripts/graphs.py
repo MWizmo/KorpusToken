@@ -105,7 +105,7 @@ class Forms:
         # проверяем наличие моды нод.
         if most_arrows != []:
             # визуализируем моду нод.
-            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="blue",
+            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="green",
                                    font_size=8, font_color="black", horizontalalignment="center")
         # визуализируем все остальные ноды.
         nx.draw_networkx_nodes(g, pos, nodelist=no_mode_nodes, with_labels=True, node_size=2000, node_color="yellow",
@@ -158,7 +158,7 @@ class Forms:
         # проверяем наличие моды нод.
         if most_arrows != []:
             # визуализируем моду нод.
-            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="blue",
+            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="green",
                                    font_size=8, font_color="black", horizontalalignment="center")
         # визуализируем все остальные ноды.
         nx.draw_networkx_nodes(g, pos, nodelist=no_mode_nodes, with_labels=True, node_size=2000, node_color="yellow",
@@ -211,7 +211,7 @@ class Forms:
         # проверяем наличие моды нод.
         if most_arrows != []:
             # визуализируем моду нод.
-            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="blue",
+            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="green",
                                    font_size=8, font_color="black", horizontalalignment="center")
         # визуализируем все остальные ноды.
         nx.draw_networkx_nodes(g, pos, nodelist=no_mode_nodes, with_labels=True, node_size=2000, node_color="yellow",
@@ -264,7 +264,7 @@ class Forms:
         # проверяем наличие моды нод.
         if most_arrows != []:
             # визуализируем моду нод.
-            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="blue",
+            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="green",
                                    font_size=8, font_color="black", horizontalalignment="center")
         # визуализируем все остальные ноды.
         nx.draw_networkx_nodes(g, pos, nodelist=no_mode_nodes, with_labels=True, node_size=2000, node_color="yellow",
@@ -317,7 +317,7 @@ class Forms:
         # проверяем наличие моды нод.
         if most_arrows != []:
             # визуализируем моду нод.
-            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="blue",
+            nx.draw_networkx_nodes(g, pos, nodelist=most_arrows, with_labels=True, node_size=2000, node_color="green",
                                    font_size=8, font_color="black", horizontalalignment="center")
         # визуализируем все остальные ноды.
         nx.draw_networkx_nodes(g, pos, nodelist=no_mode_nodes, with_labels=True, node_size=2000, node_color="yellow",

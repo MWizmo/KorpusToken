@@ -5,7 +5,7 @@ from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
-from flask import render_template, redirect, url_for, request, jsonify
+from flask import render_template, redirect, url_for, request, jsonify, session
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
@@ -77,12 +77,9 @@ def signup():
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
+@login_required
 def questionnaire_self():
-    if not current_user.is_authenticated:
-        return redirect('login')
-
     # Проверка на лимит голосования
-
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).first()
 
     if db_date:
@@ -132,10 +129,8 @@ def questionnaire_self():
 
 
 @app.route('/questionnaire_team', methods=['GET', 'POST'])
+@login_required
 def questionnaire_team():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     # Проверка на лимит голосования
 
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).first()
@@ -200,10 +195,8 @@ def logout():
 
 
 @app.route('/question_adding', methods=['POST', 'GET'])
+@login_required
 def question_adding():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -225,10 +218,8 @@ def question_adding():
 
 # Решить трабл с отображением атаманов, админов и тимлидов в общем отображении участвующих в личных анкетах
 @app.route('/questionnaire_progress', methods=['POST', 'GET'])
+@login_required
 def questionnaire_progress():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -327,10 +318,8 @@ def questionnaire_progress():
 
 
 @app.route('/users_list', methods=['POST', 'GET'])
+@login_required
 def users_list():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -344,10 +333,8 @@ def users_list():
 
 
 @app.route('/delete_user', methods=['GET'])
+@login_required
 def delete_user():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -371,10 +358,8 @@ def delete_user():
 
 
 @app.route('/teams_list', methods=['POST', 'GET'])
+@login_required
 def teams_list():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -391,10 +376,8 @@ def teams_list():
 
 
 @app.route('/delete_team', methods=['GET'])
+@login_required
 def delete_team():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -406,10 +389,8 @@ def delete_team():
 
 
 @app.route('/teams_crew', methods=['POST', 'GET'])
+@login_required
 def teams_crew():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -425,10 +406,8 @@ def teams_crew():
 
 
 @app.route('/edit_team', methods=['GET', 'POST'])
+@login_required
 def edit_team():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -459,10 +438,8 @@ def edit_team():
 
 
 @app.route('/delete_member', methods=['GET'])
+@login_required
 def delete_member():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -477,10 +454,8 @@ def delete_member():
 
 
 @app.route('/assessment', methods=['GET', 'POST'])
+@login_required
 def assessment():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
@@ -506,10 +481,8 @@ def assessment():
 
 
 @app.route('/assessment_axis', methods=['GET', 'POST'])
+@login_required
 def assessment_axis():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
@@ -524,10 +497,8 @@ def assessment_axis():
 
 
 @app.route('/assessment_team', methods=['GET', 'POST'])
+@login_required
 def assessment_team():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
@@ -558,10 +529,8 @@ def assessment_team():
 
 
 @app.route('/assessment_users', methods=['GET', 'POST'])
+@login_required
 def assessment_users():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
@@ -677,10 +646,8 @@ def assessment_error():
 
 
 @app.route('/graphs_teams')
+@login_required
 def graphs_teams():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -694,10 +661,8 @@ def graphs_teams():
 
 
 @app.route('/make_graphs')
+@login_required
 def make_graphs():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),

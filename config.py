@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 import os
 
 
 class Config(object):
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(24)
+    SECRET_KEY = 'korpus_token_secret_key'
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI')\
     or 'mysql+pymysql://korpus_user:korpus_password@localhost/korpus_db'
