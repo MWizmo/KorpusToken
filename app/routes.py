@@ -610,7 +610,7 @@ def get_members_of_team():
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.id and User.check_cadet(member.id)]
+                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
     return jsonify({'members': team_members})
 
 
