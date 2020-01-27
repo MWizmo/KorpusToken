@@ -86,7 +86,7 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get_full_name(user_id):
         user = User.query.filter_by(id=user_id).first()
-        return user.name + ' ' + user.surname
+        return user.name[0] + '. ' + user.surname
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
