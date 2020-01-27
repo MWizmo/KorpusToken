@@ -5,7 +5,7 @@ from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
-from flask import render_template, redirect, url_for, request, jsonify, session
+from flask import render_template, redirect, url_for, request, jsonify
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
@@ -466,13 +466,13 @@ def assessment():
             + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1:
         return redirect(url_for('assessment_axis'))
 
-    if User.check_expert(current_user.id) or User.check_tracker(current_user.id):
+    if (User.check_expert(current_user.id) or User.check_tracker(current_user.id)) and Axis.is_available(2):
         return redirect(url_for('assessment_team', axis_id=2))
 
-    if User.check_top_cadet(current_user.id):
+    if User.check_top_cadet(current_user.id) and Axis.is_available(1):
         return redirect(url_for('assessment_team', axis_id=1))
 
-    if User.check_chieftain(current_user.id):
+    if User.check_chieftain(current_user.id) and Axis.is_available(3):
         return redirect(url_for('assessment_users', axis_id=3, team_id=0))
 
     return render_template('assessment.html', title='Оценка',
@@ -488,9 +488,7 @@ def assessment_axis():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
-    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
-
+    axises = [(axis.id, axis.name, Axis.is_available(axis.id)) for axis in Axis.query.all()]
     return render_template('assessment_axis.html', title='Выбор оси',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id), axises=axises)
