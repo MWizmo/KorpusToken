@@ -203,6 +203,11 @@ class UserStatuses(db.Model):
 class Axis(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32))
+    is_opened = db.Column(db.Integer)
+
+    @staticmethod
+    def is_available(axis_id):
+        return Axis.query.filter_by(id=axis_id).first().is_opened
 
 
 @login.user_loader
