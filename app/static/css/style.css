@@ -453,3 +453,21 @@ font-family: 'Share Tech Mono', monospace;
         text-align: center;
     }
 
+.border{
+    padding:5px;
+    border:1px solid black;
+}
+
+.left_border{
+    border-left:1px solid black;
+    padding-left:1%;
+}
+
+.bottom_border{
+    border-bottom:2px solid black;
+}
+
+.finish_vote_btn{
+    padding:6px;
+    font-size:18px;
+}
