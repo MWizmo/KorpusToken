@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <div>
+<div class="container" style="padding-top: 5%">
+    <div class="intro">
         <h2>Ось {{axis}}</h2>
         <h3>Выберите команду для оценки</h3>
         <form class="form">
         {% for team in team_lst %}
 
-            <a class='submit' href="{{ url_for('assessment_users', axis_id=axis_id, team_id=team[0]) }}">{{ team[1] }}</a><br>
+            <a class='nav__link' href="{{ url_for('assessment_users', axis_id=axis_id, team_id=team[0]) }}">{{ team[1] }}</a><br>
 
         {% endfor %}
         </form>
