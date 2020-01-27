@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Прогресс прохождения голосования</h2>
+    <div class="vote_progress">
+        <div>
+            <h3>Ось отношений</h3>
+        {% for row in relation %}
+            <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
+        {% endfor %}
+        </div>
+        <div>
+        <h3>Ось дела</h3>
+        {% for row in business %}
+            <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
+        {% endfor %}
+            </div>
+        <div>
+        <h3>Ось власти</h3>
+        {% for row in authority %}
+            <p>{{row[0]}}: {{row[1]}}/1</p>
+        {% endfor %}
+            </div>
+    </div>
+
+
+</div>
+
+{% endblock %}

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import threading
+from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
@@ -689,3 +690,40 @@ def make_graphs():
                            team=Membership.team_participation(current_user.id),
                            teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()],
                            message='Графы для команды успешно сформированы')
+
+
+@app.route('/voting_progress')
+@login_required
+def voting_progress():
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
+    trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
+    atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    relation_results = list()
+    for cadet_id in top_cadets:
+        cadet = User.query.filter_by(id=cadet_id).first()
+        voting_num = len(Voting.query.filter(Voting.user_id==cadet_id, Voting.axis_id==1).all())
+        relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
+
+    business_results = list()
+    for user_id in trackers:
+        user = User.query.filter_by(id=user_id).first()
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2).all())
+        business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
+
+    authority_results = list()
+    for user_id in atamans:
+        user = User.query.filter_by(id=user_id).first()
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3).all())
+        authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
+
+    return render_template('voting_progress.html', title='Прогресс голосования',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           teams_number=teams_for_voting, relation=relation_results,
+                           business=business_results, authority=authority_results)
