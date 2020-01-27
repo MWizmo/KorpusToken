@@ -536,7 +536,7 @@ def assessment_users():
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
-    axis_id = int(request.args.get('axis_id'))
+    axis_id = request.args.get('axis_id')
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
     if axis_id == '3':
