@@ -464,7 +464,8 @@ def assessment():
                                team=Membership.team_participation(current_user.id))
 
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
-            + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1:
+        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1 and (Axis.is_available(1)
+           or Axis.is_available(2) or Axis.is_available(3)):
         return redirect(url_for('assessment_axis'))
 
     if (User.check_expert(current_user.id) or User.check_tracker(current_user.id)) and Axis.is_available(2):
@@ -722,8 +723,69 @@ def voting_progress():
         voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3).all())
         authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
+    if Axis.is_available(1):
+        rel_text = 'Запретить голосование по оси отношений'
+    else:
+        rel_text = 'Открыть голосование по оси отношений'
+    if Axis.is_available(2):
+        bus_text = 'Запретить голосование по оси дела'
+    else:
+        bus_text = 'Открыть голосование по оси дела'
+    if Axis.is_available(3):
+        auth_text = 'Запретить голосование по оси власти'
+    else:
+        auth_text = 'Открыть голосование по оси власти'
+
     return render_template('voting_progress.html', title='Прогресс голосования',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            teams_number=teams_for_voting, relation=relation_results,
-                           business=business_results, authority=authority_results)
+                           business=business_results, authority=authority_results,
+                           rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
+
+
+@app.route('/axis_access')
+@login_required
+def axis_access():
+    if not User.check_admin(current_user.id):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    axis_id = int(request.args.get('axis_id'))
+    axis = Axis.query.filter_by(id=axis_id).first()
+    axis.is_opened = abs(axis.is_opened - 1)
+    db.session.commit()
+    return redirect('voting_progress')
+
+
+@app.route('/manage_statuses', methods=['GET', 'POST'])
+@login_required
+def manage_statuses():
+    if not (User.check_admin(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    users = [(user.id, user.surname + ' ' + user.name) for user in User.query.order_by(User.surname).all()]
+    return render_template('manage_statuses.html', title='Прогресс голосования',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           users=users)
+
+
+@app.route('/get_statuses_of_user', methods=['GET', 'POST'])
+def get_statuses_of_user():
+    user_id = int(request.args.get('user_id'))
+    if user_id == 0:
+        statuses = []
+        new_statuses = []
+    else:
+        statuses_id = [s.status_id for s in UserStatuses.query.filter_by(user_id=user_id).all()]
+        all_statuses = [s.id for s in Statuses.query.all()]
+        statuses_diff = set(all_statuses).difference(set(statuses_id))
+        if len(statuses_diff) > 0:
+            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_diff]
+        else:
+            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
+        statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
+    return jsonify({'user_statuses': statuses, 'new_statuses':new_statuses})

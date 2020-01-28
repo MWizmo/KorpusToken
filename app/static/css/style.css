@@ -491,3 +491,26 @@ font-family: 'Share Tech Mono', monospace;
     flex-direction:row;
     justify-content:space-between;
 }
+
+.status{
+    padding:3px;
+    border: 1px solid black;
+    border-radius:5px;
+    display: inline;
+    margin-right:20px;
+}
+
+.cross{
+    color: #000000;
+	text-decoration: none;
+	opacity: 0.6;
+}
+
+.cross:hover{
+    opacity: 1;
+}
+
+.status_flex{
+    display:flex;
+    flex-direction:row;
+}
