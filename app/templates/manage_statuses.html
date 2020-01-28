@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/statuses.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="container" ng-app="app" ng-controller="ctrl">
+    <h2>Управление ролями пользователей</h2>
+    <br>
+    <select>
+        <option ng-click="choose_user(0);"></option>
+        {% for user in users %}
+            <option ng-click="choose_user({{user[0]}});">{{user[1]}}</option>
+        {% endfor %}
+    </select>
+    {% raw %}
+    <br><br>
+    <div class="status_flex">
+        <div class="status" ng-repeat="status in statuses">{{status[0]}}<a class="cross" href="#"> &#10006; </a></div>
+    </div>
+    <div ng-show="show_adding">
+        <p>Добавить роль</p>
+        <select>
+            <option ng-repeat="status in new_statuses" id="{{status[1]}}" ng-click="func1(this);">{{status[0]}}</option>
+        </select>
+    </div>
+    {% endraw %}
+</div>
+
+{% endblock %}

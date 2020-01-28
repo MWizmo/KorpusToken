@@ -24,8 +24,11 @@
         {% endfor %}
             </div>
     </div>
-
-
+    <div class="vote_progress">
+        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=1) }}">{{rel_text}}</a>
+        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=2) }}">{{bus_text}}</a>
+        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=3) }}">{{auth_text}}</a>
+    </div>
 </div>
 
 {% endblock %}
