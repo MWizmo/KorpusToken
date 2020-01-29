@@ -19,16 +19,18 @@
     </select>
     {% raw %}
     <br><br>
+    <p ng-show="show_adding">Текущие роли</p>
     <div class="status_flex">
-        <div class="status" ng-repeat="status in statuses">{{status[0]}}<a class="cross" href="#"> &#10006; </a></div>
+        <div class="status" ng-repeat="status in statuses">{{status[0]}}<a class="cross" href="#" ng-click="delete_status(this);"> &#10006; </a></div>
     </div>
     <div ng-show="show_adding">
-        <p>Добавить роль</p>
-        <select>
-            <option ng-repeat="status in new_statuses" id="{{status[1]}}" ng-click="func1(this);">{{status[0]}}</option>
-        </select>
+            <p>Добавить новую роль</p>
+            <select>
+                <option ng-repeat="status in new_statuses" value="{{status[1]}}" ng-click="add_status(this);">{{status[0]}}</option>
+            </select>
+        {% endraw %}
     </div>
-    {% endraw %}
+
 </div>
 
 {% endblock %}

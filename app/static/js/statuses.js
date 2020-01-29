@@ -22,32 +22,36 @@ app.controller("ctrl", function ($scope, $http) {
             });
 	}
 
-	$scope.func1 = function(a){
-	    console.log(a.status[1]);
+	$scope.add_status = function(sender){
+	    status_id = sender.status[1];
+	    let user_data = {
+                'user_id':$scope.user_id,
+                'status_id':status_id
+            };
+	    $http({
+                method: 'POST',
+                url: '/add_status',
+                data: user_data,
+                async:false
+            }).then(function success (response) {
+                $scope.choose_user($scope.user_id);
+            });
 	}
 
-
-    $scope.vote_for = function(member,criterion,mark){
-            $scope.results[member][criterion-1]=mark;
-            console.log($scope.results);
-        }
-
-        $scope.finish_vote = function(team_id,axis_id){
-            let user_data = {
-                'team_id':team_id,
-                 'axis':axis_id,
-                 "results":$scope.results
+	$scope.delete_status = function(sender){
+	    status_id = sender.status[1];
+	    let user_data = {
+                'user_id':$scope.user_id,
+                'status_id':status_id
             };
-            console.log(user_data);
-            $http({
+	    $http({
                 method: 'POST',
-                url: '/finish_vote',
+                url: '/delete_status',
                 data: user_data,
-                async: false
+                async:false
             }).then(function success (response) {
-                document.location.href = "assessment";
+                $scope.choose_user($scope.user_id);
             });
-
-        }
+	}
 
     });
