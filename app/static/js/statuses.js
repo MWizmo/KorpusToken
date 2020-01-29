@@ -4,7 +4,9 @@ app.controller("ctrl", function ($scope, $http) {
     $scope.statuses = [];
     $scope.show_adding = false;
 
-	$scope.choose_user = function(user_id){
+	$scope.choose_user = function(){
+	        console.log(1);
+	        user_id = $scope.selected;
 	        $http({
                 method: 'GET',
                 url: '/get_statuses_of_user?user_id=' + user_id,
@@ -22,8 +24,8 @@ app.controller("ctrl", function ($scope, $http) {
             });
 	}
 
-	$scope.add_status = function(sender){
-	    status_id = sender.status[1];
+	$scope.add_status = function(){
+	    status_id = $scope.status_selected;
 	    let user_data = {
                 'user_id':$scope.user_id,
                 'status_id':status_id
