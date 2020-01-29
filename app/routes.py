@@ -767,13 +767,13 @@ def manage_statuses():
                                team=Membership.team_participation(current_user.id))
 
     users = [(user.id, user.surname + ' ' + user.name) for user in User.query.order_by(User.surname).all()]
-    return render_template('manage_statuses.html', title='Прогресс голосования',
+    return render_template('manage_statuses.html', title='Управление ролями',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            users=users)
 
 
-@app.route('/get_statuses_of_user', methods=['GET', 'POST'])
+@app.route('/get_statuses_of_user', methods=['GET'])
 def get_statuses_of_user():
     user_id = int(request.args.get('user_id'))
     if user_id == 0:
@@ -789,3 +789,24 @@ def get_statuses_of_user():
             new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
         statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
     return jsonify({'user_statuses': statuses, 'new_statuses':new_statuses})
+
+
+@app.route('/add_status', methods=['POST'])
+def add_status():
+    data = request.json
+    user_id = int(data['user_id'])
+    status_id = int(data['status_id'])
+    new_status = UserStatuses(user_id=user_id, status_id=status_id)
+    db.session.add(new_status)
+    db.session.commit()
+    return jsonify({'response': 'ok'})
+
+
+@app.route('/delete_status', methods=['POST'])
+def delete_status():
+    data = request.json
+    user_id = int(data['user_id'])
+    status_id = int(data['status_id'])
+    UserStatuses.query.filter(UserStatuses.status_id==status_id, UserStatuses.user_id==user_id).delete()
+    db.session.commit()
+    return jsonify({'response': 'ok'})

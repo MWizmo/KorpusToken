@@ -88,7 +88,3 @@ class TeamAdding(FlaskForm):
 class MemberAdding(FlaskForm):
     name = StringField('Новый участник команды', validators=[DataRequired()])
     submit = SubmitField('Добавить')
-
-
-class Assessment(FlaskForm):
-    pass
