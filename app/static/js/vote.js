@@ -20,7 +20,7 @@ app.controller("ctrl", function ($scope, $http) {
 
     $scope.vote_for = function(member,criterion,mark){
             $scope.results[member][criterion-1]=mark;
-            console.log($scope.results);
+            console.log(1);
         }
 
         $scope.finish_vote = function(team_id,axis_id){
@@ -29,7 +29,6 @@ app.controller("ctrl", function ($scope, $http) {
                  'axis':axis_id,
                  "results":$scope.results
             };
-            console.log(user_data);
             $http({
                 method: 'POST',
                 url: '/finish_vote',
