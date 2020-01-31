@@ -41,6 +41,9 @@
                             <li><a class="nav__link" href="{{ url_for('assessment') }}">Оценка</a>
                             </li>
                         {% endif %}
+                        <li>
+                            <a class="nav__link" href="{{ url_for('assessment_results') }}">Результаты оценки</a>
+                        </li>
                         {% if responsibilities.admin %}
                             <li><a class="nav__link" href=#>Специальные Функции</a>
                                 <ul class="submenu">

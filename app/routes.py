@@ -6,11 +6,13 @@ from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
     Criterion, Voting, VotingInfo
-from flask import render_template, redirect, url_for, request, jsonify
+from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
+import os
+import csv
 
 
 @app.route('/')
@@ -413,7 +415,6 @@ def edit_team():
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
     tid = int(request.args.get('tid'))
     form = MemberAdding()
     if form.validate_on_submit():
@@ -422,12 +423,12 @@ def edit_team():
             new_member = Membership(user_id=new_member_id, team_id=tid)
             db.session.add(new_member)
             db.session.commit()
+        return redirect(url_for('edit_team', tid=tid))
     title = Teams.query.filter_by(id=tid).first().name
     members = Membership.get_crew_of_team(tid)
     users = User.query.order_by(User.name).all()
     for team_member in members:
         if team_member[0] in [user.id for user in users]:
-            print('yes')
             for user in users:
                 if user.id == team_member[0]:
                     users.remove(user)
@@ -772,64 +773,6 @@ def manage_statuses():
                            team=Membership.team_participation(current_user.id),
                            users=users)
 
-# from datetime import timedelta
-# from flask import make_response, request, current_app
-# from functools import update_wrapper
-#
-# def crossdomain(origin=None, methods=None, headers=None, max_age=21600,
-#                 attach_to_all=True, automatic_options=True):
-#     """Decorator function that allows crossdomain requests.
-#       Courtesy of
-#       https://blog.skyred.fi/articles/better-crossdomain-snippet-for-flask.html
-#     """
-#     if methods is not None:
-#         methods = ', '.join(sorted(x.upper() for x in methods))
-#     # use str instead of basestring if using Python 3.x
-#     if headers is not None and not isinstance(headers, basestring):
-#         headers = ', '.join(x.upper() for x in headers)
-#     # use str instead of basestring if using Python 3.x
-#     if not isinstance(origin, basestring):
-#         origin = ', '.join(origin)
-#     if isinstance(max_age, timedelta):
-#         max_age = max_age.total_seconds()
-#
-#     def get_methods():
-#         """ Determines which methods are allowed
-#         """
-#         if methods is not None:
-#             return methods
-#
-#         options_resp = current_app.make_default_options_response()
-#         return options_resp.headers['allow']
-#
-#     def decorator(f):
-#         """The decorator function
-#         """
-#         def wrapped_function(*args, **kwargs):
-#             """Caries out the actual cross domain code
-#             """
-#             if automatic_options and request.method == 'OPTIONS':
-#                 resp = current_app.make_default_options_response()
-#             else:
-#                 resp = make_response(f(*args, **kwargs))
-#             if not attach_to_all and request.method != 'OPTIONS':
-#                 return resp
-#
-#             h = resp.headers
-#             h['Access-Control-Allow-Origin'] = origin
-#             h['Access-Control-Allow-Methods'] = get_methods()
-#             h['Access-Control-Max-Age'] = str(max_age)
-#             h['Access-Control-Allow-Credentials'] = 'true'
-#             h['Access-Control-Allow-Headers'] = \
-#                 "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-#             if headers is not None:
-#                 h['Access-Control-Allow-Headers'] = headers
-#             return resp
-#
-#         f.provide_automatic_options = False
-#         return update_wrapper(wrapped_function, f)
-#     return decorator
-
 
 @app.route('/get_statuses_of_user', methods=['GET'])
 def get_statuses_of_user():
@@ -868,3 +811,63 @@ def delete_status():
     UserStatuses.query.filter(UserStatuses.status_id==status_id, UserStatuses.user_id==user_id).delete()
     db.session.commit()
     return jsonify({'response': 'ok'})
+
+
+@app.route('/sum_up_assessment', methods=['GET', 'POST'])
+@login_required
+def sum_up_assessment():
+    if not (User.check_admin(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
+        writer = csv.writer(output, delimiter=';')
+        criterions = [c.name for c in Criterion.query.all()]
+        writer.writerow([' '] + criterions)
+        users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if User.check_can_be_marked(user.id)]
+        for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).filter(VotingInfo.cadet_id==user[0]).group_by(VotingInfo.criterion_id).all()
+            for mark in user_res:
+                if float(mark[0]) < 1.0:
+                    res.append(0)
+                else:
+                    res.append(1)
+            writer.writerow(res)
+    return redirect(url_for('assessment_results'))
+
+
+@app.route('/get_assessment_results', methods=['GET'])
+@login_required
+def get_assessment_results():
+    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    return send_file(os.path.join(app.root_path + '/results', filename),
+                     as_attachment=True,
+                     attachment_filename=filename,
+                     mimetype='text/csv')
+
+
+@app.route('/assessment_results', methods=['GET'])
+@login_required
+def assessment_results():
+    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        user_info = list()
+        with open(os.path.join(app.root_path + '/results', filename)) as file:
+            reader = csv.reader(file)
+            next(reader)
+            for row in reader:
+                user_marks = row[0].split(';')
+                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                user_info.append(user_marks)
+        user_info.sort(key=lambda i: i[-1], reverse=True)
+        criterions = [c.name for c in Criterion.query.all()]
+        return render_template('assessment_results.html', title='Результаты оценки',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               criterions=criterions, info=user_info)
+    else:
+        return render_template('assessment_results.html', title='Результаты оценки',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               team=Membership.team_participation(current_user.id))
