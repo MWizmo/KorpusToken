@@ -514,3 +514,17 @@ font-family: 'Share Tech Mono', monospace;
     display:flex;
     flex-direction:row;
 }
+
+.res_container{
+	display: block;
+	width: 90%;
+	margin-left: 5%;
+}
+
+.result_table{
+    width:100%;
+}
+
+.result_table > tbody > tr > td{
+    border:0.5px solid black;
+}
