@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+import jdcal
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -103,7 +104,7 @@ class User(UserMixin, db.Model):
     sex = db.Column(db.String(16))
     chat_id = db.Column(db.String(64))
     state = db.Column(db.Integer)
-    photo = db.String(db.String(512))
+    photo = db.Column(db.String(512))
 
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education, work_exp, sex, name, surname):
@@ -132,6 +133,40 @@ class Teams(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     type = db.Column(db.Integer)
+
+
+class TeamRoles(db.Model):
+    @staticmethod
+    def check_team_lead(current_user_id, team_id=None):
+        if team_id:
+            if 1 in [user_role.role_id
+                     for user_role in TeamRoles.query.filter_by(user_id=current_user_id, team_id=team_id).all()]:
+                return True
+            else:
+                return False
+        else:
+            if 1 in [user_role.role_id for user_role in TeamRoles.query.filter_by(user_id=current_user_id).all()]:
+                b = True
+                return b
+            else:
+                return False
+
+    @staticmethod
+    def dict_of_user_roles(current_user_id):
+        return {'teamlead': {'exist': TeamRoles.check_team_lead(current_user_id),
+                             'team_ids': [team.id for team in Membership.query.filter_by(user_id=current_user_id) if
+                                          TeamRoles.check_team_lead(current_user_id, team.id)]}
+                }
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    team_id = db.Column(db.Integer)
+    role_id = db.Column(db.Integer)
+
+
+class Roles(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
 
 
 class Membership(db.Model):
@@ -241,8 +276,12 @@ class Voting(db.Model):
             else:
                 return True
         now = datetime.datetime.now()
+
         if last_time_voting_date:
-            if str(now.year) + str(now.month) == str(last_time_voting_date.year) + str(last_time_voting_date.month):
+            difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
+                         int(sum(jdcal.gcal2jd(last_time_voting_date.date.year, last_time_voting_date.date.month,
+                                               last_time_voting_date.date.day)))
+            if difference < 30:
                 return False
         else:
             return True
