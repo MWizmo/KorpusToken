@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import datetime
 import threading
+import os
+import csv
+
+
+import jdcal
 from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
-    Criterion, Voting, VotingInfo
+    Criterion, Voting, VotingInfo, TeamRoles
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
-import os
-import csv
 
 
 @app.route('/')
@@ -22,6 +25,7 @@ def home():
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
     return render_template('homepage.html', title='KorpusToken', user=user,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -87,11 +91,13 @@ def questionnaire_self():
 
     if db_date:
         now = datetime.datetime.now()
-        td = str(now.year) + '-' + str(now.month)
-        last = str(db_date.date.year) + '-' + str(db_date.date.month)
-        if last == td:
+        difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
+                     int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
+
+        if difference < 30:
             return render_template('questionnaire_error.html',
                                    responsibilities=User.dict_of_responsibilities(current_user.id),
+                                   user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                    team=Membership.team_participation(current_user.id))
 
     form = QuestionnairePersonal()
@@ -128,6 +134,7 @@ def questionnaire_self():
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
                            q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -140,11 +147,13 @@ def questionnaire_team():
 
     if db_date:
         now = datetime.datetime.now()
-        td = str(now.year) + '-' + str(now.month)
-        last = str(db_date.date.year) + '-' + str(db_date.date.month)
-        if last == td:
+        difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
+                     int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
+
+        if difference < 30:
             return render_template('questionnaire_error.html',
                                    responsibilities=User.dict_of_responsibilities(current_user.id),
+                                   user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                    team=Membership.team_participation(current_user.id))
 
     teammates = []
@@ -188,6 +197,7 @@ def questionnaire_team():
     return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
                            q1=questions[0].text, q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
                            q5=questions[4].text, responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -203,6 +213,7 @@ def question_adding():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     form = QuestionAdding()
@@ -213,9 +224,11 @@ def question_adding():
         db.session.commit()
         return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=True,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -226,6 +239,7 @@ def questionnaire_progress():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     questionnaire = dict(
@@ -242,14 +256,11 @@ def questionnaire_progress():
     if User.query.all():
         for user in User.query.all():
             if User.check_can_be_marked(user.id):
-            #if UserStatuses.query.filter_by(user_id=user.id):
-                #for status in UserStatuses.query.filter_by(user_id=user.id):
-                   # if status.status_id == 3:
-                        questionnaire['participaters'].append(user.id)
-                        questionnaire['participaters_self_ids'].append(user.id)
-                        questionnaire['max_particip'] += 1
-                        questionnaire['all_team_particip'] += 1
-                        questionnaire['participaters_team_ids'].append(user.id)
+                questionnaire['participaters'].append(user.id)
+                questionnaire['participaters_self_ids'].append(user.id)
+                questionnaire['max_particip'] += 1
+                questionnaire['all_team_particip'] += 1
+                questionnaire['participaters_team_ids'].append(user.id)
 
             if Questionnaire.query.filter_by(user_id=user.id, type=1):
                 for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
@@ -262,16 +273,6 @@ def questionnaire_progress():
                     if qst.date.month == datetime.datetime.now().month:
                         questionnaire['already_team'] += 1
                         questionnaire['participated_team'].append(user.id)
-
-            # if Membership.query.all():
-            #     membship_ids = [user_ids.user_id for user_ids in Membership.query.all()]
-            #     if user.id in membship_ids:
-            #         teams = [team.team_id for team in Membership.query.filter_by(user_id=user.id).all()]
-            #         for t_id in teams:
-            #             team = Teams.query.filter_by(id=t_id).first()
-            #             if team.type and team.type==1:
-            #                 questionnaire['all_team_particip'] += 1
-            #                 questionnaire['participaters_team_ids'].append(user.id)
 
     not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
                                                            if user not in questionnaire['participated_self']]
@@ -315,6 +316,7 @@ def questionnaire_progress():
 
     return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                            not_participated_team=not_participated_team_info)
@@ -326,12 +328,14 @@ def users_list():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     info = db.session.query(User.name, User.surname, Teams.name, User.id).outerjoin(Membership, User.id == Membership.user_id)\
         .outerjoin(Teams, Teams.id == Membership.team_id).all()
     return render_template('users_list.html', title='Список пользователей', users=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -341,6 +345,7 @@ def delete_user():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     uid = request.args.get('uid')
     User.query.filter_by(id=uid).delete()
@@ -366,6 +371,7 @@ def teams_list():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     form = TeamAdding()
@@ -375,6 +381,7 @@ def teams_list():
         db.session.commit()
     return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -384,6 +391,7 @@ def delete_team():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     tid = request.args.get('tid')
     Teams.query.filter_by(id=tid).delete()
@@ -394,26 +402,35 @@ def delete_team():
 @app.route('/teams_crew', methods=['POST', 'GET'])
 @login_required
 def teams_crew():
-    if not User.check_admin(current_user.id):
+    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    teams = Teams.query.all()
+    if TeamRoles.check_team_lead(current_user.id):
+        teams = [team
+                 for t_id in Membership.query.filter_by(user_id=current_user.id).all()
+                 for team in Teams.query.filter_by(id=t_id.team_id)]
+    else:
+        teams = Teams.query.all()
+
     info = list()
     for team in teams:
         info.append((team, Membership.get_crew_of_team(team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
 @app.route('/edit_team', methods=['GET', 'POST'])
 @login_required
 def edit_team():
-    if not User.check_admin(current_user.id):
+    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id, int(request.args.get('tid')))):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     tid = int(request.args.get('tid'))
     form = MemberAdding()
@@ -436,20 +453,23 @@ def edit_team():
     return render_template('edit_team.html', title='Редактировать состав команды',
                            team_title=title, members=members, tid=tid, form=form, users=users,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
 @app.route('/delete_member', methods=['GET'])
 @login_required
 def delete_member():
-    if not User.check_admin(current_user.id):
+    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id, int(request.args.get('tid')))):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     tid = request.args.get('tid')
     uid = request.args.get('uid')
     Membership.query.filter_by(team_id=tid, user_id=uid).delete()
+    TeamRoles.query.filter_by(team_id=tid, user_id=uid).delete()
     db.session.commit()
 
     return redirect('edit_team?tid=' + str(tid))
@@ -462,6 +482,7 @@ def assessment():
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
@@ -480,6 +501,7 @@ def assessment():
 
     return render_template('assessment.html', title='Оценка',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -490,10 +512,12 @@ def assessment_axis():
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     axises = [(axis.id, axis.name, Axis.is_available(axis.id)) for axis in Axis.query.all()]
     return render_template('assessment_axis.html', title='Выбор оси',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id), axises=axises)
 
 
@@ -504,6 +528,7 @@ def assessment_team():
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     axis_id = request.args.get('axis_id')
@@ -524,6 +549,7 @@ def assessment_team():
         axis = Axis.query.filter_by(id=axis_id).first().name
     return render_template('assessment_team.html', title='Выбор команды',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            team_lst=first_type_teams,
                            axis_id=axis_id, axis=axis)
@@ -536,6 +562,7 @@ def assessment_users():
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
@@ -560,6 +587,7 @@ def assessment_users():
                     answers[q.id].append('Нет ответа')
         return render_template('assessment_users.html', title='Оценка', answers=answers,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id),
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
     elif axis_id == '2':
@@ -572,6 +600,7 @@ def assessment_users():
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id), team_id=team_id,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
     else:
@@ -596,6 +625,7 @@ def assessment_users():
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id), team_id=team_id,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
 
@@ -643,6 +673,7 @@ def finish_vote():
 def assessment_error():
     return render_template('assessment_error.html', title='Лимит исчерпан',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
 
@@ -652,13 +683,14 @@ def graphs_teams():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     return render_template('graphs_teams.html', title='Грязный багоюзер',
-                               responsibilities=User.dict_of_responsibilities(current_user.id),
-                               team=Membership.team_participation(current_user.id),
-                               teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()]
-                           )
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()])
 
 
 @app.route('/make_graphs')
@@ -667,6 +699,7 @@ def make_graphs():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
@@ -689,6 +722,7 @@ def make_graphs():
     t.join()
     return render_template('graphs_teams.html', title='Выбор команды для графов',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()],
                            message='Графы для команды успешно сформированы')
@@ -700,6 +734,7 @@ def voting_progress():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
@@ -739,6 +774,7 @@ def voting_progress():
 
     return render_template('voting_progress.html', title='Прогресс голосования',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            teams_number=teams_for_voting, relation=relation_results,
                            business=business_results, authority=authority_results,
@@ -751,6 +787,7 @@ def axis_access():
     if not User.check_admin(current_user.id):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     axis_id = int(request.args.get('axis_id'))
     axis = Axis.query.filter_by(id=axis_id).first()
@@ -762,14 +799,16 @@ def axis_access():
 @app.route('/manage_statuses', methods=['GET', 'POST'])
 @login_required
 def manage_statuses():
-    if not (User.check_admin(current_user.id)):
+    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
     users = [(user.id, user.surname + ' ' + user.name) for user in User.query.order_by(User.surname).all()]
     return render_template('manage_statuses.html', title='Управление ролями',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id),
                            users=users)
 
@@ -782,7 +821,11 @@ def get_statuses_of_user():
         new_statuses = []
     else:
         statuses_id = [s.status_id for s in UserStatuses.query.filter_by(user_id=user_id).all()]
-        all_statuses = [s.id for s in Statuses.query.all()]
+        if User.check_admin(current_user.id):
+            all_statuses = [s.id for s in Statuses.query.all()]
+        elif User.check_chieftain(current_user.id):
+            all_statuses = [s.id for s in Statuses.query.all() if s.id != 1]
+
         statuses_diff = set(all_statuses).difference(set(statuses_id))
         if len(statuses_diff) > 0:
             new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_diff]
@@ -819,6 +862,7 @@ def sum_up_assessment():
     if not (User.check_admin(current_user.id)):
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
     with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
@@ -866,8 +910,10 @@ def assessment_results():
         return render_template('assessment_results.html', title='Результаты оценки',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                team=Membership.team_participation(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                criterions=criterions, info=user_info)
     else:
         return render_template('assessment_results.html', title='Результаты оценки',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
