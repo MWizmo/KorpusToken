@@ -146,8 +146,7 @@ class TeamRoles(db.Model):
                 return False
         else:
             if 1 in [user_role.role_id for user_role in TeamRoles.query.filter_by(user_id=current_user_id).all()]:
-                b = True
-                return b
+                return True
             else:
                 return False
 
