@@ -408,16 +408,18 @@ def teams_crew():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    if TeamRoles.check_team_lead(current_user.id):
-        teams = [team
-                 for t_id in Membership.query.filter_by(user_id=current_user.id).all()
-                 for team in Teams.query.filter_by(id=t_id.team_id)]
-    else:
-        teams = Teams.query.all()
-
+    # if TeamRoles.check_team_lead(current_user.id):
+    #     teams = [team
+    #              for t_id in Membership.query.filter_by(user_id=current_user.id).all()
+    #              for team in Teams.query.filter_by(id=t_id.team_id)]
+    # else:
+    teams = Teams.query.all()
     info = list()
     for team in teams:
-        info.append((team, Membership.get_crew_of_team(team.id)))
+        if User.check_admin(current_user.id):
+            info.append((team, Membership.get_crew_of_team(team.id), True))
+        else:
+            info.append((team, Membership.get_crew_of_team(team.id), TeamRoles.check_team_lead(current_user.id, team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
