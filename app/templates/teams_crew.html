@@ -15,7 +15,9 @@
                 {% else %}
                     <p class="main_text">На данный момент нет участников</p>
                 {% endif %}
-        <button class="nav__link" onclick="document.location='/edit_team?tid={{team[0].id}}'">Редактировать состав</button>
+        {% if team[2] %}
+            <button class="nav__link" onclick="document.location='/edit_team?tid={{team[0].id}}'">Редактировать состав</button>
+        {% endif %}
         {% endfor %}
     </div>
 </div>
