@@ -944,3 +944,30 @@ def log_page():
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
+
+
+@app.route('/questionnaire_of_cadets', methods=['GET'])
+@login_required
+def questionnaire_of_cadets():
+    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    teams = Teams.query.filter_by(type=1).all()
+    res_info = list()
+    for team in teams:
+        team_info = dict()
+        team_info['title'] = team.name
+        monthes = db.session.query(func.month(Questionnaire.date)) \
+            .filter(Questionnaire.team_id == team.id).group_by(func.month(Questionnaire.date)).all()
+        members = Membership.get_crew_of_team(team.id)
+        for member in members:
+            if User.check_can_be_marked(member.id):
+                questionnaries = Questionnaire.query.filter(team_id=team.id).all()
+
+    return render_template('log_page.html', title='Анкеты курсантов',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                           team=Membership.team_participation(current_user.id))
