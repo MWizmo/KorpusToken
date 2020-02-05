@@ -298,3 +298,10 @@ class VotingInfo(db.Model):
     cadet_id = db.Column(db.Integer)
     criterion_id = db.Column(db.Integer)
     mark = db.Column(db.Integer)
+
+
+class Log(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    action = db.Column(db.String(64))
+    date = db.Column(db.String(32))
