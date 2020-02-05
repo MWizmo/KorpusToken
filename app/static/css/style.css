@@ -528,3 +528,14 @@ font-family: 'Share Tech Mono', monospace;
 .result_table > tbody > tr > td{
     border:0.5px solid black;
 }
+
+.log_table{
+    width: 90%;
+    margin-left:5%;
+    padding-top: 30px;
+    text-align: center;
+}
+
+.log_table > tbody > tr > td{
+    border-bottom:0.5px solid black;
+}

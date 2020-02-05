@@ -10,12 +10,18 @@ from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis, \
-    Criterion, Voting, VotingInfo, TeamRoles
+    Criterion, Voting, VotingInfo, TeamRoles, Log
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
 from flask_login import current_user, login_user, logout_user, login_required
+
+
+def log(action):
+    new_log = Log(user_id=current_user.id, action=action, date=datetime.datetime.today().strftime("%d-%m-%Y %H:%M:%S"))
+    db.session.add(new_log)
+    db.session.commit()
 
 
 @app.route('/')
@@ -888,6 +894,7 @@ def sum_up_assessment():
 @login_required
 def get_assessment_results():
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    log('Скачивание файла с результатом оценки')
     return send_file(os.path.join(app.root_path + '/results', filename),
                      as_attachment=True,
                      attachment_filename=filename,
@@ -898,6 +905,7 @@ def get_assessment_results():
 @login_required
 def assessment_results():
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    log('Просмотр страницы результатов')
     if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
         user_info = list()
         with open(os.path.join(app.root_path + '/results', filename)) as file:
@@ -919,3 +927,20 @@ def assessment_results():
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
+
+
+@app.route('/log_page', methods=['GET'])
+@login_required
+def log_page():
+    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    logs = Log.query.all()
+    user_logs = [(l.action, User.get_full_name(l.user_id), l.date) for l in logs]
+    return render_template('log_page.html', title='Логи', logs=user_logs,
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                           team=Membership.team_participation(current_user.id))

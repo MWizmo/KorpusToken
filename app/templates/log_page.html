@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <table cellspacing="0" cellpadding="0" class="log_table">
+        <thead>
+            <tr><td>Действие</td><td>Пользователь</td><td>Дата</td></tr>
+        </thead>
+        <tbody>
+            {% for l in logs %}
+                <tr><td>{{l[0]}}</td><td>{{l[1]}}</td><td>{{l[2]}}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
