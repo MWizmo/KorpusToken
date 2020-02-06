@@ -337,8 +337,17 @@ def users_list():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    info = db.session.query(User.name, User.surname, Teams.name, User.id).outerjoin(Membership, User.id == Membership.user_id)\
-        .outerjoin(Teams, Teams.id == Membership.team_id).all()
+    users = User.query.all()
+    info = list()
+    for user in users:
+        teams = Membership.query.filter_by(user_id=user.id).all()
+        if teams:
+            user_teams = [team.name for t in teams for team in Teams.query.filter_by(id=t.team_id).all()]
+            info.append((user.name, user.surname, ', '.join(user_teams), user.id))
+        else:
+            info.append((user.name, user.surname, 'Нет', user.id))
+    # info = db.session.query(User.name, User.surname, Teams.name, User.id).outerjoin(Membership, User.id == Membership.user_id)\
+    #     .outerjoin(Teams, Teams.id == Membership.team_id).all()
     return render_template('users_list.html', title='Список пользователей', users=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
@@ -1002,4 +1011,27 @@ def questionnaire_of_cadets():
     return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', teams=teams,
                            responsibilities=User.dict_of_responsibilities(current_user.id), form=form,
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                           team=Membership.team_participation(current_user.id))
+
+
+@app.route('/user_profile', methods=['GET'])
+@login_required
+def user_profile():
+    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    uid = request.args.get('user_id')
+    user = User.query.filter_by(id=uid).first()
+    if not user:
+        return render_template('user_profile.html', title='Неизвестный пользователь',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+    date = str(user.birthday).split('-')
+    date = '{}.{}.{}'.format(date[2], date[1], date[0])
+    return render_template('user_profile.html', title='Профиль - {} {}'.format(user.surname, user.name),
+                           responsibilities=User.dict_of_responsibilities(current_user.id), user=user,
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id), date=date,
                            team=Membership.team_participation(current_user.id))

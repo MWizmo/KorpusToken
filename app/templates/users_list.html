@@ -8,13 +8,11 @@
         </thead>
         <tbody>
             {% for user in users %}
-                <tr><td>{{loop.index0+1}}</td><td>{{user[0]}} {{user[1]}}</td><td>
-                    {% if user[2] %}
-                        {{user[2]}}
-                    {% else %}
-                        Нет
-                    {% endif %}
-                </td><td><a class="nav__link" style="text-transform: uppercase;" href="/delete_user?uid={{user[3]}}" onclick ="return confirm('Удалить пользователя?');">Удалить</a></td></tr>
+            <tr>
+                <td>{{loop.index0+1}}</td>
+                <td><a class="nav__link" href="/user_profile?user_id={{user[3]}}" target="_blank">{{user[0]}} {{user[1]}}</a></td>
+                <td>{{user[2]}}</td>
+                <td><a class="nav__link" style="text-transform: uppercase;" href="/delete_user?uid={{user[3]}}" onclick ="return confirm('Удалить пользователя?');">Удалить</a></td></tr>
             {% endfor %}
         </tbody>
     </table>
