@@ -711,7 +711,6 @@ def make_graphs():
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
-
     questionarries = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2).all()
     res = list()
     for q in questionarries:
@@ -722,7 +721,7 @@ def make_graphs():
         res.append(user_res)
 
     t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, str(datetime.datetime.now().year) +
-                                                    str(datetime.datetime.now().month - 1)))
+                                                    str(datetime.datetime.now().month)))
     t.setDaemon(True)
     t.start()
     # graphs.Forms.command_form([], res, team_id, str(datetime.datetime.now().year) +
