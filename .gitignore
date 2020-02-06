@@ -7,3 +7,4 @@ app/__pycache__/*
 *.py[cod]
 *.pyc
 app/static/graphs/
+app/static/graphs/*

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <form novalidate method="post">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token() }}
+        {{ form.team.label }}
+        <select name="team">
+            {% for t in teams %}
+                <option value="{{t.id}}">{{t.name}}</option>
+            {% endfor %}
+        </select>
+        {{ form.submit }}
+    </form>
+    {% if info %}
+        <br>
+        {% for team in info %}
+            <h2>{{team['title']}}</h2>
+            {% for month in team['monthes'] %}
+                <h3>{{month['title']}}</h3>
+                <div class='slide' style="margin-bottom:150px;">
+                {% for img in month['graphs'] %}
+                     <input type="radio" name="slider2" id="slider2_{{loop.index0}}" checked="checked">
+                      <label for="slider2_{{loop.index0}}"></label>
+                      <div><img src="{{img['src']}}" onError="this.onerror=null;this.src='{{url_for('static', filename='images/no_graph.png')}}';"> <p>{{img['text']}}</p></div>
+                 {% endfor %}
+                 </div>
+                {% for member in month['team'] %}
+                    <h4>{{member['name']}}</h4>
+                    {% for answer in member['answers'] %}
+                        <p><b>{{answer['question']}}</b></p>
+                        <p>{{answer['answer']}}</p>
+                    {% endfor %}
+                    <hr>
+                {% endfor %}
+            <hr><hr>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
