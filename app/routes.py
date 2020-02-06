@@ -14,7 +14,7 @@ from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Member
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
-    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding
+    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm
 from flask_login import current_user, login_user, logout_user, login_required
 
 
@@ -946,7 +946,7 @@ def log_page():
                            team=Membership.team_participation(current_user.id))
 
 
-@app.route('/questionnaire_of_cadets', methods=['GET'])
+@app.route('/questionnaire_of_cadets', methods=['GET','POST'])
 @login_required
 def questionnaire_of_cadets():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
@@ -956,18 +956,51 @@ def questionnaire_of_cadets():
                                team=Membership.team_participation(current_user.id))
 
     teams = Teams.query.filter_by(type=1).all()
-    res_info = list()
-    for team in teams:
-        team_info = dict()
-        team_info['title'] = team.name
-        monthes = db.session.query(func.month(Questionnaire.date)) \
-            .filter(Questionnaire.team_id == team.id).group_by(func.month(Questionnaire.date)).all()
-        members = Membership.get_crew_of_team(team.id)
-        for member in members:
-            if User.check_can_be_marked(member.id):
-                questionnaries = Questionnaire.query.filter(team_id=team.id).all()
-
-    return render_template('log_page.html', title='Анкеты курсантов',
-                           responsibilities=User.dict_of_responsibilities(current_user.id),
+    form = ChooseTeamForm()
+    if form.validate_on_submit():
+        res_info = list()
+        monthes_name = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
+                        'Ноябрь', 'Декабрь']
+        _teams = [Teams.query.filter_by(id=int(form.team.data)).first()]
+        for team in _teams:
+            team_info = dict()
+            team_info['title'] = team.name
+            monthes = db.session.query(func.month(Questionnaire.date)) \
+                .filter(Questionnaire.team_id == team.id).group_by(func.month(Questionnaire.date)).all()
+            team_info['monthes'] = list()
+            members = Membership.get_crew_of_team(team.id)
+            for month in monthes:
+                month_info = dict()
+                month_info['title'] = monthes_name[month[0] - 1]
+                texts = Questions.query.filter_by(type=2).all()
+                month_info['graphs'] = [
+                    {'text': texts[i - 1].text,
+                     'src': url_for('static', filename='graphs/graph_{}_2020{}_{}.png'.format(team.id, month[0], i))}
+                    for i in range(1, 6)]
+                month_info['team'] = list()
+                for member in members:
+                    if User.check_can_be_marked(member.id):
+                        user_info = dict()
+                        user_info['name'] = member[1] + ' ' + member[2]
+                        user_info['answers'] = list()
+                        questionnaire = Questionnaire.query.filter(Questionnaire.team_id == team.id,
+                                                                   Questionnaire.user_id == member[0],
+                                                                   Questionnaire.type == 1,
+                                                                   func.month(Questionnaire.date) == month[0]).first()
+                        if questionnaire:
+                            answers = QuestionnaireInfo.query.filter_by(questionnaire_id=questionnaire.id).all()
+                            for answer in answers:
+                                user_info['answers'].append(
+                                    {'question': Questions.query.filter_by(id=answer.question_id).first().text,
+                                     'answer': answer.question_answ})
+                        month_info['team'].append(user_info)
+                team_info['monthes'].append(month_info)
+            res_info.append(team_info)
+        return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', info=res_info,
+                               responsibilities=User.dict_of_responsibilities(current_user.id), form=form,
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id), teams=teams)
+    return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', teams=teams,
+                           responsibilities=User.dict_of_responsibilities(current_user.id), form=form,
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
