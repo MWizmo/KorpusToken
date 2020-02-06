@@ -722,7 +722,7 @@ def make_graphs():
         res.append(user_res)
 
     t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, str(datetime.datetime.now().year) +
-                                                    str(datetime.datetime.now().month)))
+                                                    str(datetime.datetime.now().month - 1)))
     t.setDaemon(True)
     t.start()
     # graphs.Forms.command_form([], res, team_id, str(datetime.datetime.now().year) +
