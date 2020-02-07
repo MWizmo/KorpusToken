@@ -64,8 +64,10 @@
             {% endif %}
         </p>
         <a class='nav__link border' href="{{ url_for('questionnaire_access', questionnaire_id=1) }}">{{priv_text}}</a>
+        <br><br>
         <a class='nav__link border' href="{{ url_for('questionnaire_access', questionnaire_id=2) }}">{{com_text}}</a>
-        <a class="nav__link" href="{{url_for('graphs_teams')}}">Создать графы</a>
+        <br><br>
+        <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
     </div>
 
 

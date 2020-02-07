@@ -1074,6 +1074,8 @@ def questionnaire_of_cadets():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=Questionnaire_Table.is_available(1),
+                               command_questionnaire=Questionnaire_Table.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
@@ -1124,6 +1126,8 @@ def questionnaire_of_cadets():
                                team=Membership.team_participation(current_user.id), teams=teams)
     return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', teams=teams,
                            responsibilities=User.dict_of_responsibilities(current_user.id), form=form,
+                           private_questionnaire=Questionnaire_Table.is_available(1),
+                           command_questionnaire=Questionnaire_Table.is_available(2),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                            team=Membership.team_participation(current_user.id))
 
@@ -1134,6 +1138,8 @@ def user_profile():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=Questionnaire_Table.is_available(1),
+                               command_questionnaire=Questionnaire_Table.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     uid = request.args.get('user_id')
@@ -1141,11 +1147,15 @@ def user_profile():
     if not user:
         return render_template('user_profile.html', title='Неизвестный пользователь',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=Questionnaire_Table.is_available(1),
+                               command_questionnaire=Questionnaire_Table.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     date = str(user.birthday).split('-')
     date = '{}.{}.{}'.format(date[2], date[1], date[0])
     return render_template('user_profile.html', title='Профиль - {} {}'.format(user.surname, user.name),
                            responsibilities=User.dict_of_responsibilities(current_user.id), user=user,
+                           private_questionnaire=Questionnaire_Table.is_available(1),
+                           command_questionnaire=Questionnaire_Table.is_available(2),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id), date=date,
                            team=Membership.team_participation(current_user.id))
