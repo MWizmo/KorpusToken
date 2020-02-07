@@ -27,12 +27,16 @@
                         <li><a class="nav__link" href="{{ url_for('signup') }}">Регистрация</a></li>
                     {% else %}
                         <li><a class="nav__link" href="{{ url_for('home') }}">На главную</a></li>
-                        {% if responsibilities.can_be_marked %}
+                        {% if responsibilities.can_be_marked and (private_questionnaire == 1 or command_questionnaire == 1) %}
                             <li><a class="nav__link" href=#>Анкеты</a>
                                 <ul class="submenu">
+                                    {% if private_questionnaire == 1 %}
                                     <li><a class="nav__link" href="{{ url_for('questionnaire_self') }}">Личная анкета</a></li>
-                                    {% if team %}
-                                        <li><a class="nav__link" href="{{ url_for('questionnaire_team') }}">Командная анкета</a></li>
+                                    {% endif %}
+                                    {% if command_questionnaire == 1 %}
+                                        {% if team %}
+                                            <li><a class="nav__link" href="{{ url_for('questionnaire_team') }}">Командная анкета</a></li>
+                                        {% endif %}
                                     {% endif %}
                                 </ul>
                             </li>
