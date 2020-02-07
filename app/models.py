@@ -243,6 +243,7 @@ class Axis(db.Model):
     def is_available(axis_id):
         return Axis.query.filter_by(id=axis_id).first().is_opened
 
+
 class Questionnaire_Table(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     is_opened = db.Column(db.Integer)
