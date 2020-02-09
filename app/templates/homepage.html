@@ -6,6 +6,32 @@
 	</div>
 </div>
 <div class="home_text" align="center">
-	<h3>В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего мы все так давно ждали!</h3>
+	<h3>{{mess}}</h3>
+	{% if info %}
+	<div class="res_container">
+		<table class="result_table" cellspacing="0">
+			<thead>
+				<tr><td></td>
+				{% for c in criterions %}
+					<td>{{c}}</td>
+				{% endfor %}
+					<td>Сумма</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in info %}
+					<tr>
+						{% for cell in row %}
+							<td>{{cell}}</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<div class="vote_progress">
+			<a class='nav__link border' href="{{ url_for('get_assessment_results') }}">Скачать файл с итоговыми оценками</a>
+		</div>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}
