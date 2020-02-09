@@ -474,7 +474,7 @@ def teams_list():
 
     form = TeamAdding()
     if form.validate_on_submit():
-        team = Teams(name=form.title.data)
+        team = Teams(name=form.title.data, type=int(form.type.data))
         db.session.add(team)
         db.session.commit()
     return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
