@@ -244,13 +244,13 @@ class Axis(db.Model):
         return Axis.query.filter_by(id=axis_id).first().is_opened
 
 
-class Questionnaire_Table(db.Model):
+class QuestionnaireTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     is_opened = db.Column(db.Integer)
 
     @staticmethod
     def is_available(questionnaire_id):
-        return Questionnaire_Table.query.filter_by(id=questionnaire_id).first().is_opened
+        return QuestionnaireTable.query.filter_by(id=questionnaire_id).first().is_opened
 
 
 @login.user_loader
