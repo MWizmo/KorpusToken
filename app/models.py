@@ -174,9 +174,14 @@ class Roles(db.Model):
 class Membership(db.Model):
     @staticmethod
     def get_crew_of_team(team_id):
-        return db.session.query(User.id, User.name, User.surname) \
+        team_users = db.session.query(User.id, User.name, User.surname) \
             .outerjoin(Membership, User.id == Membership.user_id) \
             .filter(Membership.team_id == team_id).all()
+        # team_roles = db.session.query(User.id, User.name, User.surname) \
+        #     .outerjoin(TeamRoles, User.id == TeamRoles.user_id) \
+        #     .filter(TeamRoles.team_id == team_id).all()
+        # team_crew = [team_users[i] + team_roles[i] for i in range(len(team_users))]
+        return team_users
 
     @staticmethod
     def team_participation(current_user_id):
