@@ -3,32 +3,84 @@
 {% block content %}
 <div class="container">
     <div class="constructor">
-        <h2>Конструктор вопросов</h2>
-        <form method="post", action="" class="form">
-            {{ form.hidden_tag() }}
-            {{ form.csrf_token() }}
-            <p>
-            <h3>{{ form.question_form.label }}</h3>
-                {{ form.question_form(class_="text_field", rows='15',cols='75') }}
-                {% for error in form.question_form.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-            <h3>{{ form.question_type.label }}</h3>
-                {{ form.question_type(class_="text_field", rows='15',cols='75') }}
-                {% for error in form.question_type.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            <br><label>(1 - вопрос для личной анкеты, 2 - вопрос для командной анкеты)</label>
-            </p>
-            {{ form.submit(class_="submit") }}
-            {% if successful %}
-                <label style="color: green;">Вопрос добавлен</label>
+        {% if type %}
+            <h2>Конструктор вопросов анкеты типа {{ request.args.get('type') }}</h2>
+            <form method="post", action="" class="form">
+                {{ form.hidden_tag() }}
+                {{ form.csrf_token() }}
+                    <p>
+                    <h3>{{ form.question_1.label }}</h3>
+                        <p>
+                            <span>Сейчас:</span><br>
+                            <span>{{ questions[0] }}</span>
+                        </p>
+                        {{ form.question_1(class_="text_field", rows='15',cols='75') }}
+                        {% for error in form.question_1.errors %}
+                            <span style="color: red;">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                    <h3>{{ form.question_2.label }}</h3>
+                        <p>
+                            <span>Сейчас:</span><br>
+                            <span>{{ questions[1] }}</span>
+                        </p>
+                        {{ form.question_2(class_="text_field", rows='15',cols='75') }}
+                        {% for error in form.question_2.errors %}
+                            <span style="color: red;">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                    <h3>{{ form.question_3.label }}</h3>
+                        <p>
+                            <span>Сейчас:</span><br>
+                            <span>{{ questions[2] }}</span>
+                        </p>
+                        {{ form.question_3(class_="text_field", rows='15',cols='75') }}
+                        {% for error in form.question_3.errors %}
+                            <span style="color: red;">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                    <h3>{{ form.question_4.label }}</h3>
+                        <p>
+                            <span>Сейчас:</span><br>
+                            <span>{{ questions[3] }}</span>
+                        </p>
+                        {{ form.question_4(class_="text_field", rows='15',cols='75') }}
+                        {% for error in form.question_4.errors %}
+                            <span style="color: red;">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                    <h3>{{ form.question_5.label }}</h3>
+                        <p>
+                            <span>Сейчас:</span><br>
+                            <span>{{ questions[4] }}</span>
+                        </p>
+                        {{ form.question_5(class_="text_field", rows='15',cols='75') }}
+                        {% for error in form.question_5.errors %}
+                            <span style="color: red;">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+                    </p>
+                    {{ form.submit(class_="submit") }}
+                    {% if successful %}
+                        <label style="color: green;">Вопрос добавлен</label>
+                    {% endif %}
+            {% else %}
+                <h2>Выберите тип анкеты</h2>
+                <a class="nav__link" href="{{ url_for('question_adding', type=1) }}">Анкета типа 1</a>
+                <a class="nav__link" href="{{ url_for('question_adding', type=2) }}">Анкета типа 2</a>
             {% endif %}
         </form>
     </div>

@@ -5,7 +5,32 @@
 	    <h2 class="intro_title">Добро пожаловать в KorpusToken, {{ user.name }}!</h2>
 	</div>
 </div>
-<div class="home_text" align="center">
-	<h3>В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего мы все так давно ждали!</h3>
-</div>
+
+	<div class="home_text" align="center">
+		<h3>{{message}}</h3>
+	</div>
+	{% if info %}
+	<div class="res_container">
+		<table class="result_table" cellspacing="0">
+			<thead>
+				<tr><td></td>
+				{% for c in criterions %}
+					<td>{{c}}</td>
+				{% endfor %}
+					<td>Сумма</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in info %}
+					<tr>
+						{% for cell in row %}
+							<td>{{cell}}</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% endif %}
+
 {% endblock %}
