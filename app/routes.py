@@ -9,8 +9,8 @@ import jdcal
 from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, UserStatuses, Statuses, Axis, \
-    Criterion, Voting, VotingInfo, TeamRoles, Log
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, UserStatuses,\
+    Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -424,8 +424,7 @@ def users_list():
             info.append((user.name, user.surname, ', '.join(user_teams), user.id))
         else:
             info.append((user.name, user.surname, 'Нет', user.id))
-    # info = db.session.query(User.name, User.surname, Teams.name, User.id).outerjoin(Membership, User.id == Membership.user_id)\
-    #     .outerjoin(Teams, Teams.id == Membership.team_id).all()
+
     return render_template('users_list.html', title='Список пользователей', users=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
@@ -513,11 +512,6 @@ def teams_crew():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    # if TeamRoles.check_team_lead(current_user.id):
-    #     teams = [team
-    #              for t_id in Membership.query.filter_by(user_id=current_user.id).all()
-    #              for team in Teams.query.filter_by(id=t_id.team_id)]
-    # else:
     teams = Teams.query.all()
     info = list()
     for team in teams:
