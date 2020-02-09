@@ -105,6 +105,9 @@ class User(UserMixin, db.Model):
     chat_id = db.Column(db.String(64))
     state = db.Column(db.Integer)
     photo = db.Column(db.String(512))
+    vk_url = db.Column(db.String(256))
+    fb_url = db.Column(db.String(256))
+    inst_url = db.Column(db.String(256))
 
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education, work_exp, sex, name, surname):
