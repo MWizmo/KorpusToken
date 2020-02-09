@@ -29,12 +29,35 @@ def log(action):
 @login_required
 def home():
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
-    return render_template('homepage.html', title='KorpusToken', user=user,
-                           responsibilities=User.dict_of_responsibilities(current_user.id),
-                           private_questionnaire=Questionnaire_Table.is_available(1),
-                           command_questionnaire=Questionnaire_Table.is_available(2),
-                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
-                           team=Membership.team_participation(current_user.id))
+    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего мы все так давно ждали!'
+    if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        user_info = list()
+        with open(os.path.join(app.root_path + '/results', filename)) as file:
+            reader = csv.reader(file)
+            next(reader)
+            for row in reader:
+                user_marks = row[0].split(';')
+                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                user_info.append(user_marks)
+        user_info.sort(key=lambda i: i[-1], reverse=True)
+        criterions = [c.name for c in Criterion.query.all()]
+        message = message[:-1] + ', а пока вы можете посмотреть результаты оценки вклада за январь.'
+        return render_template('homepage.html', title='KorpusToken', user=user,
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=Questionnaire_Table.is_available(1),
+                               command_questionnaire=Questionnaire_Table.is_available(2),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               criterions=criterions, info=user_info, message=message)
+    else:
+        return render_template('homepage.html', title='KorpusToken', user=user,
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=Questionnaire_Table.is_available(1),
+                               command_questionnaire=Questionnaire_Table.is_available(2),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id),
+                               message=message)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -911,6 +934,7 @@ def axis_access():
     axis.is_opened = abs(axis.is_opened - 1)
     db.session.commit()
     return redirect('voting_progress')
+
 
 @app.route('/manage_statuses', methods=['GET', 'POST'])
 @login_required
