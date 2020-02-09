@@ -105,6 +105,9 @@ class User(UserMixin, db.Model):
     chat_id = db.Column(db.String(64))
     state = db.Column(db.Integer)
     photo = db.Column(db.String(512))
+    vk_url = db.Column(db.String(256))
+    fb_url = db.Column(db.String(256))
+    inst_url = db.Column(db.String(256))
 
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education, work_exp, sex, name, surname):
@@ -171,9 +174,14 @@ class Roles(db.Model):
 class Membership(db.Model):
     @staticmethod
     def get_crew_of_team(team_id):
-        return db.session.query(User.id, User.name, User.surname) \
+        team_users = db.session.query(User.id, User.name, User.surname) \
             .outerjoin(Membership, User.id == Membership.user_id) \
             .filter(Membership.team_id == team_id).all()
+        # team_roles = db.session.query(User.id, User.name, User.surname) \
+        #     .outerjoin(TeamRoles, User.id == TeamRoles.user_id) \
+        #     .filter(TeamRoles.team_id == team_id).all()
+        # team_crew = [team_users[i] + team_roles[i] for i in range(len(team_users))]
+        return team_users
 
     @staticmethod
     def team_participation(current_user_id):
@@ -243,13 +251,14 @@ class Axis(db.Model):
     def is_available(axis_id):
         return Axis.query.filter_by(id=axis_id).first().is_opened
 
-class Questionnaire_Table(db.Model):
+
+class QuestionnaireTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     is_opened = db.Column(db.Integer)
 
     @staticmethod
     def is_available(questionnaire_id):
-        return Questionnaire_Table.query.filter_by(id=questionnaire_id).first().is_opened
+        return QuestionnaireTable.query.filter_by(id=questionnaire_id).first().is_opened
 
 
 @login.user_loader
