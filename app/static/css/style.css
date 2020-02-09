@@ -520,6 +520,7 @@ font-family: 'Share Tech Mono', monospace;
 	display: block;
 	width: 90%;
 	margin-left: 5%;
+	margin-top:50px;
 }
 
 .result_table{
