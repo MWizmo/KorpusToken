@@ -79,7 +79,7 @@ class QuestionAdding(FlaskForm):
     question_3 = TextAreaField('Вопрос 3')
     question_4 = TextAreaField('Вопрос 4')
     question_5 = TextAreaField('Вопрос 5')
-    submit = SubmitField('Создать')
+    submit = SubmitField('Изменить')
 
 
 class TeamAdding(FlaskForm):

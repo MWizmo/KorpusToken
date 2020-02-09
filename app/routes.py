@@ -118,7 +118,6 @@ def signup():
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
 @login_required
 def questionnaire_self():
-    # Проверка на лимит голосования
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).first()
 
     if db_date:
@@ -177,8 +176,6 @@ def questionnaire_self():
 @app.route('/questionnaire_team', methods=['GET', 'POST'])
 @login_required
 def questionnaire_team():
-    # Проверка на лимит голосования
-
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).first()
 
     if db_date:
@@ -258,19 +255,30 @@ def question_adding():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
+    type_of_questionnaire = int(request.args.get('type')) if request.args.get('type') else None
     form = QuestionAdding()
 
-    if form.validate_on_submit():
-        q = Questions(type=form.question_type.data, text=form.question_form.data)
-        db.session.add(q)
-        db.session.commit()
-        return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=True,
+    if type_of_questionnaire:
+        q = Questions.query.filter_by(type=type_of_questionnaire).all()[:5]
+        questions = [qst.text for qst in q]
+        if form.validate_on_submit():
+            new_questions = [(form.question_1.data, 0), (form.question_2.data, 1), (form.question_3.data, 2),
+                             (form.question_4.data, 3), (form.question_5.data, 4)]
+            new_questions = [question for question in new_questions if question[0].replace(' ', '')]
+            for question in new_questions:
+                q[question[1]].text = question[0]
+
+            db.session.commit()
+            return redirect(url_for('question_adding'))
+        return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
+                               type=True,
+                               questions=questions,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-    return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
+    return render_template('question_adding.html', title='Конструктор вопросов', type=False,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
                            command_questionnaire=QuestionnaireTable.is_available(2),
@@ -278,7 +286,6 @@ def question_adding():
                            team=Membership.team_participation(current_user.id))
 
 
-# Решить трабл с отображением атаманов, админов и тимлидов в общем отображении участвующих в личных анкетах
 @app.route('/questionnaire_progress', methods=['POST', 'GET'])
 @login_required
 def questionnaire_progress():
