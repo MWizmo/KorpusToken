@@ -31,7 +31,7 @@ def home():
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
     message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
-              'мы все так давно ждали!'
+              'мы все так давно ждали!  '
     if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
         user_info = list()
         with open(os.path.join(app.root_path + '/results', filename)) as file:
@@ -43,7 +43,7 @@ def home():
                 user_info.append(user_marks)
         user_info.sort(key=lambda i: i[-1], reverse=True)
         criterions = [c.name for c in Criterion.query.all()]
-        message = message[:-1] + ', а пока вы можете посмотреть результаты оценки вклада за январь.'
+        message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за январь.'
         return render_template('homepage.html', title='KorpusToken', user=user,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
