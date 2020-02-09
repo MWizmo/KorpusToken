@@ -5,9 +5,10 @@
 	    <h2 class="intro_title">Добро пожаловать в KorpusToken, {{ user.name }}!</h2>
 	</div>
 </div>
-<div class="home_text" align="center">
-	<h3>{{mess}}</h3>
+
+
 	{% if info %}
+	<h3>{{message}}</h3>
 	<div class="res_container">
 		<table class="result_table" cellspacing="0">
 			<thead>
@@ -32,6 +33,10 @@
 			<a class='nav__link border' href="{{ url_for('get_assessment_results') }}">Скачать файл с итоговыми оценками</a>
 		</div>
 	</div>
+	{% else %}
+	<div class="home_text" align="center">
+		<h3>{{message}}</h3>
+	</div>
 	{% endif %}
-</div>
+
 {% endblock %}
