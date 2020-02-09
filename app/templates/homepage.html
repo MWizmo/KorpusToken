@@ -6,9 +6,10 @@
 	</div>
 </div>
 
-
+	<div class="home_text" align="center">
+		<h3>{{message}}</h3>
+	</div>
 	{% if info %}
-	<h3>{{message}}</h3>
 	<div class="res_container">
 		<table class="result_table" cellspacing="0">
 			<thead>
@@ -29,13 +30,6 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		<div class="vote_progress">
-			<a class='nav__link border' href="{{ url_for('get_assessment_results') }}">Скачать файл с итоговыми оценками</a>
-		</div>
-	</div>
-	{% else %}
-	<div class="home_text" align="center">
-		<h3>{{message}}</h3>
 	</div>
 	{% endif %}
 
