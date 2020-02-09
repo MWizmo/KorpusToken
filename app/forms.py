@@ -74,8 +74,11 @@ class QuestionnaireTeam(FlaskForm):
 
 
 class QuestionAdding(FlaskForm):
-    question_form = TextAreaField('Вопрос', validators=[DataRequired()])
-    question_type = IntegerField('Тип вопроса', validators=[DataRequired()])
+    question_1 = TextAreaField('Вопрос 1')
+    question_2 = TextAreaField('Вопрос 2')
+    question_3 = TextAreaField('Вопрос 3')
+    question_4 = TextAreaField('Вопрос 4')
+    question_5 = TextAreaField('Вопрос 5')
     submit = SubmitField('Создать')
 
 
