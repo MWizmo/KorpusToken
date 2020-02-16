@@ -27,6 +27,7 @@ def log(action):
 @app.route('/home')
 @login_required
 def home():
+    log('Просмотр главной страницы')
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
     message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
@@ -73,6 +74,7 @@ def login():
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
+        log('Вход в систему')
         return redirect(next_page)
     return render_template('login.html', title='Авторизация', form=form)
 
@@ -117,8 +119,8 @@ def signup():
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
 @login_required
 def questionnaire_self():
+    log('Просмотр страницы с личной анкетой')
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).first()
-
     if db_date:
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
@@ -161,6 +163,7 @@ def questionnaire_self():
             db.session.add(answ)
             i += 1
         db.session.commit()
+        log('Заполнение личной анкеты')
         return redirect(url_for('home'))
 
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
@@ -175,8 +178,8 @@ def questionnaire_self():
 @app.route('/questionnaire_team', methods=['GET', 'POST'])
 @login_required
 def questionnaire_team():
+    log('Просмотр страницы с командной анкетой')
     db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).first()
-
     if db_date:
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
@@ -226,6 +229,7 @@ def questionnaire_team():
             db.session.add(answ)
             i += 1
         db.session.commit()
+        log('Заполнение командной анкеты')
         return redirect(url_for('home'))
 
     return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
@@ -239,6 +243,7 @@ def questionnaire_team():
 
 @app.route('/logout')
 def logout():
+    log('Выход из системы')
     logout_user()
     return redirect(url_for('home'))
 
@@ -247,6 +252,7 @@ def logout():
 @login_required
 def question_adding():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы добавления вопросов (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -254,10 +260,12 @@ def question_adding():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
+    log('Просмотр страницы с редактированием вопросов')
     type_of_questionnaire = int(request.args.get('type')) if request.args.get('type') else None
     form = QuestionAdding()
 
     if type_of_questionnaire:
+        log('Просмотр страницы с редактированием вопросов для анкеты {}-го типа'.format(type_of_questionnaire))
         q = Questions.query.filter_by(type=type_of_questionnaire).all()[:5]
         questions = [qst.text for qst in q]
         if form.validate_on_submit():
@@ -268,6 +276,8 @@ def question_adding():
                 q[question[1]].text = question[0]
 
             db.session.commit()
+            log('Изменение вопроса(ов) {}-го типа c id {} '.format(type_of_questionnaire,
+                                                                   [question_id[1] for question_id in new_questions]))
             return redirect(url_for('question_adding'))
         return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
                                type=True,
@@ -289,13 +299,14 @@ def question_adding():
 @login_required
 def questionnaire_progress():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы с прогрессом анкетирования (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
+    log('Просмотр страницы с прогрессом анкетирования')
     questionnaire = dict(
         max_particip=0,
         already_self=0,
@@ -390,6 +401,7 @@ def questionnaire_progress():
 @login_required
 def questionnaire_access():
     if not User.check_admin(current_user.id):
+        log('Попытка закрыть анкету (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -400,6 +412,10 @@ def questionnaire_access():
     questionnaire = QuestionnaireTable.query.filter_by(id=questionnaire_id).first()
     questionnaire.is_opened = abs(questionnaire.is_opened - 1)
     db.session.commit()
+    if questionnaire.is_opened:
+        log('Открытие анкеты {}-го типа'.format(questionnaire_id))
+    else:
+        log('Закрытие анкеты {}-го типа'.format(questionnaire_id))
     return redirect('questionnaire_progress')
 
 
@@ -407,13 +423,14 @@ def questionnaire_access():
 @login_required
 def users_list():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы со списком пользователей (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
+    log('Просмотр страницы со списком пользователей')
     users = User.query.all()
     info = list()
     for user in users:
@@ -436,6 +453,7 @@ def users_list():
 @login_required
 def delete_user():
     if not User.check_admin(current_user.id):
+        log('Попытка удалить пользователя (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -457,6 +475,7 @@ def delete_user():
             VotingInfo.query.filter_by(voting_id=v.id).delete()
             Voting.query.filter_by(id=v.id).delete()
     db.session.commit()
+    log('Удаление пользователя с id {}'.format(uid))
     return redirect('users_list')
 
 
@@ -464,6 +483,7 @@ def delete_user():
 @login_required
 def teams_list():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы с текущими командами (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -471,11 +491,13 @@ def teams_list():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
+    log('Просмотр страницы с текущими командами')
     form = TeamAdding()
     if form.validate_on_submit():
         team = Teams(name=form.title.data, type=int(form.type.data))
         db.session.add(team)
         db.session.commit()
+        log('Добавление команды с названием "{}"'.format(form.title.data))
     return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
@@ -488,6 +510,7 @@ def teams_list():
 @login_required
 def delete_team():
     if not User.check_admin(current_user.id):
+        log('Попытка удаления команды (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -497,6 +520,7 @@ def delete_team():
     tid = request.args.get('tid')
     Teams.query.filter_by(id=tid).delete()
     db.session.commit()
+    log('Удаление команды с id {}'.format(tid))
     return redirect('teams_list')
 
 
@@ -504,13 +528,14 @@ def delete_team():
 @login_required
 def teams_crew():
     if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
+        log('Попытка просмотра страницы с составами команд (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
+    log('Просмотр страницы с составами команд')
     teams = Teams.query.all()
     info = list()
     for team in teams:
@@ -530,6 +555,7 @@ def teams_crew():
 @login_required
 def edit_team():
     if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id, int(request.args.get('tid')))):
+        log('Попытка просмотра страницы с редактированием команды (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -537,6 +563,7 @@ def edit_team():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
     tid = int(request.args.get('tid'))
+    log('Просмотр страницы с редактированием команды с id {}'.format(tid))
     form = MemberAdding()
     if form.validate_on_submit():
         new_member_id = int(form.name.data)
@@ -544,6 +571,7 @@ def edit_team():
             new_member = Membership(user_id=new_member_id, team_id=tid)
             db.session.add(new_member)
             db.session.commit()
+            log('Добавление пользователя с id {} в команду с id {}'.format(new_member_id, tid))
         return redirect(url_for('edit_team', tid=tid))
     title = Teams.query.filter_by(id=tid).first().name
     members = Membership.get_crew_of_team(tid)
@@ -567,6 +595,7 @@ def edit_team():
 @login_required
 def delete_member():
     if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id, int(request.args.get('tid')))):
+        log('Попытка удаления пользователя из команды (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -579,7 +608,7 @@ def delete_member():
     Membership.query.filter_by(team_id=tid, user_id=uid).delete()
     TeamRoles.query.filter_by(team_id=tid, user_id=uid).delete()
     db.session.commit()
-
+    log('Удаление пользователя с id {} из команды с id {}'.format(uid, tid))
     return redirect('edit_team?tid=' + str(tid))
 
 
@@ -588,6 +617,7 @@ def delete_member():
 def assessment():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с оценкой (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -595,6 +625,7 @@ def assessment():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
+    log('Просмотр страницы с оценкой')
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
         + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1 and (Axis.is_available(1)
            or Axis.is_available(2) or Axis.is_available(3)):
@@ -622,12 +653,14 @@ def assessment():
 def assessment_axis():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с выбором оси для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
+    log('Просмотр страницы с выбором оси для оценки')
     axises = [(axis.id, axis.name, Axis.is_available(axis.id)) for axis in Axis.query.all()]
     return render_template('assessment_axis.html', title='Выбор оси',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -642,6 +675,7 @@ def assessment_axis():
 def assessment_team():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с выбором команды для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -650,7 +684,7 @@ def assessment_team():
                                team=Membership.team_participation(current_user.id))
 
     axis_id = request.args.get('axis_id')
-
+    log('Просмотр страницы с выбором команды для оценки, id оси {}'.format(axis_id))
     if int(axis_id) == 3:
         if Voting.check_on_assessment(current_user.id, 0, 3):
             return redirect(url_for('assessment_users', axis_id=3, team_id=0))
@@ -660,6 +694,7 @@ def assessment_team():
     first_type_teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
                            Voting.check_on_assessment(current_user.id, team.id, int(axis_id))]
     if not first_type_teams:
+        log('Ошибка при выборе команд для оценки: команды первого типа отсутствуют')
         return redirect(url_for('assessment_error'))
 
     axis = ''
@@ -680,6 +715,7 @@ def assessment_team():
 def assessment_users():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
             or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с оценкой пользователей (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -689,6 +725,7 @@ def assessment_users():
 
     team_id = int(request.args.get('team_id'))
     axis_id = request.args.get('axis_id')
+    log('Просмотр страницы с оценкой по оси id {} команды с id {}'.format(axis_id, team_id))
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
     if axis_id == '3':
@@ -761,6 +798,7 @@ def assessment_users():
 @app.route('/get_members_of_team', methods=['GET', 'POST'])
 def get_members_of_team():
     team_id = int(request.args.get('team_id'))
+    log('Получение списка пользователей команды с id {}'.format(team_id))
     if team_id == 0:
         team_members = [(user.id,
                          User.query.filter_by(id=user.id).first().name,
@@ -794,11 +832,13 @@ def finish_vote():
                 vote_info = VotingInfo(voting_id=voting_id, criterion_id=j+1, cadet_id=i, mark=results[i][j])
                 db.session.add(vote_info)
                 db.session.commit()
+    log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
     return redirect(url_for('assessment'))
 
 
 @app.route('/assessment_error', methods=['GET'])
 def assessment_error():
+    log('Ошибка при оценке')
     return render_template('assessment_error.html', title='Лимит исчерпан',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
@@ -811,13 +851,14 @@ def assessment_error():
 @login_required
 def graphs_teams():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы с выбором команды для генерации графов (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
+    log('Просмотр страницы с выбором команды для генерации графов')
     return render_template('graphs_teams.html', title='Грязный багоюзер',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
@@ -831,6 +872,7 @@ def graphs_teams():
 @login_required
 def make_graphs():
     if not User.check_admin(current_user.id):
+        log('Попытка генерации графов (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -839,9 +881,9 @@ def make_graphs():
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
-    questionarries = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2).all()
+    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2).all()
     res = list()
-    for q in questionarries:
+    for q in questionaires:
         user_res = [User.get_full_name(q.user_id)]
         user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
         for answer in user_answers:
@@ -849,12 +891,12 @@ def make_graphs():
         res.append(user_res)
 
     t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, str(datetime.datetime.now().year) +
-                                                    str(datetime.datetime.now().month)))
+                         str(datetime.datetime.now().month)))
     t.setDaemon(True)
     t.start()
-    # graphs.Forms.command_form([], res, team_id, str(datetime.datetime.now().year) +
-    #                                                 str(datetime.datetime.now().month))
+
     t.join()
+    log('Генерация графов для команды с id {}'.format(team_id))
     return render_template('graphs_teams.html', title='Выбор команды для графов',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
                            private_questionnaire=QuestionnaireTable.is_available(1),
@@ -869,12 +911,15 @@ def make_graphs():
 @login_required
 def voting_progress():
     if not User.check_admin(current_user.id):
+        log('Попытка просмотра страницы с прогрессом оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
+
+    log('Просмотр страницы с прогессом оценки')
 
     top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
     trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
@@ -926,6 +971,7 @@ def voting_progress():
 @login_required
 def axis_access():
     if not User.check_admin(current_user.id):
+        log('Попытка открытия или закрытия оси для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -936,6 +982,10 @@ def axis_access():
     axis = Axis.query.filter_by(id=axis_id).first()
     axis.is_opened = abs(axis.is_opened - 1)
     db.session.commit()
+    if axis.is_opened:
+        log('Открытие оси с id {} для оценки'.format(axis_id))
+    else:
+        log('Закрытие оси с id {} для оценки'.format(axis_id))
     return redirect('voting_progress')
 
 
@@ -943,6 +993,7 @@ def axis_access():
 @login_required
 def manage_statuses():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с редактированием статусов/ролей (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -950,6 +1001,7 @@ def manage_statuses():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
+    log('Просмотр страницы с редактированием статусов/ролей')
     users = [(user.id, user.surname + ' ' + user.name) for user in User.query.order_by(User.surname).all()]
     return render_template('manage_statuses.html', title='Управление ролями',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -975,11 +1027,12 @@ def get_statuses_of_user():
 
         statuses_diff = set(all_statuses).difference(set(statuses_id))
         if len(statuses_diff) > 0:
-            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_diff]
+            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status, s_id) for s_id in statuses_diff]
         else:
-            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
-        statuses = [(Statuses.query.filter_by(id=s_id).first().status,s_id) for s_id in statuses_id]
-    return jsonify({'user_statuses': statuses, 'new_statuses':new_statuses})
+            new_statuses = [(Statuses.query.filter_by(id=s_id).first().status, s_id) for s_id in statuses_id]
+        statuses = [(Statuses.query.filter_by(id=s_id).first().status, s_id) for s_id in statuses_id]
+        log('Просмотр статусов пользователя с id {}'.format(user_id))
+    return jsonify({'user_statuses': statuses, 'new_statuses': new_statuses})
 
 
 @app.route('/add_status', methods=['POST'])
@@ -990,6 +1043,7 @@ def add_status():
     new_status = UserStatuses(user_id=user_id, status_id=status_id)
     db.session.add(new_status)
     db.session.commit()
+    log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
     return jsonify({'response': 'ok'})
 
 
@@ -998,8 +1052,9 @@ def delete_status():
     data = request.json
     user_id = int(data['user_id'])
     status_id = int(data['status_id'])
-    UserStatuses.query.filter(UserStatuses.status_id==status_id, UserStatuses.user_id==user_id).delete()
+    UserStatuses.query.filter(UserStatuses.status_id == status_id, UserStatuses.user_id == user_id).delete()
     db.session.commit()
+    log('Удаление статуса с id {} пользователю с id {}'.format(status_id, user_id))
     return jsonify({'response': 'ok'})
 
 
@@ -1007,6 +1062,7 @@ def delete_status():
 @login_required
 def sum_up_assessment():
     if not (User.check_admin(current_user.id)):
+        log('Попытка подведения результатов оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -1028,6 +1084,7 @@ def sum_up_assessment():
                 else:
                     res.append(1)
             writer.writerow(res)
+    log('Подведение результатов оценки')
     return redirect(url_for('assessment_results'))
 
 
@@ -1099,6 +1156,7 @@ def log_page():
 @login_required
 def questionnaire_of_cadets():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра анкет кадетов (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -1108,6 +1166,7 @@ def questionnaire_of_cadets():
 
     teams = Teams.query.filter_by(type=1).all()
     form = ChooseTeamForm()
+    log('Просмотр анкет кадетов')
     if form.validate_on_submit():
         res_info = list()
         monthes_name = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
@@ -1147,6 +1206,7 @@ def questionnaire_of_cadets():
                         month_info['team'].append(user_info)
                 team_info['monthes'].append(month_info)
             res_info.append(team_info)
+        log('Просмотр анкет команды с id {}'.format(form.team.data))
         return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', info=res_info,
                                responsibilities=User.dict_of_responsibilities(current_user.id), form=form,
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
@@ -1163,6 +1223,7 @@ def questionnaire_of_cadets():
 @login_required
 def user_profile():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра профиля пользователя (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
@@ -1172,12 +1233,14 @@ def user_profile():
     uid = request.args.get('user_id')
     user = User.query.filter_by(id=uid).first()
     if not user:
+        log('Ошибка при просмотре профиля пользователя: пользователь не найден')
         return render_template('user_profile.html', title='Неизвестный пользователь',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
+    log('Просмотр профиля пользователя с id {}'.format(uid))
     date = str(user.birthday).split('-')
     date = '{}.{}.{}'.format(date[2], date[1], date[0])
     return render_template('user_profile.html', title='Профиль - {} {}'.format(user.surname, user.name),
@@ -1192,13 +1255,14 @@ def user_profile():
 @login_required
 def choose_top_cadets():
     if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        log('Попытка просмотра страницы с выбором топовых кадетов (ГВ)')
         return render_template('gryazniy_vzlomshik.html',
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
-
+    log('Просмотр страницы с выбором топовых кадетов')
     cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
 
     return render_template('choose_top_cadets.html', title='Выбор оценивающих по оси отношений',
@@ -1228,5 +1292,6 @@ def confirm_top_cadets():
         us = UserStatuses(user_id=cadet.user_id, status_id=7)
         db.session.add(us)
     db.session.commit()
+    log('Выбор топовых кадетов')
     return jsonify({'response': 'ok'})
 
