@@ -4,13 +4,12 @@ import threading
 import os
 import csv
 
-
 import jdcal
 from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, UserStatuses,\
-    Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log
+from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, UserStatuses, Statuses, Axis, \
+    Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -1187,3 +1186,47 @@ def user_profile():
                            command_questionnaire=QuestionnaireTable.is_available(2),
                            user_roles=TeamRoles.dict_of_user_roles(current_user.id), date=date,
                            team=Membership.team_participation(current_user.id))
+
+
+@app.route('/choose_top_cadets', methods=['GET'])
+@login_required
+def choose_top_cadets():
+    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+        return render_template('gryazniy_vzlomshik.html',
+                               responsibilities=User.dict_of_responsibilities(current_user.id),
+                               private_questionnaire=QuestionnaireTable.is_available(1),
+                               command_questionnaire=QuestionnaireTable.is_available(2),
+                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                               team=Membership.team_participation(current_user.id))
+
+    cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
+
+    return render_template('choose_top_cadets.html', title='Выбор оценивающих по оси отношений',
+                           responsibilities=User.dict_of_responsibilities(current_user.id),
+                           private_questionnaire=QuestionnaireTable.is_available(1),
+                           command_questionnaire=QuestionnaireTable.is_available(2),
+                           user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+                           team=Membership.team_participation(current_user.id),
+                           cadets=cadets)
+
+
+@app.route('/confirm_top_cadets', methods=['POST'])
+def confirm_top_cadets():
+    data = request.json
+    cadets = data['top_cadets']
+    for cadet in cadets:
+        score = TopCadetsScore.query.filter_by(user_id=cadet).first()
+        if score:
+            score.score += 1
+        else:
+            score = TopCadetsScore(user_id=cadet, score=1)
+            db.session.add(score)
+    db.session.commit()
+    UserStatuses.query.filter_by(status_id=7).delete()
+    top_cadets = TopCadetsScore.query.order_by(TopCadetsScore.score.desc()).all()[:5]
+    for cadet in top_cadets:
+        us = UserStatuses(user_id=cadet.user_id, status_id=7)
+        db.session.add(us)
+    db.session.commit()
+    return jsonify({'response': 'ok'})
+

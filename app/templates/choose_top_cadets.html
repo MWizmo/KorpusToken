@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/top_cadets.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl">
+    <h3>Выберите 5 курсантов для оценивания оси отношений</h3>
+    <div class="top_cadet_div" >
+        {% for cadet in cadets %}
+        <div class="top_cadet_card">
+            {% if cadet.photo %}
+                <button class="top_cadet_btn" id="{{cadet.id}}" ng-click="choose({{cadet.id}});"
+                        style="background: url('{{cadet.photo}}') 100% 100% no-repeat; background-size: cover;">
+                </button>
+            {% else %}
+                <button class="top_cadet_btn" id="{{cadet.id}}" ng-click="choose({{cadet.id}});"
+                        style="background: url('../static/images/no-photo.jpg'); background-size: cover;">
+                </button>
+            {% endif %}
+            <div class="top_cadet_text">{{cadet.name}} {{cadet.surname}}</div>
+        </div>
+
+        {% endfor %}
+    </div>
+    <button class='nav__link border' ng-click="confirm();">Подтвердить выбор</button>
+    <br><br><br>
+</div>
+{% endblock %}
