@@ -85,6 +85,7 @@ class QuestionAdding(FlaskForm):
 class TeamAdding(FlaskForm):
     title = StringField('Название команды', validators=[DataRequired()],
                         render_kw={"placeholder": "Название новой команды"})
+    type = SelectField('Тип команды:', choices=['1', '2', '3'])
     submit = SubmitField('Добавить')
 
 
