@@ -322,3 +322,9 @@ class Log(db.Model):
     user_id = db.Column(db.Integer)
     action = db.Column(db.String(64))
     date = db.Column(db.String(32))
+
+
+class TopCadetsScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    score = db.Column(db.Integer)
