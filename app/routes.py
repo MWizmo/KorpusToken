@@ -439,7 +439,7 @@ def users_list():
             user_teams = [team.name for t in teams for team in Teams.query.filter_by(id=t.team_id).all()]
             info.append((user.name, user.surname, ', '.join(user_teams), user.id))
         else:
-            info.append((user.name, user.surname, 'Нет', user.id))
+            info.append((user.name, user.surname, 'Нет', user.id, user.tg_id))
 
     return render_template('users_list.html', title='Список пользователей', users=info,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
