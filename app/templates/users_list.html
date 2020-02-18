@@ -4,7 +4,7 @@
 <div class="container">
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
-        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Действия</td></tr>
+        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td><td>Действия</td></tr>
         </thead>
         <tbody>
             {% for user in users %}
@@ -12,6 +12,13 @@
                 <td>{{loop.index0+1}}</td>
                 <td><a class="nav__link" href="/user_profile?user_id={{user[3]}}" target="_blank">{{user[0]}} {{user[1]}}</a></td>
                 <td>{{user[2]}}</td>
+                <td>
+                    {% if user[4] %}
+                    Да
+                    {% else %}
+                    Нет
+                    {% endif %}
+                </td>
                 <td><a class="nav__link" style="text-transform: uppercase;" href="/delete_user?uid={{user[3]}}" onclick ="return confirm('Удалить пользователя?');">Удалить</a></td></tr>
             {% endfor %}
         </tbody>
