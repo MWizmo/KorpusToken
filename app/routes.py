@@ -9,7 +9,7 @@ from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, UserStatuses, Statuses, Axis, \
-    Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore
+    Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -32,6 +32,18 @@ def home():
     filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
     message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
               'мы все так давно ждали!  '
+    flag = False
+    db_date = TopCadetsVoting.query.filter_by(voter_id=current_user.id).all()
+    if db_date:
+        db_date = db_date[-1]
+        now = datetime.datetime.now()
+        difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
+                     int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
+
+        if difference > 30:
+            flag = True
+    else:
+        flag = True
     if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
         user_info = list()
         with open(os.path.join(app.root_path + '/results', filename)) as file:
@@ -50,7 +62,7 @@ def home():
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id),
-                               criterions=criterions, info=user_info, message=message)
+                               criterions=criterions, info=user_info, message=message, flag=flag)
     else:
         return render_template('homepage.html', title='KorpusToken', user=user,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
@@ -58,7 +70,7 @@ def home():
                                command_questionnaire=QuestionnaireTable.is_available(2),
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id),
-                               message=message)
+                               message=message, flag=flag)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1291,6 +1303,10 @@ def confirm_top_cadets():
     for cadet in top_cadets:
         us = UserStatuses(user_id=cadet.user_id, status_id=7)
         db.session.add(us)
+    new_voting = TopCadetsVoting(voter_id=current_user.id, date=datetime.date(datetime.datetime.now().year,
+                                                                              datetime.datetime.now().month,
+                                                                              datetime.datetime.now().day))
+    db.session.add(new_voting)
     db.session.commit()
     log('Выбор топовых кадетов')
     return jsonify({'response': 'ok'})

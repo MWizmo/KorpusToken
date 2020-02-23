@@ -48,6 +48,7 @@
                         <li>
                             <a class="nav__link" href="{{ url_for('assessment_results') }}">Результаты оценки</a>
                         </li>
+
                         {% if responsibilities.admin or responsibilities.chieftain or user_roles.teamlead.exist %}
                             <li><a class="nav__link" href=#>Специальные Функции</a>
                                 <ul class="submenu">
@@ -65,7 +66,7 @@
                                         <li><a class="nav__link" href="{{ url_for('manage_statuses') }}">Управление ролями</a></li>
                                         <li><a class="nav__link" href="{{ url_for('questionnaire_of_cadets') }}">Анкеты курсантов</a></li>
                                         <li><a class="nav__link" href="{{ url_for('log_page') }}">Логи</a></li>
-                                        <li><a class="nav__link" href="{{ url_for('choose_top_cadets') }}">Выбрать курсантов для оценки по оси отношений</a></li>
+
                                     {% endif %}
                                 </ul>
                             </li>
