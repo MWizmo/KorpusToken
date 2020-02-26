@@ -1266,14 +1266,14 @@ def user_profile():
 @app.route('/choose_top_cadets', methods=['GET'])
 @login_required
 def choose_top_cadets():
-    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
-        log('Попытка просмотра страницы с выбором топовых кадетов (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               responsibilities=User.dict_of_responsibilities(current_user.id),
-                               private_questionnaire=QuestionnaireTable.is_available(1),
-                               command_questionnaire=QuestionnaireTable.is_available(2),
-                               user_roles=TeamRoles.dict_of_user_roles(current_user.id),
-                               team=Membership.team_participation(current_user.id))
+    # if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+    #     log('Попытка просмотра страницы с выбором топовых кадетов (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            responsibilities=User.dict_of_responsibilities(current_user.id),
+    #                            private_questionnaire=QuestionnaireTable.is_available(1),
+    #                            command_questionnaire=QuestionnaireTable.is_available(2),
+    #                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
+    #                            team=Membership.team_participation(current_user.id))
     log('Просмотр страницы с выбором топовых кадетов')
     cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
 
