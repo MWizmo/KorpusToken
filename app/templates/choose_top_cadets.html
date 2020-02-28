@@ -11,16 +11,16 @@
     <div class="top_cadet_div" >
         {% for cadet in cadets %}
         <div class="top_cadet_card">
-            {% if cadet.photo %}
-                <button class="top_cadet_btn" id="{{cadet.id}}" ng-click="choose({{cadet.id}});"
-                        style="background: url('{{cadet.photo}}') 100% 100% no-repeat; background-size: cover;">
+            {% if cadet[1] %}
+                <button class="top_cadet_btn" id="{{cadet[0]}}" ng-click="choose({{cadet[0]}});"
+                        style="background: {{cadet[1]}} 100% 100% no-repeat; background-size: cover;">
                 </button>
             {% else %}
-                <button class="top_cadet_btn" id="{{cadet.id}}" ng-click="choose({{cadet.id}});"
+                <button class="top_cadet_btn" id="{{cadet[0]}}" ng-click="choose({{cadet[0]}});"
                         style="background: url('../static/images/no-photo.jpg'); background-size: cover;">
                 </button>
             {% endif %}
-            <div class="top_cadet_text">{{cadet.name}} {{cadet.surname}}</div>
+            <div class="top_cadet_text">{{cadet[2]}}</div>
         </div>
 
         {% endfor %}
