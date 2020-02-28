@@ -1283,7 +1283,7 @@ def choose_top_cadets():
                                user.name + ' ' + user.surname))
             else:
                 cadets.append((user.id, None, user.name + ' ' + user.surname))
-    cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
+    # cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
 
     return render_template('choose_top_cadets.html', title='Выбор оценивающих по оси отношений',
                            responsibilities=User.dict_of_responsibilities(current_user.id),
