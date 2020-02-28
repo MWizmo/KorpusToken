@@ -13,7 +13,7 @@
         <div class="top_cadet_card">
             {% if cadet[1] %}
                 <button class="top_cadet_btn" id="{{cadet[0]}}" ng-click="choose({{cadet[0]}});"
-                        style="background: {{cadet[1]}} 100% 100% no-repeat; background-size: cover;">
+                        style="background: url('{{cadet[1]}}') 100% 100% no-repeat; background-size: cover;">
                 </button>
             {% else %}
                 <button class="top_cadet_btn" id="{{cadet[0]}}" ng-click="choose({{cadet[0]}});"
