@@ -1275,6 +1275,14 @@ def choose_top_cadets():
     #                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
     #                            team=Membership.team_participation(current_user.id))
     log('Просмотр страницы с выбором топовых кадетов')
+    cadets = list()
+    for user in User.query.all():
+        if User.check_cadet(user.id):
+            if user.photo:
+                cadets.append((user.id, app.root_path + '/static/user_photos/user' + str(user.id) + '.jpg',
+                               user.name + ' ' + user.surname))
+            else:
+                cadets.append((user.id, None, user.name + ' ' + user.surname))
     cadets = [user for user in User.query.all() if User.check_cadet(user.id)]
 
     return render_template('choose_top_cadets.html', title='Выбор оценивающих по оси отношений',
