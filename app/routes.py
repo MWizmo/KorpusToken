@@ -1154,7 +1154,7 @@ def log_page():
                                user_roles=TeamRoles.dict_of_user_roles(current_user.id),
                                team=Membership.team_participation(current_user.id))
 
-    logs = Log.query.all()
+    logs = Log.query.order_by(Log.id.desc()).all()
     user_logs = [(l.action, User.get_full_name(l.user_id), l.date) for l in logs]
     return render_template('log_page.html', title='Логи', logs=user_logs,
                            responsibilities=User.dict_of_responsibilities(current_user.id),
