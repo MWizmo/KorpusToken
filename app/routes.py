@@ -341,13 +341,13 @@ def questionnaire_progress():
 
             if Questionnaire.query.filter_by(user_id=user.id, type=1):
                 for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
-                    if qst.date.month == datetime.datetime.now().month:
+                    if qst.date.month == datetime.datetime.now().month or qst.date.month == datetime.datetime.now().month - 1:
                         questionnaire['already_self'] += 1
                         questionnaire['participated_self'].append(user.id)
 
             if Questionnaire.query.filter_by(user_id=user.id, type=2):
                 for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
-                    if qst.date.month == datetime.datetime.now().month:
+                    if qst.date.month == datetime.datetime.now().month or qst.date.month == datetime.datetime.now().month - 1:
                         questionnaire['already_team'] += 1
                         questionnaire['participated_team'].append(user.id)
 
