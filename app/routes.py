@@ -364,12 +364,16 @@ def questionnaire_progress():
                                                            user_id=user).first().status_id).first().status
                                                                for user in questionnaire['participaters_self_ids']
                                                                if user not in questionnaire['participated_self']]
-
+    not_participated_self_teams = [Teams.query.filter_by(
+        id=Membership.query.filter_by(user_id=user).first().team_id
+    ).first().name
+                                   for user in questionnaire['participaters_self_ids']
+                                   if user not in questionnaire['participated_self']]
     not_participated_self_info = []
 
     for i in range(len(not_participated_self_ids)):
         not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
-                                           not_participated_self_surnames[i], not_participated_self_statuses[i]])
+                                           not_participated_self_surnames[i], not_participated_self_teams[i]])
 
     not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
                                                            if user not in questionnaire['participated_team']]
