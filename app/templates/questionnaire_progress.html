@@ -26,11 +26,10 @@
 
                         {% for user in not_participated_self %}
                         <tr class="tr">
-                            {% for user_info in user %}
-                            <td class="td_main">
-                               {{ user_info }}
-                            </td>
-                            {% endfor %}
+                            <td class="td_main">{{ user[0] }}</td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
+                            <td class="td_main">{{ user[2] }}</td>
+                            <td class="td_main">{{ user[3] }}</td>
                         </tr>
                         {% endfor %}
                     </table>
@@ -52,9 +51,10 @@
                         {% for user in not_participated_team %}
                         <tr class="tr">
                             {% for user_info in user %}
-                            <td class="td_main">
-                               {{ user_info }}
-                            </td>
+                            <td class="td_main">{{ user[0] }}</td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
+                            <td class="td_main">{{ user[2] }}</td>
+                            <td class="td_main">{{ user[3] }}</td>
                             {% endfor %}
                         </tr>
                         {% endfor %}
