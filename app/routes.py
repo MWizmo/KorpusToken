@@ -132,8 +132,9 @@ def signup():
 @login_required
 def questionnaire_self():
     log('Просмотр страницы с личной анкетой')
-    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).all()[-1]
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).all()
     if db_date:
+        db_date = db_date[-1]
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
                      int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
@@ -191,8 +192,9 @@ def questionnaire_self():
 @login_required
 def questionnaire_team():
     log('Просмотр страницы с командной анкетой')
-    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()[-1]
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
     if db_date:
+        db_date = db_date[-1]
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
                      int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
