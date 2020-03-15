@@ -905,7 +905,9 @@ def make_graphs():
 
     team_id = int(request.args.get('team_id'))
     questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
-                                               func.month(Questionnaire.date) in [2,3]).all()
+                                               func.month(Questionnaire.date) == datetime.datetime.now().month).all() +\
+    Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
+                               func.month(Questionnaire.date) == datetime.datetime.now().month - 1).all()
     res = list()
     for q in questionaires:
         user_res = [User.get_full_name(q.user_id)]
