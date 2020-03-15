@@ -756,8 +756,9 @@ def assessment_users():
         for i, q in enumerate(criterions):
             answers[q.id] = list()
             for c in cadets:
-                questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).first()
+                questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).all()
                 if questionnaire:
+                    questionnaire = questionnaire[-1]
                     answers[q.id].append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
                                                                         QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
                 else:
@@ -793,8 +794,9 @@ def assessment_users():
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
-            questionnaire = Questionnaire.query.filter(Questionnaire.user_id == member[0], Questionnaire.type == 1).first()
+            questionnaire = Questionnaire.query.filter(Questionnaire.user_id == member[0], Questionnaire.type == 1).all()
             if questionnaire:
+                questionnaire = questionnaire[-1]
                 answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
                                                                     QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
             else:
