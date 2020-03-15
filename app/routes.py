@@ -803,7 +803,10 @@ def assessment_users():
                 answers.append('Нет ответа')
         texts = Questions.query.filter_by(type=2).all()
         images = [
-            {'text': texts[i-1].text, 'src': url_for('static', filename='graphs/graph_{}_20201_{}.png'.format(team_id, i))}
+            {'text': texts[i - 1].text, 'src': url_for('static',
+                                                       filename='graphs/graph_{}_2020{}_{}.png'.format(team_id,
+                                                                                                       datetime.datetime.now().month,
+                                                                                                       i))}
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
