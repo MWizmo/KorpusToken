@@ -946,19 +946,19 @@ def voting_progress():
     relation_results = list()
     for cadet_id in top_cadets:
         cadet = User.query.filter_by(id=cadet_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id==cadet_id, Voting.axis_id==1).all())
+        voting_num = len(Voting.query.filter(Voting.user_id==cadet_id, Voting.axis_id==1, func.month(Voting.date)==datetime.datetime.now().month).all())
         relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
 
     business_results = list()
     for user_id in trackers:
         user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2).all())
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2, func.month(Voting.date)==datetime.datetime.now().month).all())
         business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
     authority_results = list()
     for user_id in atamans:
         user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3).all())
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3, func.month(Voting.date)==datetime.datetime.now().month).all())
         authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
     if Axis.is_available(1):
