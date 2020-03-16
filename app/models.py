@@ -295,8 +295,8 @@ class Voting(db.Model):
 
         if last_time_voting_date:
             difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
-                         int(sum(jdcal.gcal2jd(last_time_voting_date.date.year, last_time_voting_date.date.month,
-                                               last_time_voting_date.date.day)))
+                         int(sum(jdcal.gcal2jd(last_time_voting_date.year, last_time_voting_date.month,
+                                               last_time_voting_date.day)))
             if difference < 30:
                 return False
         else:
