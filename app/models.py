@@ -292,7 +292,7 @@ class Voting(db.Model):
             else:
                 return True
         now = datetime.datetime.now()
-
+        print(last_time_voting_date)
         if last_time_voting_date:
             difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
                          int(sum(jdcal.gcal2jd(last_time_voting_date.year, last_time_voting_date.month,
