@@ -132,8 +132,9 @@ def signup():
 @login_required
 def questionnaire_self():
     log('Просмотр страницы с личной анкетой')
-    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).all()[-1]
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=1).all()
     if db_date:
+        db_date = db_date[-1]
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
                      int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
@@ -191,8 +192,9 @@ def questionnaire_self():
 @login_required
 def questionnaire_team():
     log('Просмотр страницы с командной анкетой')
-    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()[-1]
+    db_date = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
     if db_date:
+        db_date = db_date[-1]
         now = datetime.datetime.now()
         difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
                      int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
@@ -754,8 +756,9 @@ def assessment_users():
         for i, q in enumerate(criterions):
             answers[q.id] = list()
             for c in cadets:
-                questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).first()
+                questionnaire = Questionnaire.query.filter(Questionnaire.user_id == c[0], Questionnaire.type == 1).all()
                 if questionnaire:
+                    questionnaire = questionnaire[-1]
                     answers[q.id].append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
                                                                         QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
                 else:
@@ -791,15 +794,19 @@ def assessment_users():
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
-            questionnaire = Questionnaire.query.filter(Questionnaire.user_id == member[0], Questionnaire.type == 1).first()
+            questionnaire = Questionnaire.query.filter(Questionnaire.user_id == member[0], Questionnaire.type == 1).all()
             if questionnaire:
+                questionnaire = questionnaire[-1]
                 answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
                                                                     QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
             else:
                 answers.append('Нет ответа')
         texts = Questions.query.filter_by(type=2).all()
         images = [
-            {'text': texts[i-1].text, 'src': url_for('static', filename='graphs/graph_{}_20201_{}.png'.format(team_id, i))}
+            {'text': texts[i - 1].text, 'src': url_for('static',
+                                                       filename='graphs/graph_{}_2020{}_{}.png'.format(team_id,
+                                                                                                       datetime.datetime.now().month,
+                                                                                                       i))}
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
@@ -897,7 +904,10 @@ def make_graphs():
                                team=Membership.team_participation(current_user.id))
 
     team_id = int(request.args.get('team_id'))
-    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2).all()
+    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
+                                               func.month(Questionnaire.date) == datetime.datetime.now().month).all() +\
+    Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
+                               func.month(Questionnaire.date) == datetime.datetime.now().month - 1).all()
     res = list()
     for q in questionaires:
         user_res = [User.get_full_name(q.user_id)]
@@ -944,19 +954,19 @@ def voting_progress():
     relation_results = list()
     for cadet_id in top_cadets:
         cadet = User.query.filter_by(id=cadet_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id==cadet_id, Voting.axis_id==1).all())
+        voting_num = len(Voting.query.filter(Voting.user_id==cadet_id, Voting.axis_id==1, func.month(Voting.date)==datetime.datetime.now().month).all())
         relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
 
     business_results = list()
     for user_id in trackers:
         user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2).all())
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2, func.month(Voting.date)==datetime.datetime.now().month).all())
         business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
     authority_results = list()
     for user_id in atamans:
         user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3).all())
+        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3, func.month(Voting.date)==datetime.datetime.now().month).all())
         authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
     if Axis.is_available(1):
