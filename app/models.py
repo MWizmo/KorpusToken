@@ -278,17 +278,17 @@ class Voting(db.Model):
         if axis_id == 3:
             last_time_voting_date = Voting.query.filter_by(
                 user_id=current_user_id, team_id=0, axis_id=axis_id
-            ).first()
+            ).all()
             if last_time_voting_date:
-                last_time_voting_date = last_time_voting_date.date
+                last_time_voting_date = last_time_voting_date[-1].date
             else:
                 return True
         else:
             last_time_voting_date = Voting.query.filter_by(
                 user_id=current_user_id, team_id=team_id, axis_id=axis_id
-            ).first()
+            ).all()
             if last_time_voting_date:
-                last_time_voting_date = last_time_voting_date.date
+                last_time_voting_date = last_time_voting_date[-1].date
             else:
                 return True
         now = datetime.datetime.now()
