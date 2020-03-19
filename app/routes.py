@@ -55,7 +55,7 @@ def home():
                 user_info.append(user_marks)
         user_info.sort(key=lambda i: i[-1], reverse=True)
         criterions = [c.name for c in Criterion.query.all()]
-        message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за январь.'
+        message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за февраль.'
         return render_template('homepage.html', title='KorpusToken', user=user,
                                responsibilities=User.dict_of_responsibilities(current_user.id),
                                private_questionnaire=QuestionnaireTable.is_available(1),
