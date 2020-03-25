@@ -206,12 +206,26 @@ class QuestionsTypes(db.Model):
     description = db.Column(db.Text)
 
 
+class QuestionnaireTable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(16))
+
+    @staticmethod
+    def is_opened():
+        return len(QuestionnaireTable.query.filter_by(status='Active').all()) > 0
+
+    @staticmethod
+    def current_questionnaire_id():
+        return QuestionnaireTable.query.filter_by(status='Active').first().id
+
+
 class Questionnaire(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     team_id = db.Column(db.Integer)
     date = db.Column(db.Date)
     type = db.Column(db.Integer)
+    questionnaire_id = db.Column(db.Integer)
 
 
 class QuestionnaireInfo(db.Model):
@@ -252,13 +266,13 @@ class Axis(db.Model):
         return Axis.query.filter_by(id=axis_id).first().is_opened
 
 
-class QuestionnaireTable(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    is_opened = db.Column(db.Integer)
-
-    @staticmethod
-    def is_available(questionnaire_id):
-        return QuestionnaireTable.query.filter_by(id=questionnaire_id).first().is_opened
+# class QuestionnaireTable(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     is_opened = db.Column(db.Integer)
+#
+#     @staticmethod
+#     def is_available(questionnaire_id):
+#         return QuestionnaireTable.query.filter_by(id=questionnaire_id).first().is_opened
 
 
 @login.user_loader

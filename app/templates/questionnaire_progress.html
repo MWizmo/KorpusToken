@@ -5,7 +5,7 @@
 <div class="container">
 
     <div class="progress" style="width: 50%; margin: 50px;">
-
+        {% if is_opened %}
         <h2>Прогресс прохождения анкетирования</h2>
 
         <p style="padding-top: 20px;">
@@ -61,11 +61,14 @@
                 </p>
             {% endif %}
         </p>
-        <a class='nav__link border' href="{{ url_for('questionnaire_access', questionnaire_id=1) }}">{{priv_text}}</a>
-        <br><br>
-        <a class='nav__link border' href="{{ url_for('questionnaire_access', questionnaire_id=2) }}">{{com_text}}</a>
+        <a class='nav__link border' href="{{ url_for('finish_questionnaire') }}">Завершить анкетирование</a>
         <br><br>
         <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
+        {% else %}
+            <h2>В данный момент нет активного анкетирования</h2>
+        <br><br>
+            <a class="nav__link border" href="{{url_for('start_questionnaire')}}">Начать новое анкетирование</a>
+        {% endif %}
     </div>
 
 
