@@ -60,7 +60,7 @@ class Forms:
             line += 1
 
     @staticmethod
-    def command_form(questions_command, answers_command, team_id, date):
+    def command_form(questions_command, answers_command, team_id, quest_id):
         # список связей.
         edges_list = []
         # список нод, на которые указавыают стрелки.
@@ -117,7 +117,7 @@ class Forms:
                                 font_color="black", horizontalalignment="center")
         # сохраняем в папке со скриптом граф.
         # # plt.show()
-        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, date, 1)))
+        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, quest_id, 1)))
         edges_list.clear()
         arrow_receivers.clear()
         arrow_senders.clear()
@@ -170,7 +170,7 @@ class Forms:
                                 font_color="black", horizontalalignment="center")
         # сохраняем в папке со скриптом граф.
         # plt.show()
-        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, date, 2)))
+        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, quest_id, 2)))
         edges_list.clear()
         arrow_receivers.clear()
         arrow_senders.clear()
@@ -223,7 +223,7 @@ class Forms:
                                 font_color="black", horizontalalignment="center")
         # сохраняем в папке со скриптом граф.
         # plt.show()
-        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, date, 3)))
+        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, quest_id, 3)))
         edges_list.clear()
         arrow_receivers.clear()
         arrow_senders.clear()
@@ -276,7 +276,7 @@ class Forms:
                                 font_color="black", horizontalalignment="center")
         # сохраняем в папке со скриптом граф.
         # plt.show()
-        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, date, 4)))
+        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, quest_id, 4)))
         edges_list.clear()
         arrow_receivers.clear()
         arrow_senders.clear()
@@ -329,7 +329,7 @@ class Forms:
                                 font_color="black", horizontalalignment="center")
         # сохраняем в папке со скриптом граф.
         # plt.show()
-        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, date, 5)))
+        plt.savefig(os.path.join(app.root_path + '/static/graphs/', 'graph_{}_{}_{}.png'.format(team_id, quest_id, 5)))
         edges_list.clear()
         arrow_receivers.clear()
         arrow_senders.clear()
