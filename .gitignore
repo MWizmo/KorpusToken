@@ -2,9 +2,8 @@ venv/
 app/scripts/__pycache__
 migrations/__pycache__
 __pycache__/
-app/__pycache__/*
 __pycache__/*
-app/__pycache__/*
+app/__pycache__/
 .idea/*
 *.py[cod]
 *.pyc
