@@ -733,7 +733,7 @@ def finish_vote():
     q_ids = data['q_ids']
     voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
                     date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
-                                       datetime.datetime.now().day)
+                                       datetime.datetime.now().day),
                     )
     db.session.add(voting)
     db.session.commit()
@@ -744,10 +744,6 @@ def finish_vote():
                 vote_info = VotingInfo(voting_id=voting_id, criterion_id=j + 1, cadet_id=i, mark=results[i][j])
                 db.session.add(vote_info)
                 db.session.commit()
-    for q_id in q_ids:
-        questionnaire = Questionnaire.query.filter_by(id=q_id).first()
-        questionnaire.assessment = 0
-        db.session.commit()
 
     log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
     return redirect(url_for('assessment'))
@@ -780,6 +776,12 @@ def finish_assessment():
         assessment_status.status = 'Finished'
         db.session.commit()
         log('Закрыл оценку')
+
+    q_ids = [questionnaire.id for questionnaire in Questionnaire.query.filter_by(assessment=1).all()]
+    for q_id in q_ids:
+        questionnaire = Questionnaire.query.filter_by(id=q_id).first()
+        questionnaire.assessment = 0
+        db.session.commit()
 
     return redirect('voting_progress')
 
