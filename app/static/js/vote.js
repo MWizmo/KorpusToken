@@ -3,13 +3,14 @@ app.controller("ctrl", function ($scope, $http) {
 
 	$scope.results = [];
 
-	$scope.start_voting = function(team_id){
+	$scope.start_voting = function(team_id, q_ids){
 	        $http({
                 method: 'GET',
                 url: '/get_members_of_team?team_id=' + team_id,
                 async:false
             }).then(function success (response) {
                 $scope.members = response.data['members'];
+                $scope.q_ids = q_ids;
                 $scope.results = [];
                 for(let i=0;i<$scope.members.length;i++){
                     $scope.results[$scope.members[i][0]] = [0,0,0,0,0,0,0,0,0];
@@ -27,7 +28,8 @@ app.controller("ctrl", function ($scope, $http) {
             let user_data = {
                 'team_id':team_id,
                  'axis':axis_id,
-                 "results":$scope.results
+                 "results":$scope.results,
+                 'q_ids': $scope.q_ids
             };
             $http({
                 method: 'POST',

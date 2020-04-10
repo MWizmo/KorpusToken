@@ -7,6 +7,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+
 class User(UserMixin, db.Model):
     @staticmethod
     def check_cadet(current_user_id):
@@ -89,6 +94,28 @@ class User(UserMixin, db.Model):
         user = User.query.filter_by(id=user_id).first()
         return user.name[0] + '. ' + user.surname
 
+    def __repr__(self):
+        return '<User: {}>'.format(self.login)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __init__(self, email, login, tg_nickname,
+                 courses, birthday, education, work_exp, sex, name, surname):
+        self.name = name
+        self.surname = surname
+        self.email = email
+        self.login = login
+        self.tg_nickname = tg_nickname
+        self.courses = courses
+        self.birthday = birthday
+        self.education = education
+        self.work_exp = work_exp
+        self.sex = sex
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     surname = db.Column(db.String(64))
@@ -108,28 +135,6 @@ class User(UserMixin, db.Model):
     vk_url = db.Column(db.String(256))
     fb_url = db.Column(db.String(256))
     inst_url = db.Column(db.String(256))
-
-    def __init__(self, email, login, tg_nickname,
-                 courses, birthday, education, work_exp, sex, name, surname):
-        self.name = name
-        self.surname = surname
-        self.email = email
-        self.login = login
-        self.tg_nickname = tg_nickname
-        self.courses = courses
-        self.birthday = birthday
-        self.education = education
-        self.work_exp = work_exp
-        self.sex = sex
-
-    def __repr__(self):
-        return '<User: {}>'.format(self.login)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
 
 
 class Teams(db.Model):
@@ -226,6 +231,7 @@ class Questionnaire(db.Model):
     date = db.Column(db.Date)
     type = db.Column(db.Integer)
     questionnaire_id = db.Column(db.Integer)
+    assessment = db.Column(db.Integer)
 
 
 class QuestionnaireInfo(db.Model):
@@ -264,20 +270,6 @@ class Axis(db.Model):
     @staticmethod
     def is_available(axis_id):
         return Axis.query.filter_by(id=axis_id).first().is_opened
-
-
-# class QuestionnaireTable(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     is_opened = db.Column(db.Integer)
-#
-#     @staticmethod
-#     def is_available(questionnaire_id):
-#         return QuestionnaireTable.query.filter_by(id=questionnaire_id).first().is_opened
-
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
 
 
 class Criterion(db.Model):
@@ -330,6 +322,19 @@ class VotingInfo(db.Model):
     cadet_id = db.Column(db.Integer)
     criterion_id = db.Column(db.Integer)
     mark = db.Column(db.Integer)
+
+
+class VotingTable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(16))
+
+    @staticmethod
+    def is_opened():
+        return len(VotingTable.query.filter_by(status='Active').all()) > 0
+
+    @staticmethod
+    def current_questionnaire_id():
+        return VotingTable.query.filter_by(status='Active').first().id
 
 
 class Log(db.Model):

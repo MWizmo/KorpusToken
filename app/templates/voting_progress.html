@@ -3,35 +3,42 @@
 {% block content %}
 
 <div class="container">
-    <h2>Прогресс прохождения голосования</h2>
-    <div class="vote_progress">
-        <div>
-            <h3>Ось отношений</h3>
-        {% for row in relation %}
-            <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
-        {% endfor %}
+    {% if access.assessment_opened %}
+        <h2>Прогресс прохождения голосования</h2>
+        <div class="vote_progress">
+            <div>
+                <h3>Ось отношений</h3>
+            {% for row in relation %}
+                <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
+            {% endfor %}
+            </div>
+            <div>
+            <h3>Ось дела</h3>
+            {% for row in business %}
+                <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
+            {% endfor %}
+                </div>
+            <div>
+            <h3>Ось власти</h3>
+            {% for row in authority %}
+                <p>{{row[0]}}: {{row[1]}}/1</p>
+            {% endfor %}
+                </div>
         </div>
-        <div>
-        <h3>Ось дела</h3>
-        {% for row in business %}
-            <p>{{row[0]}}: {{row[1]}}/{{teams_number}}</p>
-        {% endfor %}
-            </div>
-        <div>
-        <h3>Ось власти</h3>
-        {% for row in authority %}
-            <p>{{row[0]}}: {{row[1]}}/1</p>
-        {% endfor %}
-            </div>
-    </div>
-    <div class="vote_progress">
-        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=1) }}">{{rel_text}}</a>
-        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=2) }}">{{bus_text}}</a>
-        <a class='nav__link border' href="{{ url_for('axis_access', axis_id=3) }}">{{auth_text}}</a>
-    </div>
-    <div class="vote_progress">
-        <a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Сформировать результаты оценки</a>
-    </div>
-</div>
+        <div class="vote_progress">
+            <a class='nav__link border' href="{{ url_for('axis_access', axis_id=1) }}">{{rel_text}}</a>
+            <a class='nav__link border' href="{{ url_for('axis_access', axis_id=2) }}">{{bus_text}}</a>
+            <a class='nav__link border' href="{{ url_for('axis_access', axis_id=3) }}">{{auth_text}}</a>
+        </div>
+        <div class="vote_progress">
+            <a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Сформировать результаты оценки</a>
+            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Завершить оценку</a>
 
+        </div>
+    </div>
+    {% else %}
+        <div class="vote_progress">
+            <a class='nav__link border' href="{{ url_for('start_assessment') }}">Начать оценку</a>
+        </div>
+    {% endif %}
 {% endblock %}

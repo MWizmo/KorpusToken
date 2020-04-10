@@ -11,7 +11,6 @@ class SuppClass:
     @staticmethod
     def get_teams():
         teams = []
-
         for team in Teams.query.all():
             teams.append((str(team.id), team.name))
         return teams
@@ -35,7 +34,6 @@ class SignupForm(FlaskForm):
     courses = StringField('Пройденные курсы в IT-Korpus:')
     participate = BooleanField('Я участвую в проекте Корпуса')
     team = SelectField('Название команды:', choices=[*SuppClass.get_teams()])
-    #role = SelectField('Роль в команде:', choices=[*Config.ROLES])
     birthday = DateField('Дата рождения: ', render_kw={"placeholder": "YYYY-MM-DD"})
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
     vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
@@ -45,12 +43,14 @@ class SignupForm(FlaskForm):
     education = StringField('Образование: ')
     submit = SubmitField('Зарегистрироваться')
 
-    def validate_login(self, login):
+    @staticmethod
+    def validate_login(login):
         user = User.query.filter_by(login=login.data).first()
         if user is not None:
             raise ValidationError('Логин занят')
 
-    def validate_email(self, email):
+    @staticmethod
+    def validate_email(email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Email занят')

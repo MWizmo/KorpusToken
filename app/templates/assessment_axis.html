@@ -6,13 +6,13 @@
     <div class="qustionnaire">
         <form class="form" style="padding-top: 15%; padding-left: 0%">
             <h2>Выберите ось</h2>
-            {% if responsibilities.top_cadet and axises[0][2]%}
+            {% if access.responsibilities.top_cadet and axises[0][2]%}
                 <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
             {% endif %}
-            {% if (responsibilities.expert or responsibilities.tracker) and axises[1][2] %}
+            {% if (access.responsibilities.expert or access.responsibilities.tracker) and axises[1][2] %}
                 <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
             {% endif %}
-            {% if responsibilities.chieftain and axises[2][2] %}
+            {% if access.responsibilities.chieftain and axises[2][2] %}
                 <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[2][0]) }}" style="width: auto%; height: auto%;">{{ axises[2][1] }}</a>
             {% endif %}
         </form>
