@@ -65,9 +65,15 @@
         <br><br>
         <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
         {% else %}
-            <h2>В данный момент нет активного анкетирования</h2>
-        <br><br>
-            <a class="nav__link border" href="{{url_for('start_questionnaire')}}">Начать новое анкетирование</a>
+            {% if ready %}
+                <h2>В настоящее время проходит оценка вклада</h2>
+                <br><br>
+                <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
+            {% else %}
+                <h2>В данный момент нет активного анкетирования</h2>
+                <br><br>
+                <a class="nav__link border" href="{{url_for('start_questionnaire')}}">Начать новое анкетирование</a>
+            {% endif %}
         {% endif %}
     </div>
 

@@ -4,7 +4,7 @@ import threading
 import os
 import csv
 
-import jdcal
+# import jdcal
 from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
@@ -15,7 +15,7 @@ from app.models import User, Questions, QuestionnaireInfo, Questionnaire, Questi
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
-    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm
+    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm, StartAssessmentForm
 from flask_login import current_user, login_user, logout_user, login_required
 
 
@@ -31,40 +31,31 @@ def log(action):
 def home():
     log('Просмотр главной страницы')
     user = {'name': User.query.filter_by(id=current_user.id).first().name}
-    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
     message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
               'мы все так давно ждали!  '
-    flag = False
-    db_date = TopCadetsVoting.query.filter_by(voter_id=current_user.id).all()
-    if db_date:
-        db_date = db_date[-1]
-        now = datetime.datetime.now()
-        difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
-                     int(sum(jdcal.gcal2jd(db_date.date.year, db_date.date.month, db_date.date.day)))
-
-        if difference > 30:
-            flag = True
-    else:
-        flag = True
-    if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
-        user_info = list()
-        with open(os.path.join(app.root_path + '/results', filename)) as file:
-            reader = csv.reader(file)
-            next(reader)
-            for row in reader:
-                user_marks = row[0].split(';')
-                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
-                user_info.append(user_marks)
-        user_info.sort(key=lambda i: i[-1], reverse=True)
-        criterions = [c.name for c in Criterion.query.all()]
-        message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за февраль.'
-        return render_template('homepage.html', title='KorpusToken', user=user,
+    cur_voting = VotingTable.query.filter_by(status='Finished').all()
+    if cur_voting:
+        voting_id = cur_voting[-1].id
+        month = cur_voting[-1].month
+        filename = 'results_' + str(voting_id) + '.csv'
+        if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+            user_info = list()
+            with open(os.path.join(app.root_path + '/results', filename)) as file:
+                reader = csv.reader(file)
+                next(reader)
+                for row in reader:
+                    user_marks = row[0].split(';')
+                    user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                    user_info.append(user_marks)
+            user_info.sort(key=lambda i: i[-1], reverse=True)
+            criterions = [c.name for c in Criterion.query.all()]
+            message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за {}.'.format(month)
+            return render_template('homepage.html', title='KorpusToken', user=user,
+                                   access=get_access(current_user),
+                                   criterions=criterions, info=user_info, message=message, flag=True)
+    return render_template('homepage.html', title='KorpusToken', user=user,
                                access=get_access(current_user),
-                               criterions=criterions, info=user_info, message=message, flag=flag)
-    else:
-        return render_template('homepage.html', title='KorpusToken', user=user,
-                               access=get_access(current_user),
-                               message=message, flag=flag)
+                               message=message)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -359,6 +350,9 @@ def questionnaire_progress():
                                access=get_access(current_user),
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                                not_participated_team=not_participated_team_info)
+    elif QuestionnaireTable.is_in_assessment():
+        return render_template('questionnaire_progress.html', title='Прогресс анкетирования', ready=True,
+                               access=get_access(current_user))
     else:
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                                access=get_access(current_user))
@@ -372,7 +366,7 @@ def finish_questionnaire():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     questionnaire = QuestionnaireTable.query.filter_by(status='Active').first()
-    questionnaire.status = 'Finished'
+    questionnaire.status = 'Ready for assessment'
     db.session.commit()
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
@@ -555,18 +549,18 @@ def assessment():
 
     log('Просмотр страницы с оценкой')
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
-        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1 and (Axis.is_available(1)
-                                                                                                or Axis.is_available(
-                2) or Axis.is_available(3)):
+        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1: # and (Axis.is_available(1)
+        #                                                                                         or Axis.is_available(
+        #         2) or Axis.is_available(3)):
         return redirect(url_for('assessment_axis'))
 
-    if (User.check_expert(current_user.id) or User.check_tracker(current_user.id)) and Axis.is_available(2):
+    if (User.check_expert(current_user.id) or User.check_tracker(current_user.id)):# and Axis.is_available(2):
         return redirect(url_for('assessment_team', axis_id=2))
 
-    if User.check_top_cadet(current_user.id) and Axis.is_available(1):
+    if User.check_top_cadet(current_user.id):# and Axis.is_available(1):
         return redirect(url_for('assessment_team', axis_id=1))
 
-    if User.check_chieftain(current_user.id) and Axis.is_available(3):
+    if User.check_chieftain(current_user.id):# and Axis.is_available(3):
         return redirect(url_for('assessment_users', axis_id=3, team_id=0))
 
     return render_template('assessment.html', title='Оценка',
@@ -582,7 +576,7 @@ def assessment_axis():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
-    axises = [(axis.id, axis.name, Axis.is_available(axis.id)) for axis in Axis.query.all()]
+    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
     return render_template('assessment_axis.html', title='Выбор оси',
                            access=get_access(current_user), axises=axises)
 
@@ -627,12 +621,13 @@ def assessment_users():
         log('Попытка просмотра страницы с оценкой пользователей (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
-    q_ids = []
+    #q_ids = []
     team_id = int(request.args.get('team_id'))
     axis_id = request.args.get('axis_id')
     log('Просмотр страницы с оценкой по оси id {} команды с id {}'.format(axis_id, team_id))
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
+    q_id = QuestionnaireTable.query.filter_by(status='Ready for assessment').first().id
     if axis_id == '3':
         questions = Questions.query.filter_by(type=1)[1:4]
         cadets = [(user.id,
@@ -643,13 +638,10 @@ def assessment_users():
         for i, q in enumerate(criterions):
             answers[q.id] = list()
             for c in cadets:
-                questionnaire = Questionnaire.query.filter(Questionnaire.assessment == 1,
-                                                           Questionnaire.user_id == c[0], Questionnaire.type == 1,
-                                                           func.month(
-                                                               Questionnaire.date) == 2).all() + Questionnaire.query.filter(
-                    Questionnaire.user_id == c[0], Questionnaire.type == 1, func.month(Questionnaire.date) == 3).all()
+                questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id,
+                                                           Questionnaire.user_id == c[0], Questionnaire.type == 1).all()
                 if questionnaire:
-                    q_ids.append(questionnaire.id)
+                    #q_ids.append(questionnaire.id)
                     questionnaire = questionnaire[-1]
                     answers[q.id].append(
                         QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
@@ -679,14 +671,10 @@ def assessment_users():
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
-            questionnaire = Questionnaire.query.filter(Questionnaire.assessment == 1, Questionnaire.user_id == member[0],
-                                                       Questionnaire.type == 1,
-                                                       func.month(
-                                                           Questionnaire.date) == 2).all() + Questionnaire.query.filter(
-                Questionnaire.user_id == member[0], Questionnaire.type == 1, func.month(
-                    Questionnaire.date) == 3).all()
+            questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id, Questionnaire.user_id == member[0],
+                                                       Questionnaire.type == 1).all()
             if questionnaire:
-                q_ids.append(questionnaire.id)
+                #q_ids.append(questionnaire.id)
                 questionnaire = questionnaire[-1]
                 answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
                                                               QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
@@ -695,13 +683,11 @@ def assessment_users():
         texts = Questions.query.filter_by(type=2).all()
         images = [
             {'text': texts[i - 1].text, 'src': url_for('static',
-                                                       filename='graphs/graph_{}_2020{}_{}.png'.format(team_id,
-                                                                                                       datetime.datetime.now().month,
-                                                                                                       i))}
+                                                       filename='graphs/graph_{}_{}_{}.png'.format(team_id, q_id, i))}
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
-                               access=get_access(current_user), team_id=team_id, q_ids=q_ids,
+                               access=get_access(current_user), team_id=team_id, #q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
 
 
@@ -726,15 +712,12 @@ def get_members_of_team():
 @app.route('/finish_vote', methods=['POST'])
 def finish_vote():
     data = request.json
-    print(data)
     team_id = int(data['team_id'])
     axis_id = int(data['axis'])
     results = data['results']
-    q_ids = data['q_ids']
     voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
                     date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
-                                       datetime.datetime.now().day)
-                    )
+                                       datetime.datetime.now().day), voting_id=VotingTable.current_voting_id())
     db.session.add(voting)
     db.session.commit()
     voting_id = voting.id
@@ -744,10 +727,10 @@ def finish_vote():
                 vote_info = VotingInfo(voting_id=voting_id, criterion_id=j + 1, cadet_id=i, mark=results[i][j])
                 db.session.add(vote_info)
                 db.session.commit()
-    for q_id in q_ids:
-        questionnaire = Questionnaire.query.filter_by(id=q_id).first()
-        questionnaire.assessment = 0
-        db.session.commit()
+    # for q_id in q_ids:
+    #     questionnaire = Questionnaire.query.filter_by(id=q_id).first()
+    #     questionnaire.assessment = 0
+    #     db.session.commit()
 
     log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
     return redirect(url_for('assessment'))
@@ -777,6 +760,8 @@ def finish_assessment():
     assessment_status = VotingTable.query.filter_by(status='Active').first()
 
     if assessment_status:
+        q = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
+        q.status = 'Finished'
         assessment_status.status = 'Finished'
         db.session.commit()
         log('Закрыл оценку')
@@ -836,7 +821,7 @@ def make_graphs():
                            message='Графы для команды успешно сформированы')
 
 
-@app.route('/voting_progress')
+@app.route('/voting_progress', methods=['GET', 'POST'])
 @login_required
 def voting_progress():
     if not User.check_admin(current_user.id):
@@ -844,7 +829,7 @@ def voting_progress():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
 
-    log('Просмотр страницы с прогессом оценки')
+    log('Просмотр страницы с прогрессом оценки')
 
     top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
     trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
@@ -871,24 +856,30 @@ def voting_progress():
                                              func.month(Voting.date) == datetime.datetime.now().month).all())
         authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
-    if Axis.is_available(1):
-        rel_text = 'Запретить голосование по оси отношений'
-    else:
-        rel_text = 'Открыть голосование по оси отношений'
-    if Axis.is_available(2):
-        bus_text = 'Запретить голосование по оси дела'
-    else:
-        bus_text = 'Открыть голосование по оси дела'
-    if Axis.is_available(3):
-        auth_text = 'Запретить голосование по оси власти'
-    else:
-        auth_text = 'Открыть голосование по оси власти'
-
+    # if Axis.is_available(1):
+    #     rel_text = 'Запретить голосование по оси отношений'
+    # else:
+    #     rel_text = 'Открыть голосование по оси отношений'
+    # if Axis.is_available(2):
+    #     bus_text = 'Запретить голосование по оси дела'
+    # else:
+    #     bus_text = 'Открыть голосование по оси дела'
+    # if Axis.is_available(3):
+    #     auth_text = 'Запретить голосование по оси власти'
+    # else:
+    #     auth_text = 'Открыть голосование по оси власти'
+    form = StartAssessmentForm()
+    if form.validate_on_submit():
+        assessment_status = VotingTable(status='Active', month=form.month.data)
+        db.session.add(assessment_status)
+        db.session.commit()
+        log('Открыл оценку')
+        return redirect('voting_progress')
     return render_template('voting_progress.html', title='Прогресс голосования',
                            access=get_access(current_user),
                            teams_number=teams_for_voting, relation=relation_results,
-                           business=business_results, authority=authority_results,
-                           rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
+                           business=business_results, authority=authority_results, form=form)#,
+                           #rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
 
 
 @app.route('/axis_access')
@@ -977,7 +968,12 @@ def sum_up_assessment():
         log('Попытка подведения результатов оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
-    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    if cur_voting:
+        voting_id = cur_voting.id
+    else:
+        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+    filename = 'results_' + str(voting_id) + '.csv'
     with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
         writer = csv.writer(output, delimiter=';')
         criterions = [c.name for c in Criterion.query.all()]
@@ -986,7 +982,9 @@ def sum_up_assessment():
                  User.check_can_be_marked(user.id)]
         for user in users:
             res = [user[1]]
-            user_res = db.session.query(func.avg(VotingInfo.mark)).filter(VotingInfo.cadet_id == user[0]).group_by(
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
                 VotingInfo.criterion_id).all()
             for mark in user_res:
                 if float(mark[0]) < 1.0:
@@ -1001,7 +999,12 @@ def sum_up_assessment():
 @app.route('/get_assessment_results', methods=['GET'])
 @login_required
 def get_assessment_results():
-    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    if cur_voting:
+        voting_id = cur_voting.id
+    else:
+        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+    filename = 'results_' + str(voting_id) + '.csv'
     log('Скачивание файла с результатом оценки')
     return send_file(os.path.join(app.root_path + '/results', filename),
                      as_attachment=True,
@@ -1012,7 +1015,12 @@ def get_assessment_results():
 @app.route('/assessment_results', methods=['GET'])
 @login_required
 def assessment_results():
-    filename = 'results_' + str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + '.csv'
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    if cur_voting:
+        voting_id = cur_voting.id
+    else:
+        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+    filename = 'results_' + str(voting_id) + '.csv'
     log('Просмотр страницы результатов')
     if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
         user_info = list()
