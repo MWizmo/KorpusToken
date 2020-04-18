@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-import jdcal
+# import jdcal
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -213,15 +213,23 @@ class QuestionsTypes(db.Model):
 
 class QuestionnaireTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(16))
+    status = db.Column(db.String(32))
 
     @staticmethod
     def is_opened():
-        return len(QuestionnaireTable.query.filter_by(status='Active').all()) > 0
+        return len(QuestionnaireTable.query.filter_by(status='Active').all())> 0
+
+    @staticmethod
+    def is_in_assessment():
+        return len(QuestionnaireTable.query.filter_by(status='Ready for assessment').all()) > 0
 
     @staticmethod
     def current_questionnaire_id():
-        return QuestionnaireTable.query.filter_by(status='Active').first().id
+        q = QuestionnaireTable.query.filter_by(status='Active').first()
+        if q:
+            return q.id
+        else:
+            return QuestionnaireTable.query.filter_by(status='Ready for assessment').first().id
 
 
 class Questionnaire(db.Model):
@@ -282,27 +290,21 @@ class Voting(db.Model):
     @staticmethod
     def check_on_assessment(current_user_id, team_id, axis_id):
         if axis_id == 3:
-            last_time_voting_date = Voting.query.filter_by(
+            last_voting = Voting.query.filter_by(
                 user_id=current_user_id, team_id=0, axis_id=axis_id
             ).all()
-            if last_time_voting_date:
-                last_time_voting_date = last_time_voting_date[-1].date
+            if last_voting:
+                last_voting = last_voting[-1].voting_id
             else:
                 return True
         else:
-            last_time_voting_date = Voting.query.filter_by(
-                user_id=current_user_id, team_id=team_id, axis_id=axis_id
-            ).all()
-            if last_time_voting_date:
-                last_time_voting_date = last_time_voting_date[-1].date
+            last_voting = Voting.query.filter_by(user_id=current_user_id, team_id=team_id, axis_id=axis_id).all()
+            if last_voting:
+                last_voting = last_voting[-1].voting_id
             else:
                 return True
-        now = datetime.datetime.now()
-        if last_time_voting_date:
-            difference = int(sum(jdcal.gcal2jd(now.year, now.month, now.day))) - \
-                         int(sum(jdcal.gcal2jd(last_time_voting_date.year, last_time_voting_date.month,
-                                               last_time_voting_date.day)))
-            if difference < 30:
+        if last_voting:
+            if last_voting == VotingTable.current_voting_id():
                 return False
             else:
                 return True
@@ -314,6 +316,7 @@ class Voting(db.Model):
     team_id = db.Column(db.Integer)
     date = db.Column(db.Date)
     axis_id = db.Column(db.Integer)
+    voting_id= db.Column(db.Integer)
 
 
 class VotingInfo(db.Model):
@@ -327,13 +330,14 @@ class VotingInfo(db.Model):
 class VotingTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(16))
+    month = db.Column(db.String(32))
 
     @staticmethod
     def is_opened():
         return len(VotingTable.query.filter_by(status='Active').all()) > 0
 
     @staticmethod
-    def current_questionnaire_id():
+    def current_voting_id():
         return VotingTable.query.filter_by(status='Active').first().id
 
 

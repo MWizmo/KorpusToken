@@ -97,3 +97,8 @@ class MemberAdding(FlaskForm):
 class ChooseTeamForm(FlaskForm):
     team = StringField('Выберите команду', validators=[DataRequired()])
     submit = SubmitField('Выбрать')
+
+
+class StartAssessmentForm(FlaskForm):
+    month = StringField('Укажите, за какой период проводится оценка (например, "Март" или "Март-апрель")', validators=[DataRequired()])
+    submit = SubmitField('Начать оценку',render_kw={"class": "nav__link border"})
