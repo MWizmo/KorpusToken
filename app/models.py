@@ -94,15 +94,6 @@ class User(UserMixin, db.Model):
         user = User.query.filter_by(id=user_id).first()
         return user.name[0] + '. ' + user.surname
 
-    def __repr__(self):
-        return '<User: {}>'.format(self.login)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education, work_exp, sex, name, surname):
         self.name = name
@@ -115,6 +106,43 @@ class User(UserMixin, db.Model):
         self.education = education
         self.work_exp = work_exp
         self.sex = sex
+
+    def __repr__(self):
+        return '<User: {}>'.format(self.login)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def to_dict(self, include: dict):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'surname': self.surname,
+            'tg_nickname': self.tg_nickname,
+            'tg_id': self.tg_id,
+            'photo': self.photo,
+            'sex': self.sex,
+        }
+
+        if include['login']:
+            data['login'] = self.login
+
+        if include['email']:
+            data['email'] = self.email
+
+        if include['birthday']:
+            data['birthday'] = self.birthday
+
+        if include['education']:
+            data['education'] = self.education
+
+        if include['work_exp']:
+            data['work_exp'] = self.work_exp
+
+        return data
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -135,6 +163,7 @@ class User(UserMixin, db.Model):
     vk_url = db.Column(db.String(256))
     fb_url = db.Column(db.String(256))
     inst_url = db.Column(db.String(256))
+    token = db.Column(db.String(64))
 
 
 class Teams(db.Model):
@@ -182,10 +211,7 @@ class Membership(db.Model):
         team_users = db.session.query(User.id, User.name, User.surname) \
             .outerjoin(Membership, User.id == Membership.user_id) \
             .filter(Membership.team_id == team_id).all()
-        # team_roles = db.session.query(User.id, User.name, User.surname) \
-        #     .outerjoin(TeamRoles, User.id == TeamRoles.user_id) \
-        #     .filter(TeamRoles.team_id == team_id).all()
-        # team_crew = [team_users[i] + team_roles[i] for i in range(len(team_users))]
+
         return team_users
 
     @staticmethod
