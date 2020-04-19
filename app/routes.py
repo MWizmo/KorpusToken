@@ -53,9 +53,8 @@ def home():
             return render_template('homepage.html', title='KorpusToken', user=user,
                                    access=get_access(current_user),
                                    criterions=criterions, info=user_info, message=message, flag=True)
-    return render_template('homepage.html', title='KorpusToken', user=user,
-                               access=get_access(current_user),
-                               message=message)
+    return render_template('homepage.html', title='KorpusToken', user=user, access=get_access(current_user),
+                           message=message)
 
 
 @app.route('/login', methods=['GET', 'POST'])

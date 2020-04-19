@@ -95,7 +95,9 @@ class User(UserMixin, db.Model):
         return user.name[0] + '. ' + user.surname
 
     def __init__(self, email, login, tg_nickname,
-                 courses, birthday, education, work_exp, sex, name, surname):
+                 courses, birthday, education,
+                 work_exp, sex, name, surname,
+                 token=None):
         self.name = name
         self.surname = surname
         self.email = email
@@ -106,6 +108,7 @@ class User(UserMixin, db.Model):
         self.education = education
         self.work_exp = work_exp
         self.sex = sex
+        self.token = token
 
     def __repr__(self):
         return '<User: {}>'.format(self.login)
