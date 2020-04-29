@@ -91,7 +91,7 @@ def login():
         if user.check_password(user_password):
             payload['message'] = 'Logged'
             if not user.token:
-                token_word = f'{user.login}{user.email}{user.surname}{datetime.datetime.now().timestamp()}'
+                token_word = '{}{}{}{}'.format(user.login, user.email, user.surname, datetime.datetime.now().timestamp())
                 user.token = hashlib.sha256(token_word.encode()).hexdigest()
                 db.session.commit()
                 payload['token'] = user.token
