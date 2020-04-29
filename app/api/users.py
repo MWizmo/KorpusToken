@@ -39,7 +39,7 @@ def register():
 
             data['birthday'] = datetime.datetime.strptime(data['birthday'], '%Y-%m-%d')
             token_word = '{}{}{}{}'.format(data["login"], data["email"], data["surname"]
-                                           datetime.datetime.now().timestamp())                                  )
+                                           datetime.datetime.now().timestamp())                                  
             token_word = hashlib.sha256(token_word.encode()).hexdigest()
             user = User(
                 data['email'],
