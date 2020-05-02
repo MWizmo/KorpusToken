@@ -94,7 +94,7 @@ def login():
                 token_word = '{}{}{}{}'.format(user.login, user.email, user.surname, datetime.datetime.now().timestamp())
                 user.token = hashlib.sha256(token_word.encode()).hexdigest()
                 db.session.commit()
-                payload['token'] = user.token
+            payload['token'] = user.token
         else:
             payload['message'] = 'Login or password incorrect'
     else:
