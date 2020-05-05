@@ -38,7 +38,8 @@ def register():
                 return response
 
             data['birthday'] = datetime.datetime.strptime(data['birthday'], '%Y-%m-%d')
-            token_word = f'{data["login"]}{data["email"]}{data["surname"]}{datetime.datetime.now().timestamp()}'
+            token_word = '{}{}{}{}'.format(data["login"], data["email"], data["surname"],
+                                           datetime.datetime.now().timestamp())                                  
             token_word = hashlib.sha256(token_word.encode()).hexdigest()
             user = User(
                 data['email'],
@@ -90,10 +91,10 @@ def login():
         if user.check_password(user_password):
             payload['message'] = 'Logged'
             if not user.token:
-                token_word = f'{user.login}{user.email}{user.surname}{datetime.datetime.now().timestamp()}'
+                token_word = '{}{}{}{}'.format(user.login, user.email, user.surname, datetime.datetime.now().timestamp())
                 user.token = hashlib.sha256(token_word.encode()).hexdigest()
                 db.session.commit()
-                payload['token'] = user.token
+            payload['token'] = user.token
         else:
             payload['message'] = 'Login or password incorrect'
     else:

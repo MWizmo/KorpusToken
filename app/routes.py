@@ -835,56 +835,67 @@ def voting_progress():
                                access=get_access(current_user))
 
     log('Просмотр страницы с прогрессом оценки')
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    if assessment:
+        top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
+        trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
+        atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        relation_results = list()
+        for cadet_id in top_cadets:
+            cadet = User.query.filter_by(id=cadet_id).first()
+            voting_num = len(Voting.query.filter(Voting.user_id == cadet_id, Voting.axis_id == 1,
+                                                 Voting.voting_id==assessment.id).all())
+            relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
 
-    top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
-    trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
-    atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
-    teams_for_voting = len(Teams.query.filter_by(type=1).all())
-    relation_results = list()
-    for cadet_id in top_cadets:
-        cadet = User.query.filter_by(id=cadet_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == cadet_id, Voting.axis_id == 1,
-                                             func.month(Voting.date) == datetime.datetime.now().month).all())
-        relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
+        business_results = list()
+        for user_id in trackers:
+            user = User.query.filter_by(id=user_id).first()
+            voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2,
+                                                 Voting.voting_id==assessment.id).all())
+            business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
-    business_results = list()
-    for user_id in trackers:
-        user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2,
-                                             func.month(Voting.date) == datetime.datetime.now().month).all())
-        business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
+        authority_results = list()
+        for user_id in atamans:
+            user = User.query.filter_by(id=user_id).first()
+            voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3,
+                                                 Voting.voting_id==assessment.id).all())
+            authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
-    authority_results = list()
-    for user_id in atamans:
-        user = User.query.filter_by(id=user_id).first()
-        voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3,
-                                             func.month(Voting.date) == datetime.datetime.now().month).all())
-        authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
-
-    # if Axis.is_available(1):
-    #     rel_text = 'Запретить голосование по оси отношений'
-    # else:
-    #     rel_text = 'Открыть голосование по оси отношений'
-    # if Axis.is_available(2):
-    #     bus_text = 'Запретить голосование по оси дела'
-    # else:
-    #     bus_text = 'Открыть голосование по оси дела'
-    # if Axis.is_available(3):
-    #     auth_text = 'Запретить голосование по оси власти'
-    # else:
-    #     auth_text = 'Открыть голосование по оси власти'
-    form = StartAssessmentForm()
-    if form.validate_on_submit():
-        assessment_status = VotingTable(status='Active', month=form.month.data)
-        db.session.add(assessment_status)
-        db.session.commit()
-        log('Открыл оценку')
-        return redirect('voting_progress')
-    return render_template('voting_progress.html', title='Прогресс голосования',
-                           access=get_access(current_user),
-                           teams_number=teams_for_voting, relation=relation_results,
-                           business=business_results, authority=authority_results, form=form)#,
-                           #rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
+        # if Axis.is_available(1):
+        #     rel_text = 'Запретить голосование по оси отношений'
+        # else:
+        #     rel_text = 'Открыть голосование по оси отношений'
+        # if Axis.is_available(2):
+        #     bus_text = 'Запретить голосование по оси дела'
+        # else:
+        #     bus_text = 'Открыть голосование по оси дела'
+        # if Axis.is_available(3):
+        #     auth_text = 'Запретить голосование по оси власти'
+        # else:
+        #     auth_text = 'Открыть голосование по оси власти'
+        form = StartAssessmentForm()
+        if form.validate_on_submit():
+            assessment_status = VotingTable(status='Active', month=form.month.data)
+            db.session.add(assessment_status)
+            db.session.commit()
+            log('Открыл оценку')
+            return redirect('voting_progress')
+        return render_template('voting_progress.html', title='Прогресс голосования',
+                               access=get_access(current_user),
+                               teams_number=teams_for_voting, relation=relation_results,
+                               business=business_results, authority=authority_results, form=form)#,
+                               #rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
+    else:
+        form = StartAssessmentForm()
+        if form.validate_on_submit():
+            assessment_status = VotingTable(status='Active', month=form.month.data)
+            db.session.add(assessment_status)
+            db.session.commit()
+            log('Открыл оценку')
+            return redirect('voting_progress')
+        return render_template('voting_progress.html', title='Прогресс голосования',
+                               access=get_access(current_user), form=form)
 
 
 @app.route('/axis_access')
