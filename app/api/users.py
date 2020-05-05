@@ -20,7 +20,8 @@ def register():
         return response
     elif request.method == 'POST':
         data = request.get_json() or {}
-        data = json.loads(data)
+        if type(data) == str:
+            data = json.loads(data)
         payload = {
             'message': '',
             'validation_errors': []
@@ -79,7 +80,8 @@ def register():
 @bp.route('/users/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
-    data = json.loads(data)
+    if type(data) == str:
+        data = json.loads(data)
     if ('login' not in data) or ('password' not in data):
         return bad_request('Must include login and password fields')
 
