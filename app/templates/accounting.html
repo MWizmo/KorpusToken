@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
+<script src="{{url_for('static', filename='js/signup.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.maskedinput.min.js')}}"></script>
+{% endblock %}
+
+<div class="container">
+    <h2>Операции с токенами</h2>
+    <br><br>
+    <h2>Администрирование</h2><hr>
+    <div class="token_horiz_block">
+        <div class="token_block">
+            <h3>Отправить токены вклада</h3>
+            <form method="post">
+                {{ send_ktd_form.hidden_tag() }}
+                <p>{{ send_ktd_form.receiver.label }}</p>
+                <p>{{ send_ktd_form.receiver() }}</p>
+                <p>{{ send_ktd_form.num.label }}</p>
+                <p>{{ send_ktd_form.num() }}</p>
+                <p> {{ send_ktd_form.send_ktd() }}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["send_ktd"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="token_block">
+            <h3>Отправить токены инвестиции</h3>
+            <form method="post">
+                {{ send_kti_form.hidden_tag() }}
+                <p>{{ send_kti_form.receiver.label }}</p>
+                <p>{{ send_kti_form.receiver() }}</p>
+                <p>{{ send_kti_form.num.label }}</p>
+                <p>{{ send_kti_form.num() }}</p>
+                <p> {{ send_kti_form.send_kti() }}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["send_kti"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="token_block">
+            <h3>Отправить эфириум</h3>
+            <form method="post">
+                {{ send_eth_form.hidden_tag() }}
+                <p>{{ send_eth_form.receiver.label }}</p>
+                <p>{{ send_eth_form.receiver() }}</p>
+                <p>{{ send_eth_form.num.label }}</p>
+                <p>{{ send_eth_form.num() }}</p>
+                <p> {{ send_eth_form.send_eth() }}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["send_eth"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <h2>Бюджет и оценка</h2><hr>
+    <div class="token_horiz_block">
+        <div class="token_block">
+            <h3>Добавить статью расхода в бюджет</h3>
+            <form method="post">
+                {{ set_budget_form.hidden_tag() }}
+                <p>{{ set_budget_form.subject.label }}</p>
+                <p>{{ set_budget_form.subject() }}</p>
+                <p>{{ set_budget_form.price.label }}</p>
+                <p>{{ set_budget_form.price() }}</p>
+                <p>{{ set_budget_form.date.label }}</p>
+                <p>{{ set_budget_form.date(id="date") }}</p>
+                <p>{{ set_budget_form.set_budget() }}  {{ set_budget_form.get_budget() }}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["set_budget"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+            {% with messages = get_flashed_messages(category_filter=["get_budget"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+              {% endif %}
+            {% endwith %}
+        </div>
+        <div class="token_block">
+            <h3>Зафиксировать оценку</h3>
+            <form method="post">
+                {{ put_mark_form.hidden_tag() }}
+                <p>{{ put_mark_form.project.label }}</p>
+                <p>{{ put_mark_form.project() }}</p>
+                <p>{{ put_mark_form.student.label }}</p>
+                <p>{{ put_mark_form.student() }}</p>
+                <p>{{ put_mark_form.criterion.label }}</p>
+                <p>{{ put_mark_form.criterion() }}</p>
+                <p>{{ put_mark_form.mark.label }}</p>
+                <p>
+                    <input type="radio" value="0" name="mark"><span>0</span>
+                    <input type="radio" value="1" name="mark"><span>1</span>
+                </p>
+                <p>{{ put_mark_form.date.label }}</p>
+                <p>{{ put_mark_form.date(id="date2") }}</p>
+                <p>{{ put_mark_form.put_mark() }}  {{put_mark_form.get_mark()}}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["put_mark"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+            {% with messages = get_flashed_messages(category_filter=["get_mark"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+              {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <h2>Обмен токенов вклада на эфир</h2><hr>
+    <div class="token_horiz_block">
+        <div class="token_block">
+            <h3>Обменять токены вклада</h3>
+            <form method="post">
+                {{ exchange_ktd_to_eth_form.hidden_tag() }}
+                <p>{{ exchange_ktd_to_eth_form.num.label }}</p>
+                <p>{{ exchange_ktd_to_eth_form.num() }}</p>
+                <p> {{ exchange_ktd_to_eth_form.exchange_ktd_to_eth() }}</p>
+            </form>
+            {% with messages = get_flashed_messages(category_filter=["exchange_ktd_to_eth"]) %}
+              {% if messages %}
+                  <p>{{ messages[0] }}</p>
+                    {% if messages[1] %}
+                        <a href="{{messages[1]}}" target="_blank">Ссылка</a>
+                    {% endif %}
+              {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+<script>
+$( document ).ready(function() {
+    $("#date").mask("99.99.9999");
+    $("#date2").mask("99.99.9999");
+});
+</script>
+{% endblock %}

@@ -3,8 +3,6 @@ import datetime
 import threading
 import os
 import csv
-
-# import jdcal
 from sqlalchemy import func
 from app import app, db
 from app.scripts import graphs
@@ -1201,3 +1199,4 @@ def confirm_top_cadets():
     db.session.commit()
     log('Выбор топовых кадетов')
     return jsonify({'response': 'ok'})
+

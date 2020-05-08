@@ -572,3 +572,13 @@ font-family: 'Share Tech Mono', monospace;
     width:150px;
     margin-right:20px;
 }
+
+.token_horiz_block{
+    display:flex;
+    flex-direction:row;
+    margin-bottom:30px;
+}
+
+.token_block{
+    margin-right:10%;
+}
