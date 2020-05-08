@@ -387,3 +387,13 @@ class TopCadetsVoting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     voter_id = db.Column(db.Integer)
     date = db.Column(db.Date)
+
+
+class WeeklyVoting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    team_id = db.Column(db.Integer)
+    date = db.Column(db.Date)
+    criterion_id = db.Column(db.Integer)
+    mark = db.Column(db.Integer)
+    finished = db.Column(db.Integer)
