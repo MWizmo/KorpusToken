@@ -38,7 +38,7 @@ def register():
                 response.status_code = 400
                 return response
 
-            data['birthday'] = datetime.datetime.strptime(data['birthday'], '%Y-%m-%d')
+            data['birthday'] = datetime.datetime.strptime(data['birthday'], '%d-%m-%Y')
             token_word = '{}{}{}{}'.format(data["login"], data["email"], data["surname"],
                                            datetime.datetime.now().timestamp())                                  
             token_word = hashlib.sha256(token_word.encode()).hexdigest()
