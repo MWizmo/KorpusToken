@@ -61,10 +61,11 @@ def register():
 
             user = User.query.filter_by(email=data['email']).first()
             if 'team' in data:
-                user_team = Membership(user_id=user.id,
-                                       team_id=Teams.query.filter_by(name=data['team']).first().id,
-                                       role_id=0)
-                db.session.add(user_team)
+                for team in data['team']:
+                    user_team = Membership(user_id=user.id,
+                                           team_id=Teams.query.filter_by(name=team).first().id,
+                                           role_id=0)
+                    db.session.add(user_team)
             user_status = UserStatuses(user_id=user.id, status_id=3)
             db.session.add(user_status)
             db.session.commit()
