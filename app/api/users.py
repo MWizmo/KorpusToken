@@ -55,6 +55,7 @@ def register():
                 data['surname'],
                 token_word
             )
+            user.set_password(data['password'])
             db.session.add(user)
             db.session.commit()
 
