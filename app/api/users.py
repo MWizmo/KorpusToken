@@ -89,16 +89,17 @@ def login():
 
     user_login = data['login']
     user_password = data['password']
-    user = User.query.filter_by(login=user_login).first()
+    user_client = User.query.filter_by(login=user_login).first()
     payload = {}
-    if user:
-        if user.check_password(user_password):
+    if user_client:
+        if user_client.check_password(user_password):
             payload['message'] = 'Logged'
-            if not user.token:
-                token_word = '{}{}{}{}'.format(user.login, user.email, user.surname, datetime.datetime.now().timestamp())
-                user.token = hashlib.sha256(token_word.encode()).hexdigest()
+            if not user_client.token:
+                token_word = '{}{}{}{}'.format(user_client.login, user_client.email, user_client.surname,
+                                               datetime.datetime.now().timestamp())
+                user_client.token = hashlib.sha256(token_word.encode()).hexdigest()
                 db.session.commit()
-            payload['token'] = user.token
+            payload['token'] = user_client.token
         else:
             payload['message'] = 'Login or password incorrect'
     else:
@@ -109,6 +110,33 @@ def login():
     return response
 
 
-@bp.route('/users/get_users', methods=['GET'])
-def get_users():
-    pass
+@bp.route('/users/user', methods=['GET', 'POST'])
+def user():
+    if request.method == 'GET':
+        data = request.get_json() or {}
+        if type(data) == str:
+            data = json.dumps(data)
+        if 'token' not in data:
+            return bad_request('Must include user token')
+
+        payload = {
+            'message': ''
+        }
+        request_user = User.query.filter_by(token=data['token']).first()
+
+        if 'params' not in data:
+            return bad_request('Must include params')
+
+        if data['params'][0] == 'ALL':
+            payload.update(request_user.to_dict())
+        else:
+            for param in data['params']:
+                payload[param.lower()] = getattr(request_user, param.lower())
+
+        response = jsonify(payload)
+        response.status_code = 200
+        return response
+    else:
+        pass
+
+    # TODO Отладить и протестировать GET запрос USER

@@ -119,7 +119,7 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def to_dict(self, include: dict):
+    def to_dict(self):  # , include: dict
         data = {
             'id': self.id,
             'name': self.name,
@@ -128,22 +128,27 @@ class User(UserMixin, db.Model):
             'tg_id': self.tg_id,
             'photo': self.photo,
             'sex': self.sex,
+            'login': self.login,
+            'email': self.email,
+            'birthday': self.birthday,
+            'education': self.education,
+            'work_exp': self.work_exp
         }
 
-        if include['login']:
-            data['login'] = self.login
-
-        if include['email']:
-            data['email'] = self.email
-
-        if include['birthday']:
-            data['birthday'] = self.birthday
-
-        if include['education']:
-            data['education'] = self.education
-
-        if include['work_exp']:
-            data['work_exp'] = self.work_exp
+        # if include['login']:
+        #     data['login'] = self.login
+        #
+        # if include['email']:
+        #     data['email'] = self.email
+        #
+        # if include['birthday']:
+        #     data['birthday'] = self.birthday
+        #
+        # if include['education']:
+        #     data['education'] = self.education
+        #
+        # if include['work_exp']:
+        #     data['work_exp'] = self.work_exp
 
         return data
 
