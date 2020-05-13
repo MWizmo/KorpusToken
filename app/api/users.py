@@ -115,7 +115,7 @@ def user():
     if request.method == 'GET':
         data = request.get_json() or {}
         if type(data) == str:
-            data = json.dumps(data)
+            data = json.loads(data)
         if 'token' not in data:
             return bad_request('Must include user token')
 
@@ -131,12 +131,15 @@ def user():
             payload.update(request_user.to_dict())
         else:
             for param in data['params']:
-                payload[param.lower()] = getattr(request_user, param.lower())
+                try:
+                    payload[param.lower()] = getattr(request_user, param.lower())
+                except AttributeError:
+                    return bad_request(f'AttributeError: {param}')
 
         response = jsonify(payload)
         response.status_code = 200
         return response
     else:
+        # TODO: Дописать POST для редактирования профиля
         pass
 
-    # TODO Отладить и протестировать GET запрос USER
