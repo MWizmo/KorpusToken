@@ -346,8 +346,8 @@ def questionnaire_progress():
                 teams = Membership.query.filter_by(user_id=user).all()
                 teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
                 teams_id = [t for t in teams_id if t]
-                if len(teams_id) == 1:
-                    not_participated_self_teams.append(teams_id[0].name)
+                if len(teams_id) > 0:
+                    not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
         not_participated_self_info = []
 
         for i in range(len(not_participated_self_ids)):
@@ -368,8 +368,8 @@ def questionnaire_progress():
                 teams = Membership.query.filter_by(user_id=user).all()
                 teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
                 teams_id = [t for t in teams_id if t]
-                if len(teams_id) == 1:
-                    not_participated_team_teams.append(teams_id[0].name)
+                if len(teams_id) > 0:
+                    not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
         # not_participated_team_teams = [Teams.query.filter(
         #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
         # ).first().name
