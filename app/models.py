@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
                     team = Teams.query.filter_by(id=t.team_id).first()
                     if team.type and team.type == 1:
                         return True
+                return True
         return False
 
     @staticmethod
@@ -132,7 +133,8 @@ class User(UserMixin, db.Model):
             'email': self.email,
             'birthday': self.birthday,
             'education': self.education,
-            'work_exp': self.work_exp
+            'work_exp': self.work_exp,
+            'membership': True if Membership.query.filter_by(user_id=self.id).first() else False
         }
         return data
 
