@@ -10,15 +10,18 @@ from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable
-from flask import render_template, redirect, url_for, request, jsonify, send_file
+from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
-    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm, StartAssessmentForm
+    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm, StartAssessmentForm, \
+    RestorePassword
 from flask_login import current_user, login_user, logout_user, login_required
 
 
-def log(action):
-    new_log = Log(user_id=current_user.id, action=action, date=datetime.datetime.today().strftime("%d-%m-%Y %H:%M:%S"))
+def log(action, user_id=None):
+    if user_id is None:
+        user_id = current_user.id
+    new_log = Log(user_id=user_id, action=action, date=datetime.datetime.today().strftime("%d-%m-%Y %H:%M:%S"))
     db.session.add(new_log)
     db.session.commit()
 
@@ -71,6 +74,21 @@ def login():
         log('Вход в систему')
         return redirect(next_page)
     return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/restore_password', methods=['GET', 'POST'])
+def restore_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RestorePassword()
+    if form.validate_on_submit():
+        user = User.query.filter_by(login=form.login.data).first()
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Пароль успешно сменен', 'restore')
+        log('Восстановления пароля', user_id=user.id)
+        return redirect('login')
+    return render_template('restore_password.html', title='Восстановление пароля', form=form)
 
 
 @app.route('/signup', methods=['GET', 'POST'])

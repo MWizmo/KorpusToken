@@ -54,6 +54,18 @@ class SignupForm(FlaskForm):
             raise ValidationError('Email занят')
 
 
+class RestorePassword(FlaskForm):
+    login = StringField('Логин в системе:', validators=[DataRequired()])
+    password = PasswordField('Новый пароль: ', validators=[DataRequired()])
+    password2 = PasswordField('Повторите пароль: ', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Отправить')
+
+    def validate_login(self, login):
+        user = User.query.filter_by(login=login.data).first()
+        if user is None:
+            raise ValidationError('Пользователь с таким логином не найден')
+
+
 class QuestionnairePersonal(FlaskForm):
     qst_personal_growth = TextAreaField('Личностный рост ', validators=[DataRequired()])
     qst_controllability = TextAreaField('Управляемость ', validators=[DataRequired()])
