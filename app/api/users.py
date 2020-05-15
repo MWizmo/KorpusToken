@@ -110,33 +110,31 @@ def login():
     return response
 
 
-@bp.route('/users/user', methods=['GET', 'POST'])
-def user():
-    if request.method == 'GET':
-        data = request.get_json() or {}
-        if type(data) == str:
-            data = json.dumps(data)
-        if 'token' not in data:
-            return bad_request('Must include user token')
+@bp.route('/users/get_user', methods=['POST'])
+def get_user():
+    data = request.get_json() or {}
+    if type(data) == str:
+        data = json.loads(data)
+    if 'token' not in data:
+        return bad_request('Must include user token')
 
-        payload = {
-            'message': ''
-        }
-        request_user = User.query.filter_by(token=data['token']).first()
+    payload = {
+        'message': ''
+    }
+    request_user = User.query.filter_by(token=data['token']).first()
 
-        if 'params' not in data:
-            return bad_request('Must include params')
+    if 'params' not in data:
+        return bad_request('Must include params')
 
-        if data['params'][0] == 'ALL':
-            payload.update(request_user.to_dict())
-        else:
-            for param in data['params']:
-                payload[param.lower()] = getattr(request_user, param.lower())
-
-        response = jsonify(payload)
-        response.status_code = 200
-        return response
+    if data['params'][0] == 'ALL':
+        payload.update(request_user.to_dict())
     else:
-        pass
+        for param in data['params']:
+            try:
+                payload[param.lower()] = getattr(request_user, param.lower())
+            except AttributeError:
+                return bad_request(f'AttributeError: {param}')
 
-    # TODO Отладить и протестировать GET запрос USER
+    response = jsonify(payload)
+    response.status_code = 200
+    return response

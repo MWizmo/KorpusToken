@@ -134,22 +134,6 @@ class User(UserMixin, db.Model):
             'education': self.education,
             'work_exp': self.work_exp
         }
-
-        # if include['login']:
-        #     data['login'] = self.login
-        #
-        # if include['email']:
-        #     data['email'] = self.email
-        #
-        # if include['birthday']:
-        #     data['birthday'] = self.birthday
-        #
-        # if include['education']:
-        #     data['education'] = self.education
-        #
-        # if include['work_exp']:
-        #     data['work_exp'] = self.work_exp
-
         return data
 
     id = db.Column(db.Integer, primary_key=True)
