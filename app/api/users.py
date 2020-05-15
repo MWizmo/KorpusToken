@@ -3,8 +3,9 @@ import hashlib
 import datetime
 
 from app.api import bp
+from app.scripts.service import get_questionnaires_access
 from app.api.errors import bad_request
-from app.models import db, User, Teams, Membership, UserStatuses
+from app.models import db, User, Teams, Membership, UserStatuses, QuestionnaireTable, Questionnaire
 from app.scripts.service import login_validating, email_validating
 from flask import request, jsonify
 
@@ -128,8 +129,16 @@ def get_user():
 
     if data['params'][0] == 'ALL':
         payload.update(request_user.to_dict())
+        payload.update(get_questionnaires_access(request_user))
     else:
         for param in data['params']:
+            if param == 'QUESTIONNAIRE_SELF':
+                payload['questionnaire_self'] = get_questionnaires_access(request_user)['questionnaire_self']
+                continue
+
+            if param == 'QUESTIONNAIRE_TEAM':
+                payload['questionnaire_team'] = get_questionnaires_access(request_user)['questionnaire_team']
+                continue
             try:
                 payload[param.lower()] = getattr(request_user, param.lower())
             except AttributeError:

@@ -207,7 +207,6 @@ def questionnaire_team():
         db.session.commit()
         log('Заполнение командной анкеты')
         return redirect(url_for('home'))
-
     return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
                            q1=questions[0].text, q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
                            q5=questions[4].text,
