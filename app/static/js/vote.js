@@ -35,6 +35,7 @@ app.controller("ctrl", function ($scope, $http) {
                 data: user_data,
                 async: false
             }).then(function success (response) {
+                console.log('Анкета успешно заполнена');
                 document.location.href = "assessment";
             });
 
