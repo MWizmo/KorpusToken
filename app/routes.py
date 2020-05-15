@@ -189,9 +189,14 @@ def questionnaire_team():
             return render_template('questionnaire_error.html',
                                    access=get_access(current_user))
     teammates = []
-    lst_teammates_bd = Membership.query.filter_by(
-        team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
-
+    # lst_teammates_bd = Membership.query.filter_by(
+    #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
+    teams = Membership.query.filter_by(user_id=current_user.id).all()
+    teams_id = [Teams.query.filter(Teams.id==t.team_id, Teams.type==1).first() for t in teams]
+    teams_id = [t for t in teams_id if t]
+    if len(teams_id) == 1:
+        team_id = teams_id[0].id
+    lst_teammates_bd = Membership.query.filter(Membership.team_id==team_id, Membership.user_id!=current_user.id)
     for teammate in lst_teammates_bd:
         if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
             continue
@@ -330,11 +335,19 @@ def questionnaire_progress():
                 user_id=user).first().status_id).first().status
                                           for user in questionnaire['participaters_self_ids']
                                           if user not in questionnaire['participated_self']]
-        not_participated_self_teams = [Teams.query.filter_by(
-            id=Membership.query.filter_by(user_id=user).first().team_id
-        ).first().name
-                                       for user in questionnaire['participaters_self_ids']
-                                       if user not in questionnaire['participated_self']]
+        # not_participated_self_teams = [Teams.query.filter_by(
+        #     id=Membership.query.filter_by(user_id=user).first().team_id
+        # ).first().name
+        #                                for user in questionnaire['participaters_self_ids']
+        #                                if user not in questionnaire['participated_self']]
+        not_participated_self_teams = []
+        for user in questionnaire['participaters_self_ids']:
+            if user not in questionnaire['participated_self']:
+                teams = Membership.query.filter_by(user_id=user).all()
+                teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+                teams_id = [t for t in teams_id if t]
+                if len(teams_id) == 1:
+                    not_participated_self_teams.append(teams_id[0].name)
         not_participated_self_info = []
 
         for i in range(len(not_participated_self_ids)):
@@ -349,11 +362,19 @@ def questionnaire_progress():
         not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
                                           for user in questionnaire['participaters_team_ids']
                                           if user not in questionnaire['participated_team']]
-        not_participated_team_teams = [Teams.query.filter_by(
-            id=Membership.query.filter_by(user_id=user).first().team_id
-        ).first().name
-                                       for user in questionnaire['participaters_team_ids']
-                                       if user not in questionnaire['participated_team']]
+        not_participated_team_teams = []
+        for user in questionnaire['participaters_team_ids']:
+            if user not in questionnaire['participated_team']:
+                teams = Membership.query.filter_by(user_id=user).all()
+                teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+                teams_id = [t for t in teams_id if t]
+                if len(teams_id) == 1:
+                    not_participated_team_teams.append(teams_id[0].name)
+        # not_participated_team_teams = [Teams.query.filter(
+        #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
+        # ).first().name
+        #                                for user in questionnaire['participaters_team_ids']
+        #                                if user not in questionnaire['participated_team']]
 
         not_participated_team_info = []
 
