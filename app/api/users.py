@@ -123,7 +123,8 @@ def get_user():
         'message': ''
     }
     request_user = User.query.filter_by(token=data['token']).first()
-
+    if not request_user:
+        return bad_request('Token invalid')
     if 'params' not in data:
         return bad_request('Must include params')
 
