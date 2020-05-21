@@ -47,7 +47,7 @@ class User(UserMixin, db.Model):
                     team = Teams.query.filter_by(id=t.team_id).first()
                     if team.type and team.type == 1:
                         return True
-                return True
+                #return True
         return False
 
     @staticmethod

@@ -184,19 +184,30 @@ def questionnaire_team():
     cur_quest = QuestionnaireTable.current_questionnaire_id()
     user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
     if user_quest:
-        user_quest = user_quest[-1]
-        if user_quest.questionnaire_id == cur_quest:
-            return render_template('questionnaire_error.html',
-                                   access=get_access(current_user))
+        teams = Membership.query.filter_by(user_id=current_user.id).all()
+        teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+        teams_id = [t for t in teams_id if t]
+        if len(teams_id) == 1:
+            user_quest = user_quest[-1]
+            if user_quest.questionnaire_id == cur_quest:
+                return render_template('questionnaire_error.html',
+                                       access=get_access(current_user))
     teammates = []
     # lst_teammates_bd = Membership.query.filter_by(
     #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
     teams = Membership.query.filter_by(user_id=current_user.id).all()
     teams_id = [Teams.query.filter(Teams.id==t.team_id, Teams.type==1).first() for t in teams]
-    teams_id = [t for t in teams_id if t]
+    teams_id = [t.id for t in teams_id if t]
     if len(teams_id) == 1:
         team_id = teams_id[0].id
-    lst_teammates_bd = Membership.query.filter(Membership.team_id==team_id, Membership.user_id!=current_user.id)
+    else:
+        done_teams = [q.team_id for q in
+                      Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
+        if len(teams_id) == len(done_teams):
+            return render_template('questionnaire_error.html', access=get_access(current_user))
+        else:
+            team_id = list(set(teams_id).difference(set(done_teams)))[0]
+    lst_teammates_bd = Membership.query.filter(Membership.team_id==team_id, Membership.user_id!=current_user.id).all()
     for teammate in lst_teammates_bd:
         if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
             continue
@@ -208,8 +219,7 @@ def questionnaire_team():
     form = QuestionnaireTeam()
     questions = Questions.query.filter_by(type=2)
     if form.validate_on_submit():
-        q = Questionnaire(user_id=current_user.id,
-                          team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id,
+        q = Questionnaire(user_id=current_user.id, team_id=team_id,
                           date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
                                              datetime.datetime.now().day),
                           type=2, questionnaire_id=cur_quest, assessment=1)
@@ -229,10 +239,16 @@ def questionnaire_team():
             i += 1
         db.session.commit()
         log('Заполнение командной анкеты')
-        return redirect(url_for('home'))
+        done_teams = [q.team_id for q in
+                      Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
+        if len(teams_id) == len(done_teams):
+            return redirect(url_for('home'))
+        else:
+            return redirect(url_for('questionnaire_team'))
+    team_title = Teams.query.filter_by(id=team_id).first().name
     return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
                            q1=questions[0].text, q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
-                           q5=questions[4].text,
+                           q5=questions[4].text, team_title=team_title,
                            access=get_access(current_user))
 
 
