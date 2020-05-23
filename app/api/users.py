@@ -140,6 +140,25 @@ def get_user():
             if param == 'QUESTIONNAIRE_TEAM':
                 payload['questionnaire_team'] = get_questionnaires_access(request_user)['questionnaire_team']
                 continue
+
+            if param == 'TEAMMATES':
+                if Membership.query.filter_by(user_id=request_user.id).first():
+                    if data['team_id']:
+                        if Membership.query.filter_by(user_id=request_user.id, team_id=data['team_id']).first():
+                            teammates = [User.query.filter_by(id=teammate.user_id).first()
+                                         for teammate in Membership.query.filter_by(team_id=data['team_id']).all()
+                                         if teammate.user_id != request_user.id]
+                            teammates_dict = {}
+                            for teammate in teammates:
+                                teammates_dict.update({teammate.name+' '+teammate.surname: teammate.id})
+                            payload['teammates'] = teammates_dict
+                        else:
+                            return bad_request('User is not in that team')
+                    else:
+                        return bad_request('Must include team_id')
+                else:
+                    return bad_request('User has not got team')
+                continue
             try:
                 payload[param.lower()] = getattr(request_user, param.lower())
             except AttributeError:

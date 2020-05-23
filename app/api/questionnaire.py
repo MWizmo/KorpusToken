@@ -91,3 +91,15 @@ def questionnaire_self():
             return bad_request('Token invalid')
 
 
+@bp.route('/questionnaire/questionnaire_team', methods=['GET', 'POST'])
+def questionnaire_team():
+    if request.method == 'GET':
+        payload = {
+            'message': 'OK',
+            'questions': [question.text for question in Questions.query.filter_by(type=2).all()[:5]]
+        }
+        response = jsonify(payload)
+        response.status_code = 200
+        return response
+    else:
+        pass
