@@ -120,7 +120,7 @@ def get_user():
         return bad_request('Must include user token')
 
     payload = {
-        'message': ''
+        'message': 'OK'
     }
     request_user = User.query.filter_by(token=data['token']).first()
     if not request_user:
@@ -131,6 +131,8 @@ def get_user():
     if data['params'][0] == 'ALL':
         payload.update(request_user.to_dict())
         payload.update(get_questionnaires_access(request_user))
+        teams = Membership.query.filter_by(user_id=request_user.id).first()
+        payload['teams'] = teams.team_id if teams else 0
     else:
         for param in data['params']:
             if param == 'QUESTIONNAIRE_SELF':
@@ -141,29 +143,57 @@ def get_user():
                 payload['questionnaire_team'] = get_questionnaires_access(request_user)['questionnaire_team']
                 continue
 
-            if param == 'TEAMMATES':
-                if Membership.query.filter_by(user_id=request_user.id).first():
-                    if data['team_id']:
-                        if Membership.query.filter_by(user_id=request_user.id, team_id=data['team_id']).first():
-                            teammates = [User.query.filter_by(id=teammate.user_id).first()
-                                         for teammate in Membership.query.filter_by(team_id=data['team_id']).all()
-                                         if teammate.user_id != request_user.id]
-                            teammates_dict = {}
-                            for teammate in teammates:
-                                teammates_dict.update({teammate.name+' '+teammate.surname: teammate.id})
-                            payload['teammates'] = teammates_dict
-                        else:
-                            return bad_request('User is not in that team')
-                    else:
-                        return bad_request('Must include team_id')
-                else:
-                    return bad_request('User has not got team')
+            if param == 'MEMBERSHIP':
+                payload['membership'] = True if Membership.query.filter_by(user_id=request_user.id).first() else False
                 continue
+
+            if param == 'TEAMS':
+                teams = Membership.query.filter_by(user_id=request_user.id).first()
+                payload['teams'] = teams.team_id if teams else 0
+                # [team.team_id for team in Membership.query.filter_by(user_id=request_user.id).all()]
+                continue
+
             try:
                 payload[param.lower()] = getattr(request_user, param.lower())
             except AttributeError:
                 return bad_request(f'AttributeError: {param}')
+    response = jsonify(payload)
+    response.status_code = 200
+    return response
 
+
+@bp.route('/users/get_teammates', methods=['POST'])
+def get_teammates():
+    data = request.get_json() or {}
+    if type(data) == str:
+        data = json.loads(data)
+    if 'token' not in data:
+        return bad_request('Must include user token')
+    payload = {
+        'message': 'OK'
+    }
+    request_user = User.query.filter_by(token=data['token']).first()
+    if Membership.query.filter_by(user_id=request_user.id).first():
+        if data['team_id']:
+            try:
+                data['team_id'] = int(data['team_id'])
+            except Exception:
+                return bad_request('team_id must be integer')
+
+            if Membership.query.filter_by(user_id=request_user.id, team_id=data['team_id']).first():
+                teammates = [User.query.filter_by(id=teammate.user_id).first()
+                             for teammate in Membership.query.filter_by(team_id=data['team_id']).all()
+                             if teammate.user_id != request_user.id]
+                teammates_dict = {}
+                for teammate in teammates:
+                    teammates_dict.update({teammate.name + ' ' + teammate.surname: teammate.id})
+                payload['teammates'] = teammates_dict
+            else:
+                return bad_request('User is not in that team')
+        else:
+            return bad_request('Must include team_id')
+    else:
+        return bad_request('User has not got team')
     response = jsonify(payload)
     response.status_code = 200
     return response
