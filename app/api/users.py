@@ -186,7 +186,8 @@ def get_teammates():
                              if teammate.user_id != request_user.id]
                 teammates_dict = {}
                 for teammate in teammates:
-                    teammates_dict.update({teammate.name + ' ' + teammate.surname: teammate.id})
+                    if teammate:
+                        teammates_dict.update({teammate.name + ' ' + teammate.surname: teammate.id})
                 payload['teammates'] = teammates_dict
             else:
                 return bad_request('User is not in that team')
