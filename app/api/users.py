@@ -10,8 +10,8 @@ from app.scripts.service import login_validating, email_validating
 from flask import request, jsonify
 
 
-@bp.route('/users/register', methods=['GET', 'POST'])
-def register():
+@bp.route('/users/registration', methods=['GET', 'POST'])
+def registration():
     if request.method == 'GET':
         payload = {
             'teams': [team.name for team in Teams.query.all()]
