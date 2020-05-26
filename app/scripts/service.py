@@ -24,7 +24,7 @@ def get_questionnaires_access(current_user):
         else:
             accesses['questionnaire_self'] = True
     else:
-        if User.check_cadet(current_user.id) or User.check_teamlead(current_user.id):
+        if (User.check_cadet(current_user.id) or User.check_teamlead(current_user.id)):
             accesses['questionnaire_self'] = True
         else:
             accesses['questionnaire_self'] = False
