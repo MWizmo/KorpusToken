@@ -237,7 +237,7 @@ class QuestionnaireTable(db.Model):
 
     @staticmethod
     def is_opened():
-        return len(QuestionnaireTable.query.filter_by(status='Active').all())> 0
+        return len(QuestionnaireTable.query.filter_by(status='Active').all()) > 0
 
     @staticmethod
     def is_in_assessment():
@@ -246,7 +246,7 @@ class QuestionnaireTable(db.Model):
     @staticmethod
     def current_questionnaire_id():
         q = QuestionnaireTable.query.filter_by(status='Active').first()
-        if q:
+        if q is not None:
             return q.id
         else:
             return QuestionnaireTable.query.filter_by(status='Ready for assessment').first().id

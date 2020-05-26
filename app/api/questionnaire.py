@@ -2,10 +2,11 @@ import json
 import hashlib
 import datetime
 
-from app.scripts.service import get_access
+from app.scripts.service import get_access, get_questionnaires_access
 from app.api import bp
 from app.api.errors import bad_request
-from app.models import db, Questionnaire, Questions, QuestionnaireTable, Membership, QuestionnaireInfo, User
+from app.models import db, Questionnaire, Questions, QuestionnaireTable, Membership, QuestionnaireInfo, User, \
+    VotingTable
 from flask import request, jsonify
 
 
@@ -164,3 +165,31 @@ def questionnaire_team():
                 return bad_request('Cant be marked')
         else:
             return bad_request('Token invalid')
+
+
+@bp.route("/questionnaire/get_status", methods=['POST'])
+def get_status():
+    data = request.get_json() or {}
+    if type(data) == str:
+        data = json.loads(data)
+    if 'token' not in data:
+        return bad_request('Must contain token')
+    payload = {
+        'message': 'OK'
+    }
+
+    request_user = User.query.filter_by(token=data['token']).first()
+    if not request_user:
+        return bad_request('Token invalid')
+
+    info = get_access(request_user)
+    payload['assessment_is_opened'] = info['assessment_opened']
+    payload['questionnaire_is_opened'] = info['questionnaire_opened']
+    if payload['assessment_is_opened']:
+        payload['assessment_month'] = VotingTable.query.filter_by(status='Active').first().month
+    else:
+        payload['assessment_month'] = None
+
+    response = jsonify(payload)
+    response.status_code = 200
+    return response

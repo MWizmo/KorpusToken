@@ -6,7 +6,7 @@ class Config(object):
     SECRET_KEY = 'korpus_token_secret_key'
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI')\
-    or 'mysql+pymysql://korpus_user:korpus_password@localhost/korpus_db'
+        or 'mysql+pymysql://korpus_user:korpus_password@localhost/korpus_db'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
