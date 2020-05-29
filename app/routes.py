@@ -199,7 +199,7 @@ def questionnaire_team():
     teams_id = [Teams.query.filter(Teams.id==t.team_id, Teams.type==1).first() for t in teams]
     teams_id = [t.id for t in teams_id if t]
     if len(teams_id) == 1:
-        team_id = teams_id[0].id
+        team_id = teams_id[0]
     else:
         done_teams = [q.team_id for q in
                       Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
