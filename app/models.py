@@ -92,8 +92,11 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def get_full_name(user_id):
-        user = User.query.filter_by(id=user_id).first()
-        return user.name[0] + '. ' + user.surname
+        try:
+            user = User.query.filter_by(id=user_id).first()
+            return user.name[0] + '. ' + user.surname
+        except AttributeError:
+            return 'Unknown (id {})'.format(user_id)
 
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education,
