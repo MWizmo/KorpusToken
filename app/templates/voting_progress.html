@@ -45,6 +45,9 @@
                 {{form.month()}}<br><br>
                 {{form.submit()}}
             </form>
+            {% if msg %}
+            <p>{{msg}}</p>
+            {% endif %}
             <!--a class='nav__link border' href="{{ url_for('start_assessment') }}">Начать оценку</a-->
         </div>
     {% endif %}
