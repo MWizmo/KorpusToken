@@ -941,6 +941,10 @@ def voting_progress():
     else:
         form = StartAssessmentForm()
         if form.validate_on_submit():
+            if QuestionnaireTable.is_opened():
+                return render_template('voting_progress.html', title='Прогресс голосования',
+                                       access=get_access(current_user), form=form,
+                                       msg='Сначала надо завершить текущий процесс анкетирования')
             assessment_status = VotingTable(status='Active', month=form.month.data)
             db.session.add(assessment_status)
             db.session.commit()
@@ -1116,7 +1120,7 @@ def log_page():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
 
-    logs = Log.query.order_by(Log.id.desc()).all()
+    logs = Log.query.order_by(Log.id.desc()).all()[:100]
     user_logs = [(l.action, User.get_full_name(l.user_id), l.date) for l in logs]
     return render_template('log_page.html', title='Логи', logs=user_logs,
                            access=get_access(current_user))
