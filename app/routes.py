@@ -9,7 +9,7 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable
+    VotingTable, WeeklyVoting, WeeklyVotingMembers
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
@@ -707,11 +707,35 @@ def assessment_users():
                          User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
-
+                        if User.check_cadet(member.user_id)]
+                        #if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
+        current_month = 8
+        dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
+                                                           WeeklyVoting.team_id == team_id,
+                                                           WeeklyVoting.finished == 1).distinct().all()
+        voting_results = []
+        for date in dates:
+            date_info = {'date': f'{date[0].day}.{date[0].month}.{date[0].year}'}
+            marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
+                filter(WeeklyVoting.date == date[0], WeeklyVoting.team_id == team_id, WeeklyVoting.finished == 1). \
+                group_by(WeeklyVoting.criterion_id).all()
+            mark_res = []
+            for mark in marks:
+                mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
+            date_info['marks'] = mark_res
+            teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date==date[0], WeeklyVotingMembers.team_id==team_id).all()
+            teammates = [t[0] for t in teammates]
+            teammates_info = []
+            for member in team_members:
+                if member[0] in teammates and len(teammates) > 0:
+                    teammates_info.append(member)
+                elif len(teammates) == 0:
+                    teammates_info.append(member)
+            date_info['teammates'] = teammates_info
+            voting_results.append(date_info)
         return render_template('assessment_users.html', title='Оценка',
-                               access=get_access(current_user), team_id=team_id,
+                               access=get_access(current_user), team_id=team_id, voting_results=voting_results,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
     else:
         team_members = [(member.user_id,

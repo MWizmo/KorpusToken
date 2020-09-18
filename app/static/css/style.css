@@ -582,3 +582,17 @@ font-family: 'Share Tech Mono', monospace;
 .token_block{
     margin-right:10%;
 }
+
+.vote_business_block{
+    width:33%;
+}
+
+.vote_block_business{
+    display:flex;
+    flex-direction:row;
+    margin-bottom:20px;
+}
+
+.weekly_vote_block{
+    margin:1%;
+}

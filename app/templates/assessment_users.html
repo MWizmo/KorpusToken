@@ -89,31 +89,46 @@
                 </div>
             {% endif %}
             {% if axis.id == 2 %}
-                <div class="vote_block">
-                    <table class="vote_table">
-                        {% if team_title %}
-                            <tr><td><h3>Команда «{{team_title}}»</h3></td></tr>
-                        {% endif %}
-                        <tr><td><h3>Ось {{axis.name}}</h3></td></tr>
-                        <tr><td><br></td></tr>
-                        {% for c in criterions %}
-                            <tr><td colspan="3"><h4 class="bottom_border">{{c.name}}</h4></td></tr>
+                {% if team_title %}
+                    <h3>Команда «{{team_title}}»</h3>
+                {% endif %}
+                <h3>Ось {{axis.name}}</h3><br>
+                <div class="vote_block_business">
+                    {% for c in criterions %}
+                    <div class="vote_business_block">
+                        <table>
+                            <tr><td colspan="3"><h4><u>{{c.name}}</u></h4></td></tr>
                             {% for member in team_members %}
-                                <!div class="horiz"-->
                                 <tr>
-                                <td><b>{{member[1]}} {{member[2]}}</b></td>
+                                    <td><b>{{member[1]}} {{member[2]}}</b></td>
                                     <td>Да<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},1)"></td>
                                     <td>Нет<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"></td>
-                                <!--/div-->
-                                    </tr>
+                                </tr>
                             {% endfor %}
-
-                        <tr><td><br><br></td></tr>
+                        </table>
+                    </div>
                     {% endfor %}
-                    </table>
-                    <iframe class="vote_frame" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSHDRFM75vGrzKFVr1lRwJcqgw4Wir0isx8HEB0n1kCapzluAoB_0Q9Mhir2xOOkyHIqwrzKsvToNFL/pubhtml?widget=true&amp;headers=false"></iframe>
+                    <!--iframe class="vote_frame" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSHDRFM75vGrzKFVr1lRwJcqgw4Wir0isx8HEB0n1kCapzluAoB_0Q9Mhir2xOOkyHIqwrzKsvToNFL/pubhtml?widget=true&amp;headers=false"></iframe-->
                 </div>
-                    {% endif %}
+                <div class="vote_block_business">
+                {% for res in voting_results %}
+                    <div class="weekly_vote_block">
+                        <h4><u>Дата: {{res['date']}}</u></h4>
+                        <ul>
+                            {% for mark in res['marks'] %}
+                                <li>{{mark['criterion']}}: {{mark['mark']}}</li>
+                            {% endfor %}
+                        </ul><br>
+                        <h4><u>Оценивались:</u></h4>
+                        <ul>
+                            {% for member in res['teammates'] %}
+                                <li>{{member[1]}} {{member[2]}}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
         <button class="nav__link finish_vote_btn" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
     </div>
 </div>
