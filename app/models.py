@@ -45,8 +45,11 @@ class User(UserMixin, db.Model):
                 teams = Membership.query.filter_by(user_id=current_user_id).all()
                 for t in teams:
                     team = Teams.query.filter_by(id=t.team_id).first()
-                    if team.type and team.type == 1:
-                        return True
+                    try:
+                        if team.type and team.type == 1:
+                            return True
+                    except AttributeError:
+                        continue
                 #return True
         return False
 
