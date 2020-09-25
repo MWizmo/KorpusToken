@@ -593,19 +593,21 @@ def delete_member():
 @login_required
 def assessment():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)
+            or User.check_teamlead(current_user.id)):
         log('Попытка просмотра страницы с оценкой (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
 
     log('Просмотр страницы с оценкой')
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
-        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id)) > 1: # and (Axis.is_available(1)
+        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id) + User.check_teamlead(
+                current_user.id)) > 1:  # and (Axis.is_available(1)
         #                                                                                         or Axis.is_available(
         #         2) or Axis.is_available(3)):
         return redirect(url_for('assessment_axis'))
 
-    if (User.check_expert(current_user.id) or User.check_tracker(current_user.id)):# and Axis.is_available(2):
+    if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(current_user.id):# and Axis.is_available(2):
         return redirect(url_for('assessment_team', axis_id=2))
 
     if User.check_top_cadet(current_user.id):# and Axis.is_available(1):
@@ -622,7 +624,7 @@ def assessment():
 @login_required
 def assessment_axis():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
         log('Попытка просмотра страницы с выбором оси для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
@@ -636,7 +638,7 @@ def assessment_axis():
 @login_required
 def assessment_team():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
         log('Попытка просмотра страницы с выбором команды для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
@@ -668,7 +670,7 @@ def assessment_team():
 @login_required
 def assessment_users():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
         log('Попытка просмотра страницы с оценкой пользователей (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
@@ -914,7 +916,7 @@ def voting_progress():
     assessment = VotingTable.query.filter_by(status='Active').first()
     if assessment:
         top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
-        trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
+        trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()+UserStatuses.query.filter_by(status_id=4).all()]
         atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
         teams_for_voting = len(Teams.query.filter_by(type=1).all())
         relation_results = list()
