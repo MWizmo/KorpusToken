@@ -77,7 +77,7 @@
                             </li>
                         {% endif %}
 
-                        {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.top_cadet or access.responsibilities.chieftain or access.user_roles.teamlead.exist) and (access.assessment_opened) %}
+                        {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.top_cadet or access.responsibilities.chieftain or access.responsibilities.teamlead) and (access.assessment_opened) %}
                             <li><a class="nav__link" href="{{ url_for('assessment') }}">Оценка</a></li>
                         {% endif %}
 

@@ -9,7 +9,7 @@
             {% if access.responsibilities.top_cadet%}
                 <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
             {% endif %}
-            {% if (access.responsibilities.expert or access.responsibilities.tracker or access.user_roles.teamlead.exist)%}
+            {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.teamlead)%}
                 <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
             {% endif %}
             {% if access.responsibilities.chieftain %}
