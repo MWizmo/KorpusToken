@@ -18,7 +18,8 @@
                     <tr><td><h3>Ось {{axis.name}}</h3></td></tr>
                         <tr><td><br></td></tr>
                     {% for c in criterions %}
-                        <tr ><td colspan="3"><h4 class="bottom_border">{{c.name}}</h4></td>
+                        <tr ><td colspan="3"><h4 class="bottom_border">{{c.name}} ({{questions[loop.index0].text}})</h4></td>
+
                             <td><h4 class="bottom_border">Ответы из анкеты</h4></td>
                         </tr>
                         {% for member in team_members %}

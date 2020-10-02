@@ -702,7 +702,7 @@ def assessment_users():
                 else:
                     answers[q.id].append('Нет ответа')
         return render_template('assessment_users.html', title='Оценка', answers=answers,
-                               access=get_access(current_user),
+                               access=get_access(current_user), questions=questions,
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
     elif axis_id == '2':
         team_members = [(member.user_id,
