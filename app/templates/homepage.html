@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="intro">
+<div class="cards_flex_container">
+        <a href="/assessment_page" class="card_container" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);">
+            <img class="menu_image" src="/static/images/assessment.png">
+            <p class="card_title">Оценка вклада</p>
+        </a>
+        <a href="/blockchain" class="card_container" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
+            <img class="menu_image" src="/static/images/blockchain.png">
+            <p class="card_title">Блокчейн</p>
+        </a>
+        <a href="" class="card_container" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
+            <img class="menu_image" src="/static/images/profile.png">
+            <p class="card_title">Профиль</p>
+        </a>
+        <a href="/community" class="card_container" onmouseover="enlarge_block(14);" id="block14" onmouseleave="reduce_block(14);">
+            <img class="menu_image" src="/static/images/community.png">
+            <p class="card_title">Сообщество</p>
+        </a>
+    </div>
+<!--div class="intro">
 	<div class="container">
 	    <h2 class="intro_title">Добро пожаловать в KorpusToken, {{ user.name }}!</h2>
 	</div>
@@ -35,5 +53,5 @@
 		</table>
 	</div>
 	{% endif %}
-
+-->
 {% endblock %}

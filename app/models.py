@@ -29,6 +29,10 @@ class User(UserMixin, db.Model):
                 return True
         return False
 
+    @property
+    def is_admin(self):
+        return User.check_admin(self.id)
+
     @staticmethod
     def check_teamlead(current_user_id):
         statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()

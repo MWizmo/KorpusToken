@@ -4,7 +4,7 @@
 <div class="container">
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
-        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td><td>Действия</td></tr>
+        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>
         </thead>
         <tbody>
             {% for user in users %}
@@ -19,7 +19,10 @@
                     Нет
                     {% endif %}
                 </td>
-                <td><a class="nav__link" style="text-transform: uppercase;" href="/delete_user?uid={{user[3]}}" onclick ="return confirm('Удалить пользователя?');">Удалить</a></td></tr>
+                {% if current_user.is_admin %}
+                <td><a class="nav__link" style="text-transform: uppercase;" href="/delete_user?uid={{user[3]}}" onclick ="return confirm('Удалить пользователя?');">Удалить</a></td>
+                {% endif %}
+            </tr>
             {% endfor %}
         </tbody>
     </table>

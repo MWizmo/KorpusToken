@@ -4,14 +4,14 @@
 <div class="container">
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
-            <tr><td>Название команды</td><td>Тип команды</td><td>Действия</td></tr>
+            <tr><td>Название команды</td><td>Тип команды</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>
         </thead>
         <tbody>
             {% for team in teams %}
-                <tr><td>{{team.name}}</td><td>{{team.type}}</td><td><a class="nav__link" href="/delete_team?tid={{team.id}}">Удалить</a></td></tr>
+                <tr><td>{{team.name}}</td><td>{{team.type}}</td>{% if current_user.is_admin %}<td><a class="nav__link" href="/delete_team?tid={{team.id}}">Удалить</a></td>{% endif %}</tr>
             {% endfor %}
             <tr><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
-            <tr>
+            {% if current_user.is_admin %}<tr>
                 <form  action="" method="post" class="form">
                     {{ form.hidden_tag() }}
                     {{ form.csrf_token() }}
@@ -19,7 +19,7 @@
                     <td>{{form.type}}</td>
                     <td>{{form.submit(class_='submit')}}</td>
                 </form>
-            </tr>
+            </tr>{% endif %}
         </tbody>
     </table>
 </div>

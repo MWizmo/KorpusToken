@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,9 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu_style.css') }}">
-    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     {% block scripts %} {% endblock %}
     {% if title %}
     <title> {{ title }} </title>
@@ -15,84 +16,50 @@
     {% endif %}
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="header__inner">
-                <div class="logo"><a href="{{ url_for('home') }}"><img class="logo_gif" src="./static/gif/logo.gif"></a></div>
-                <span class="user_login"> {{ current_user.login }} </span>
-                <nav class="nav">
-                    <ul class="menu">
-                    {% if current_user.is_anonymous %}
-                        <li><a class="nav__link" href="{{ url_for('login') }}">Войти</a></li>
-                        <li><a class="nav__link" href="{{ url_for('signup') }}">Регистрация</a></li>
-                    {% else %}
-<!--                        <li><a class="nav__link" href="{{ url_for('home') }}">На главную</a></li>-->
-                        {% if access.responsibilities.admin or access.responsibilities.chieftain %}
-                            <li><a class="nav__link" href=#>Аналитика</a>
-                                <ul class="submenu">
-                                    {% if access.responsibilities.admin %}
-                                        <li><a class="nav__link" href="{{ url_for('questionnaire_progress') }}">Анкетирование</a></li>
-                                        <li><a class="nav__link" href="{{ url_for('voting_progress') }}">Прогресс оценки</a></li>
-                                    {% endif %}
-                                    <li><a class="nav__link" href="{{ url_for('log_page') }}">Логи</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-                        {% if access.responsibilities.can_be_marked and access.questionnaire_opened %}
-                            <li><a class="nav__link" href=#>Анкеты</a>
-                                <ul class="submenu">
-                                    <li><a class="nav__link" href="{{ url_for('questionnaire_self') }}">Личная анкета</a></li>
-                                    {% if access.team %}
-                                        <li><a class="nav__link" href="{{ url_for('questionnaire_team') }}">Командная анкета</a></li>
-                                    {% endif %}
-                                    <li><a class="nav__link" href="{{ url_for('choose_top_cadets') }}">Выбрать курсантов для оценки по оси отношений</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-
-                        {% if access.responsibilities.admin %}
-                            <li><a class="nav__link" href=#>Информация</a>
-                                <ul class="submenu">
-                                    <li><a class="nav__link" href="{{ url_for('users_list') }}">Пользователи</a></li>
-                                    <li><a class="nav__link" href="{{ url_for('teams_list') }}">Текущие команды</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-
-                        {% if access.responsibilities.admin or access.responsibilities.chieftain or access.user_roles.teamlead.exist %}
-                            <li><a class="nav__link" href=#>Управление</a>
-                                <ul class="submenu">
-                                    {% if access.responsibilities.admin %}
-                                        <li><a class="nav__link" href="{{ url_for('accounting') }}">Korpus Бухгалтерия</a></li>
-                                        <li><a class="nav__link" href="{{ url_for('question_adding') }}">Конструктор вопросов</a></li>
-                                        <li><a class="nav__link" href="{{ url_for('voting_progress') }}">Прогресс оценки</a></li>
-                                     {% endif %}
-                                    {% if access.responsibilities.admin or access.user_roles.teamlead.exist %}
-                                            <li><a class="nav__link" href="{{ url_for('teams_crew') }}">Составы команд</a></li>
-                                    {% endif %}
-                                    {% if access.responsibilities.admin or access.responsibilities.chieftain %}
-                                            <li><a class="nav__link" href="{{ url_for('manage_statuses') }}">Управление ролями</a></li>
-                                    {% endif %}
-                                </ul>
-                            </li>
-                        {% endif %}
-
-                        {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.top_cadet or access.responsibilities.chieftain or access.responsibilities.teamlead) and (access.assessment_opened) %}
-                            <li><a class="nav__link" href="{{ url_for('assessment') }}">Оценка</a></li>
-                        {% endif %}
-
-                        <li>
-                            <a class="nav__link" href="{{ url_for('assessment_results') }}">Результаты оценки</a>
-                        </li>
-
-                        <li><a class="nav__link" href="{{ url_for('logout') }}">Выйти</a></li>
-                    {% endif %}
-                    </ul>
-                </nav>
+<nav class="home-nav">
+    <div class="header-container">
+        <a href="/" class="logo_href">
+            <div class="home_header_logo_block">
+                <img class="logo_img" src="{{ url_for('static', filename='images/logo_white.png') }}">
             </div>
+        </a>
+        {% if current_user.is_authenticated %}
+        <div class="profile_nav_div">
+            {% if current_user.is_admin %}
+            <a href="" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(0);" id="block0" onmouseleave="reduce_block(0);">
+                <img class="header_profile_img"
+                     src="{{ url_for('static', filename='images/admin.png') }}">
+                <span>Admin</span>
+            </a>
+            {% endif %}
+            <a href="/assessment_page" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(1);" id="block1" onmouseleave="reduce_block(1);">
+                <img class="header_profile_img"
+                     src="{{ url_for('static', filename='images/assessment.png') }}">
+                <span>Оценка вклада</span>
+            </a>
+            <a href="" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(2);" id="block2" onmouseleave="reduce_block(2);">
+                <img class="header_profile_img"
+                     src="{{ url_for('static', filename='images/blockchain.png') }}">
+                <span>Блокчейн</span>
+            </a>
+            <a href="" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(3);" id="block3" onmouseleave="reduce_block(3);">
+                <img class="header_profile_img"
+                     src="{{ url_for('static', filename='images/profile.png') }}">
+                <span>Профиль</span>
+            </a>
+            <a href="/logout" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(4);" id="block4" onmouseleave="reduce_block(4);">
+                <img class="header_profile_img"
+                     src="{{ url_for('static', filename='images/icons8-open-door-50.png') }}">
+                <span>Выход</span>
+            </a>
         </div>
-
-    <header>
+        {% endif %}
+    </div>
+</nav>
+<div style="padding-top: 10vh;">
     {% block content %} {% endblock %}
+</div>
+<script src="{{url_for('static', filename='js/move.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/header.js')}}"></script>
 </body>
 </html>

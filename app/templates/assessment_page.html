@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="small_card_container">
+    <div class="small_card_flex">
+        <a href="/voting_progress" class="small_card" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);">
+            <img class="small_card_img" src="/static/images/progress.png">
+            <p class="small_card_text">Прогресс оценки</p>
+        </a>
+        <a href="/assessment" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
+            <img class="small_card_img" src="/static/images/go_to_assessment.png">
+            <p class="small_card_text">Участвовать в оценке</p>
+        </a>
+        <a href="" class="small_card" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
+            <img class="small_card_img" src="/static/images/results.png">
+            <p class="small_card_text">Результаты оценок</p>
+        </a>
+        {% if current_user.is_admin %}
+        <a href="/questionnaire_progress" class="small_card" onmouseover="enlarge_block(14);" id="block14" onmouseleave="reduce_block(14);">
+            <img class="small_card_img" src="/static/images/assessment_manage.png">
+            <p class="small_card_text">Управление оценкой</p>
+        </a>
+        {% endif %}
+    </div>
+
+    </div>
+
+{% endblock %}

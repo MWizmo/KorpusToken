@@ -589,6 +589,31 @@ def delete_member():
     return redirect('edit_team?tid=' + str(tid))
 
 
+@app.route('/assessment_page')
+@login_required
+def assessment_page():
+    return render_template('assessment_page.html', title='Оценка вклада')
+
+
+@app.route('/blockchain')
+@login_required
+def blockchain():
+    return render_template('blockchain.html', title='Блокчейн')
+
+
+@app.route('/change_to_eth')
+@login_required
+def change_to_eth():
+    return render_template('change_to_eth.html', title='Обменять на eth')
+
+
+@app.route('/community')
+@login_required
+def community():
+    teams = Membership.query.filter_by(user_id=current_user.id).all()
+    return render_template('community.html', title='Сообщество', team_id=teams[0].team_id if teams else None)
+
+
 @app.route('/assessment', methods=['GET', 'POST'])
 @login_required
 def assessment():
