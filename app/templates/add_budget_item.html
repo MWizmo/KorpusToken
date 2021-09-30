@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="signup">
+        <h2> Добавить статью в бюджет </h2>
+        <form action="" method="post">
+            <p>
+                <span class="main_text">Статья расхода</span> <br>
+                <input name="item">
+            </p>
+            <p>
+                <span class="main_text">Стоимость</span> <br>
+                <input name="summa">
+            </p>
+            <div class="black_buttons_block" style="margin-left:0;">
+        <a class="black_button" href="">Подтвердить</a>
+        <a class="black_button" href="">Отмена</a>
+    </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

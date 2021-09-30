@@ -39,7 +39,7 @@ body{
     padding-top: 5vh;
 	display: block;
 	width: 100%;
-	max-width: 1200px;
+	/*max-width: 1200px;*/
 	margin: 0 auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -833,7 +833,6 @@ margin-bottom: 10px;
 .info_card_text{
     width: 100%;
     text-align: center;
-
 }
 
 .green{
@@ -878,4 +877,38 @@ font-size: 1vw;
     background: white;
     padding: 20px 10px;
     cursor: pointer;
+}
+
+.eth_text{
+    width: 100%;
+    text-align: center;
+    font-size: 1.5vw;
+}
+
+.purple{
+    color: #7245F2;
+}
+
+.black_buttons_block{
+    width: 80%;
+    margin-left:10%;
+    margin-top: 50px;
+    display:flex;
+    flex-direction: row;
+}
+
+.black_button{
+    border-radius: 15px;
+    font-size: 1vw;
+    background: black;
+    color: white;
+    padding: 10px 10px;
+    cursor: pointer;
+    margin-right:50px;
+    text-decoration:none;
+}
+
+.black_button:hover{
+    color:white;
+    text-decoration:none;
 }

@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<div class="small_card_container">
+    <div class="small_card_flex" style="flex-direction: column;">
+        <p class="eth_text">Адрес вашего текущего кошелька ethereum</p>
+        <p class="eth_text purple">#dfoghsdifusldfgknlsdkfgbsldfg</p>
+        <p class="eth_text">Адрес вашего нового кошелька ethereum</p>
+        <div class="dark_block" style="width: 60%; margin-left: 20%;">
+            <input class="eth_input" style="margin-top: 2vh;">
+        </div>
+        <button class="eth_button" style="width: 50%; margin-left: 25%;">Подтвердить</button>
+    </div>
+</div>
 
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="small_card_container">
+    <div class="small_card_flex">
+        <a href="/all_budget_records" class="small_card" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);" target="_blank">
+            <img class="small_card_img" src="/static/images/transactions.png">
+            <p class="small_card_text">Все записи</p>
+        </a>
+        <a href="/current_budget" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
+            <img class="small_card_img" src="/static/images/budget.png">
+            <p class="small_card_text">Текущий бюджет</p>
+        </a>
+    </div>
+
+    </div>
+
+{% endblock %}

@@ -607,6 +607,61 @@ def change_to_eth():
     return render_template('change_to_eth.html', title='Обменять на eth')
 
 
+@app.route('/change_address')
+@login_required
+def change_address():
+    return render_template('change_address.html', title='Изменить адрес кошелька')
+
+
+@app.route('/transfer_ktd')
+@login_required
+def transfer_ktd():
+    return render_template('transfer_ktd.html', title='Перевести токены вклада')
+
+
+@app.route('/manage_ktd')
+@login_required
+def manage_ktd():
+    return render_template('manage_ktd.html', title='Доступ к токенам вклада')
+
+
+@app.route('/manage_kti')
+@login_required
+def manage_kti():
+    return render_template('manage_kti.html', title='Доступ к токенам инвестиций')
+
+
+@app.route('/budget')
+@login_required
+def budget():
+    return render_template('budget.html', title='Бюджет')
+
+
+@app.route('/add_budget_item')
+@login_required
+def add_budget_item():
+    return render_template('add_budget_item.html', title='Добавить статью')
+
+
+@app.route('/write_to_blockchain')
+@login_required
+def write_to_blockchain():
+    return render_template('write_to_blockchain.html', title='Записать в блокчейн')
+
+
+@app.route('/add_to_blockchain')
+@login_required
+def add_to_blockchain():
+    return render_template('add_to_blockchain.html', title='Записать в блокчейн')
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    form = SignupForm()
+    return render_template('profile.html', title='Профиль', form=form, script='signup.js', profile=True)
+
+
 @app.route('/community')
 @login_required
 def community():

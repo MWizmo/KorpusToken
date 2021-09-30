@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="small_card_container">
+    <div class="small_card_flex" style="width: 70%; margin-left:15%;">
+      <div style="min-width:33%;">
+        <div class="info_card">
+                <div class="info_card_text_block">
+                    <p class="info_card_text"><b>Баланс эфириума в системе:</b></p>
+                    <p class="info_card_text blue">123123</p>
+                </div>
+            </div><br><br>
+        <div class="info_card">
+                <div class="info_card_text_block">
+                    <p class="info_card_text"><b>Баланс токенов:</b></p>
+                    <p class="info_card_text green">123123</p>
+                </div>
+            </div>
+      </div>
+
+
+        <div class="input_eth_container" style="justify-content: space-between;">
+            <div class="dark_block">
+                <p class="info_card_text"><b>Кто получит доступ?<br>(введите адрес кошелька получателя)</b></p>
+                <input class="eth_input">
+            </div>
+          <div class="dark_block" style="margin-bottom: 0;">
+                <p class="info_card_text"><b>Лимит</b></p>
+                <input class="eth_input">
+            </div>
+        </div>
+    </div>
+  <button class="eth_button" style="width: 40%; margin-left:30%; margin-top: 5vh;">Подтвердить</button>
+</div>
+
+
+
+{% endblock %}

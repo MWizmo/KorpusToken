@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Все записи</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="/static/admin/bootstrap/bootstrap3/swatch/default/bootstrap.min.css?v=3.3.5" rel="stylesheet">
+    <link href="/static/admin/bootstrap/bootstrap3/css/bootstrap-theme.min.css?v=3.3.5" rel="stylesheet">
+    <link href="/static/admin/admin/css/bootstrap3/admin.css?v=1.1.1" rel="stylesheet">
+    <link href="/static/admin/admin/css/bootstrap3/submenu.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 4px;
+        }
+    </style>
+    <link rel="shortcut icon" href="/static/images/favicon.jpg" type="image/jpg">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/menu_style.css">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+<nav class="home-nav">
+                <div class="header-container">
+                    <a href="/" class="logo_href">
+                        <div class="home_header_logo_block">
+                            <img class="logo_img" src="/static/images/logo_white.png">
+                        </div>
+                    </a>
+
+                    <div class="profile_nav_div">
+                        {% if current_user.is_admin %}
+                        <a href="" class="header_profile_block header_before_load_margin"
+                           onmouseover="enlarge_block(0);" id="block0" onmouseleave="reduce_block(0);">
+                            <img class="header_profile_img"
+                                 src="/static/images/admin.png">
+                            <span>Admin</span>
+                        </a>
+                        {% endif %}
+                        <a href="/assessment_page" class="header_profile_block header_before_load_margin"
+                           onmouseover="enlarge_block(1);" id="block1" onmouseleave="reduce_block(1);">
+                            <img class="header_profile_img"
+                                 src="/static/images/assessment.png">
+                            <span>Оценка вклада</span>
+                        </a>
+                        <a href="/blockchain" class="header_profile_block header_before_load_margin"
+                           onmouseover="enlarge_block(2);" id="block2" onmouseleave="reduce_block(2);">
+                            <img class="header_profile_img"
+                                 src="/static/images/blockchain.png">
+                            <span>Блокчейн</span>
+                        </a>
+                        <a href="/profile" class="header_profile_block header_before_load_margin"
+                           onmouseover="enlarge_block(3);" id="block3" onmouseleave="reduce_block(3);">
+                            <img class="header_profile_img"
+                                 src="/static/images/profile.png">
+                            <span>Профиль</span>
+                        </a>
+                        <a href="/logout" class="header_profile_block header_before_load_margin"
+                           onmouseover="enlarge_block(4);" id="block4" onmouseleave="reduce_block(4);">
+                            <img class="header_profile_img"
+                                 src="/static/images/icons8-open-door-50.png">
+                            <span>Выход</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+<div class="container" style="margin:0; padding:0;width:100%;padding-top:10vh;">
+
+    <!--ul class="nav nav-tabs actions-nav">
+        <li class="active">
+            <a href="javascript:void(0)">List (1)</a>
+        </li>
+    </ul-->
+    <div class="table-responsive" style="margin-top:5vh; width: 80%; margin-left: 10%;">
+        <table class="table table-striped table-bordered table-hover model-list" style="width:100%;">
+            <thead>
+            <tr>
+                <th class="col-md-1">&nbsp;</th>
+                <th class="column-header col-type">
+                    <a href="/transactions/?sort=0" title="Sort by Дата">Дата</a>
+                </th>
+                <th class="column-header col-summa">
+                    <a href="/transactions/?sort=1" title="Sort by Сумма">Сумма</a>
+                </th>
+                <th class="column-header col-receiver">
+                    <a href="/transactions/?sort=2" title="Sort by Кто добавил">Кто добавил</a>
+                </th>
+                <th class="column-header col-date">
+                    <a href="/transactions/?sort=3" title="Sort by Статья">Статья</a>
+                </th>
+            </tr>
+            </thead>
+            {% for row in data %}
+            <tr>
+                <td class="list-buttons-column"></td>
+                <td class="col-type">{{row.date}}</td>
+                <td class="col-summa">{{row.summa}}</td>
+                <td class="col-receiver">{{row.who_added}}</td>
+                <td class="col-date">{{row.item}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<script src="/static/admin/vendor/jquery.min.js?v=3.3.1" type="text/javascript"></script>
+<script src="/static/admin/bootstrap/bootstrap3/js/bootstrap.min.js?v=3.3.5" type="text/javascript"></script>
+<script src="/static/admin/vendor/moment.min.js?v=2.22.2" type="text/javascript"></script>
+<script src="/static/admin/vendor/select2/select2.min.js?v=3.5.2" type="text/javascript"></script>
+<script src="/static/admin/admin/js/helpers.js?v=1.0.0" type="text/javascript"></script>
+<script src="/static/admin/vendor/bootstrap-daterangepicker/daterangepicker.js?v=1.3.22"></script>
+<script src="/static/admin/admin/js/form.js?v=1.0.1"></script>
+<script src="/static/admin/admin/js/filters.js?v=1.0.0"></script>
+</body>
+</html>

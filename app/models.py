@@ -406,3 +406,20 @@ class WeeklyVotingMembers(db.Model):
     cadet_id = db.Column(db.Integer)
     team_id = db.Column(db.Integer)
     date = db.Column(db.Date)
+
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(32))
+    summa = db.Column(db.Float)
+    receiver = db.Column(db.String(128))
+    date = db.Column(db.Date)
+    status = db.Column(db.String(32))
+
+
+class BudgetRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date)
+    item = db.Column(db.String(128))
+    summa = db.Column(db.Float)
+    who_added = db.Column(db.String(128))

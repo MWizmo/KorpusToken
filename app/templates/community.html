@@ -2,6 +2,12 @@
 {% block content %}
 <div class="small_card_container">
     <div class="small_card_flex">
+        {% if current_user.is_admin %}
+        <a href="/manage_statuses" class="small_card" onmouseover="enlarge_block(10);" id="block10" onmouseleave="reduce_block(10);">
+            <img class="small_card_img" src="/static/images/assessment_manage.png">
+            <p class="small_card_text">Управление ролями</p>
+        </a>
+        {% endif %}
         <a href="/users_list" class="small_card" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);">
             <img class="small_card_img" src="/static/images/all_members.png">
             <p class="small_card_text">Все участники</p>

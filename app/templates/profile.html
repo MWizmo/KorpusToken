@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
+<script src="{{url_for('static', filename='js/signup.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.maskedinput.min.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="signup">
+        <h2> Профиль </h2>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token() }}
+            <p>
+                <span class="main_text">{{ form.email.label }}</span> <br>
+                <input id="email" name="email" size="32" value="{{current_user.email}}">
+                {% for error in form.email.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.login.label }}</span> <br>
+                <input id="login" name="login" size="32" value="{{current_user.login}}">
+                {% for error in form.login.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.name.label }}</span> <br>
+                <input id="name" name="name" size="32" value="{{current_user.name}}">
+                {% for error in form.name.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.surname.label }} </span><br>
+                <input id="surname" name="surname" size="32" value="{{current_user.surname}}">
+                {% for error in form.surname.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.tg_nickname.label }} </span><br>
+                <input id="tg_nickname" name="tg_nickname" size="32" value="{{current_user.tg_nickname}}">
+                {% for error in form.tg_nickname.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.courses.label }} </span><br>
+                <input id="cources" name="cources" size="64" value="{{current_user.cources}}">
+                {% for error in form.courses.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.participate.label }}</span>
+                {{ form.participate(class_="submit", id_='participate') }} <br>
+                <div id="teams" style="display: none;">
+                    {{ form.team(class_="submit_team") }}
+                </div>
+            </p>
+            <p>
+                <span class="main_text">{{ form.birthday.label }} </span><br>
+                {{ form.birthday(id="date") }}
+                {% for error in form.birthday.errors %}
+                <span style="color: red;"> {{error}} </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.sex.label }}</span> <br>
+                {{ form.sex(class_="submit_sex") }}
+            </p>
+            <!--p>
+                <span class="main_text">{{ form.education.label }} </span><br>
+                {{ form.education }}
+            </p-->
+            <p>
+                <span class="main_text">{{ form.work_exp.label }}</span> <br>
+                {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
+            </p>
+            <p>
+                <span class="main_text">{{ form.vk_url.label }}</span> <br>
+                {{ form.vk_url }}
+            </p>
+            <p>
+                <span class="main_text">{{ form.fb_url.label }} </span><br>
+                {{ form.fb_url }}<br>
+                <label>если нет, оставить -</label>
+            </p>
+            <p>
+                <span class="main_text">{{ form.inst_url.label }}</span> <br>
+                {{ form.inst_url }}<br>
+                <label>если нет, оставить -</label>
+            </p>
+            <p>
+                {{ form.submit(class_="submit") }}
+            </p>
+        </form>
+    </div>
+</div>
+<script>
+$( document ).ready(function() {
+    $("#date").mask("9999-99-99");
+});
+
+    $('#participate').click(function(){
+        $('#teams').slideToggle(300);
+    });
+</script>
+{% endblock %}
