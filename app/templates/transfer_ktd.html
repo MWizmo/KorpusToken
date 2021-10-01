@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="small_card_container">
+<form class="small_card_container" method="post">
+    {{ form.hidden_tag() }}
     <div class="small_card_flex" style="width: 70%; margin-left:15%;">
       <div style="min-width:33%;">
         <div class="info_card">
@@ -21,16 +22,16 @@
         <div class="input_eth_container" style="justify-content: space-between;">
             <div class="dark_block">
                 <p class="info_card_text"><b>Сколько токенов перевести?</b></p>
-                <input class="eth_input">
+                {{ form.num(class_='eth_input') }}
             </div>
           <div class="dark_block" style="margin-bottom: 0;">
                 <p class="info_card_text"><b>Адрес получателя</b></p>
-                <input class="eth_input">
+              {{ form.address(class_='eth_input') }}
             </div>
         </div>
     </div>
-  <button class="eth_button" style="width: 40%; margin-left:30%; margin-top: 5vh;">Подтвердить</button>
-</div>
+  <button class="eth_button" style="width: 40%; margin-left:30%; margin-top: 5vh;" type="submit">Подтвердить</button>
+</form>
 
 
 

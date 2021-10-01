@@ -76,6 +76,7 @@
             </p>
             <p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
+                <input id="date" name="date" size="64" value="{{current_user.cources}}">
                 {{ form.birthday(id="date") }}
                 {% for error in form.birthday.errors %}
                 <span style="color: red;"> {{error}} </span>

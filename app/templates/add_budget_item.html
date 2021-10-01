@@ -5,17 +5,18 @@
     <div class="signup">
         <h2> Добавить статью в бюджет </h2>
         <form action="" method="post">
+            {{form.hidden_tag()}}
             <p>
                 <span class="main_text">Статья расхода</span> <br>
-                <input name="item">
+                {{form.item()}}
             </p>
             <p>
                 <span class="main_text">Стоимость</span> <br>
-                <input name="summa">
+                {{form.cost()}}
             </p>
             <div class="black_buttons_block" style="margin-left:0;">
-        <a class="black_button" href="">Подтвердить</a>
-        <a class="black_button" href="">Отмена</a>
+        <button class="black_button"  type="submit">Подтвердить</button>
+        <button class="black_button" type="button" onclick="window.location.href='/current_budget';">Отмена</button>
     </div>
         </form>
     </div>

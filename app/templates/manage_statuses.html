@@ -8,10 +8,10 @@
 
 {% block content %}
 
-<div class="container" ng-app="app" ng-controller="ctrl">
+<div class="container" ng-app="app" ng-controller="ctrl" style="margin-left: 10%;" ng-cloak>
     <h2>Управление ролями пользователей</h2>
     <br>
-    <select ng-model="selected" ng-change="choose_user();">
+    <select ng-model="selected" ng-change="choose_user();" >
         <option vlue="0"></option>
         {% for user in users %}
             <option value="{{user[0]}}">{{user[1]}}</option>

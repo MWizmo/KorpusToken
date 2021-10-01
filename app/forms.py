@@ -113,3 +113,13 @@ class ChooseTeamForm(FlaskForm):
 class StartAssessmentForm(FlaskForm):
     month = StringField('Укажите, за какой период проводится оценка (например, "Март" или "Март-апрель")', validators=[DataRequired()])
     submit = SubmitField('Начать оценку',render_kw={"class": "nav__link border"})
+
+
+class TransferKtdForm(FlaskForm):
+    num = StringField(validators=[DataRequired()])
+    address = StringField(validators=[DataRequired()])
+
+
+class AddBudgetItemForm(FlaskForm):
+    item = StringField(validators=[DataRequired()])
+    cost = StringField(validators=[DataRequired()])
