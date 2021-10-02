@@ -667,10 +667,22 @@ def add_to_blockchain():
     return render_template('add_to_blockchain.html', title='Записать в блокчейн')
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    form = SignupForm()
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.surname = form.surname.data
+        current_user.tg_nickname = form.tg_nickname.data
+        current_user.birthday = form.birthday.data
+        current_user.education = form.education.data
+        current_user.work_exp = form.work_exp.data
+        current_user.vk_url = form.vk_url.data
+        current_user.fb_url = form.fb_url.data
+        current_user.inst_url = form.inst_url.data
+        current_user.courses = form.courses.data
+        db.session.commit()
     return render_template('profile.html', title='Профиль', form=form, script='signup.js', profile=True)
 
 

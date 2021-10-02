@@ -54,6 +54,22 @@ class SignupForm(FlaskForm):
             raise ValidationError('Email занят')
 
 
+class ProfileForm(FlaskForm):
+    tg_nickname = StringField('Ник в Telegram:', validators=[DataRequired()])
+    name = StringField('Имя', validators=[DataRequired()])
+    surname = StringField('Фамилия', validators=[DataRequired()])
+    courses = StringField('Пройденные курсы в IT-Korpus:')
+    participate = BooleanField('Я участвую в проекте Корпуса')
+    birthday = DateField('Дата рождения: ', render_kw={"placeholder": "YYYY-MM-DD"})
+    sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
+    vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
+    fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])
+    inst_url = StringField('Ссылка на профиль Инстаграм:', validators=[DataRequired()])
+    work_exp = TextAreaField('Опыт работы: ')
+    education = StringField('Образование: ')
+    submit = SubmitField('Зарегистрироваться')
+
+
 class RestorePassword(FlaskForm):
     login = StringField('Логин в системе:', validators=[DataRequired()])
     password = PasswordField('Новый пароль: ', validators=[DataRequired()])

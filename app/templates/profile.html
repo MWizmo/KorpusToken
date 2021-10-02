@@ -14,24 +14,6 @@
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}
             <p>
-                <span class="main_text">{{ form.email.label }}</span> <br>
-                <input id="email" name="email" size="32" value="{{current_user.email}}">
-                {% for error in form.email.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.login.label }}</span> <br>
-                <input id="login" name="login" size="32" value="{{current_user.login}}">
-                {% for error in form.login.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
                 <span class="main_text">{{ form.name.label }}</span> <br>
                 <input id="name" name="name" size="32" value="{{current_user.name}}">
                 {% for error in form.name.errors %}
@@ -70,14 +52,10 @@
             <p>
                 <span class="main_text">{{ form.participate.label }}</span>
                 {{ form.participate(class_="submit", id_='participate') }} <br>
-                <div id="teams" style="display: none;">
-                    {{ form.team(class_="submit_team") }}
-                </div>
             </p>
             <p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
-                <input id="date" name="date" size="64" value="{{current_user.cources}}">
-                {{ form.birthday(id="date") }}
+                <input id="date" name="birthday" size="64" value="{{current_user.birthday}}">
                 {% for error in form.birthday.errors %}
                 <span style="color: red;"> {{error}} </span>
                 {% endfor %}
@@ -86,30 +64,26 @@
                 <span class="main_text">{{ form.sex.label }}</span> <br>
                 {{ form.sex(class_="submit_sex") }}
             </p>
-            <!--p>
                 <span class="main_text">{{ form.education.label }} </span><br>
-                {{ form.education }}
-            </p-->
+                <input id="education" name="education" size="64" value="{{current_user.education}}">
             <p>
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
                 {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
             </p>
             <p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
-                {{ form.vk_url }}
+                <input id="vk_url" name="vk_url" size="64" value="{{current_user.vk_url}}">
             </p>
             <p>
                 <span class="main_text">{{ form.fb_url.label }} </span><br>
-                {{ form.fb_url }}<br>
-                <label>если нет, оставить -</label>
+                <input id="fb_url" name="fb_url" size="64" value="{{current_user.fb_url}}">
             </p>
             <p>
                 <span class="main_text">{{ form.inst_url.label }}</span> <br>
-                {{ form.inst_url }}<br>
-                <label>если нет, оставить -</label>
+                <input id="inst_url" name="inst_url" size="64" value="{{current_user.inst_url}}">
             </p>
             <p>
-                {{ form.submit(class_="submit") }}
+                <input name="submit" type="submit" class="_submit"  value="Сохранить">
             </p>
         </form>
     </div>
