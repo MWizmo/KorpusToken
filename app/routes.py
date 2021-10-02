@@ -4,7 +4,7 @@ import threading
 import os
 import csv
 from sqlalchemy import func
-from app import app, db
+from app import app, db, w3
 from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
@@ -14,9 +14,8 @@ from flask import render_template, redirect, url_for, request, jsonify, send_fil
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
     QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm, StartAssessmentForm, \
-    RestorePassword
+    RestorePassword, ChangeAddress
 from flask_login import current_user, login_user, logout_user, login_required
-
 
 def log(action, user_id=None):
     if user_id is None:
@@ -101,6 +100,7 @@ def signup():
         tg = form.tg_nickname.data
         if tg[0] == '@':
             tg = tg[1:]
+        ethAccount = w3.eth.account.create()
         user = User(
             email=form.email.data,
             login=form.login.data,
@@ -111,7 +111,8 @@ def signup():
             work_exp=form.work_exp.data,
             sex=form.sex.data,
             name=form.name.data,
-            surname=form.surname.data)
+            surname=form.surname.data,
+						private_key=ethAccount.privateKey.hex())
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -598,7 +599,11 @@ def assessment_page():
 @app.route('/blockchain')
 @login_required
 def blockchain():
-    return render_template('blockchain.html', title='Блокчейн')
+    ktd_balance = User.get_ktd_balance(current_user.id)
+    ktd_price = User.get_ktd_price(current_user.id)
+
+    return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
+		                      ktd_price=ktd_price)
 
 
 @app.route('/change_to_eth')
@@ -607,10 +612,22 @@ def change_to_eth():
     return render_template('change_to_eth.html', title='Обменять на eth')
 
 
-@app.route('/change_address')
+@app.route('/change_address', methods=['GET', 'POST'])
 @login_required
 def change_address():
-    return render_template('change_address.html', title='Изменить адрес кошелька')
+    form = ChangeAddress()
+
+    user = User.query.filter_by(id=current_user.id).first()
+
+    current_address = user.get_eth_address(current_user_id=current_user.id)
+
+    if form.validate_on_submit():
+      user.private_key = form.new_private_key.data
+      db.session.commit()
+      
+      return redirect(url_for('change_address'))
+      
+    return render_template('change_address.html', title='Изменить адрес кошелька', form=form, current_address=current_address)
 
 
 @app.route('/transfer_ktd')
@@ -1364,3 +1381,7 @@ def confirm_top_cadets():
     log('Выбор топовых кадетов')
     return jsonify({'response': 'ok'})
 
+
+@app.route('/transactions', methods=['GET'])
+def transactions():
+		return render_template('transactions.html', title='Транзакции')

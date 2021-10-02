@@ -113,3 +113,7 @@ class ChooseTeamForm(FlaskForm):
 class StartAssessmentForm(FlaskForm):
     month = StringField('Укажите, за какой период проводится оценка (например, "Март" или "Март-апрель")', validators=[DataRequired()])
     submit = SubmitField('Начать оценку',render_kw={"class": "nav__link border"})
+
+class ChangeAddress(FlaskForm):
+    new_private_key = StringField('Укажите приватный ключ вашего кошелька ethereum', validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%"})

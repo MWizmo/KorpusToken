@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./
+    container_name: korpus-api
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/usr/src/app
+  db:
+    image: mysql
+    container_name: korpus-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 'korpus_password'
+      MYSQL_PASSWORD: 'korpus_password'
+      MYSQL_USER: 'korpus_user'
+      MYSQL_DATABASE: 'korpus_db'
+    volumes:
+      - korpus-data:/var/lib/mysql
+
+volumes:
+  korpus-data:
+    name: korpus-data

@@ -2,7 +2,8 @@
 import datetime
 
 # import jdcal
-from app import db, login
+from app import db, login, w3
+from web3.auto import Web3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -90,6 +91,46 @@ class User(UserMixin, db.Model):
         return False
 
     @staticmethod
+    def get_eth_account(current_user_id):
+      user = User.query.filter_by(id=current_user_id).first()
+      account = w3.eth.account.privateKeyToAccount(user.private_key)
+
+      return account
+
+    @staticmethod
+    def get_eth_address(current_user_id):
+      user = User.query.filter_by(id=current_user_id).first()
+      account = w3.eth.account.privateKeyToAccount(user.private_key)
+
+      return User.get_eth_account(current_user_id).address
+
+    @staticmethod
+    def get_ktd_balance(current_user_id):
+      file = open("app/static/ABI/KTD_ABI.json", "r")
+      KorpusContract = w3.eth.contract(
+        # вводим его адрес и ABI
+        Web3.toChecksumAddress("0x19Fcb1b2286f178C6070Dfb309bB5324Ac8823c9"),
+        abi=file.read()
+      )
+      file.close()
+      
+      return KorpusContract.functions.balanceOf(User.get_eth_address(current_user_id)).call()
+
+    @staticmethod
+    def get_ktd_price(current_user_id):
+      file = open("app/static/ABI/Contract_ABI.json", "r")
+      KorpusContract = w3.eth.contract(
+        # вводим его адрес и ABI
+        Web3.toChecksumAddress("0x47ae9eFf852D74f05FA3cc2F67C4563Ca2600B4C"),
+        abi=file.read()
+      )
+      file.close()
+
+      sellPrice = KorpusContract.functions.sellPrice().call()
+      
+      return sellPrice / 1000000000000000000
+
+    @staticmethod
     def dict_of_responsibilities(current_user_id):
         return dict(admin=User.check_admin(current_user_id), cadet=User.check_cadet(current_user_id),
                     chieftain=User.check_chieftain(current_user_id), teamlead=User.check_teamlead(current_user_id),
@@ -108,7 +149,7 @@ class User(UserMixin, db.Model):
     def __init__(self, email, login, tg_nickname,
                  courses, birthday, education,
                  work_exp, sex, name, surname,
-                 token=None):
+                 private_key, token=None):
         self.name = name
         self.surname = surname
         self.email = email
@@ -119,6 +160,7 @@ class User(UserMixin, db.Model):
         self.education = education
         self.work_exp = work_exp
         self.sex = sex
+        self.private_key = private_key
         self.token = token
 
     def __repr__(self):
@@ -168,6 +210,7 @@ class User(UserMixin, db.Model):
     fb_url = db.Column(db.String(256))
     inst_url = db.Column(db.String(256))
     token = db.Column(db.String(64))
+    private_key = db.Column(db.String(256))
 
 
 class Teams(db.Model):

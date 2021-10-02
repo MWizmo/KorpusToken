@@ -1,15 +1,26 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="small_card_container">
-    <div class="small_card_flex" style="flex-direction: column;">
-        <p class="eth_text">Адрес вашего текущего кошелька ethereum</p>
-        <p class="eth_text purple">#dfoghsdifusldfgknlsdkfgbsldfg</p>
-        <p class="eth_text">Адрес вашего нового кошелька ethereum</p>
-        <div class="dark_block" style="width: 60%; margin-left: 20%;">
-            <input class="eth_input" style="margin-top: 2vh;">
-        </div>
-        <button class="eth_button" style="width: 50%; margin-left: 25%;">Подтвердить</button>
-    </div>
+  <div class="small_card_flex" style="flex-direction: column">
+    <p class="eth_text">Адрес вашего текущего кошелька ethereum</p>
+    <p class="eth_text purple">{{ current_address }}</p>
+    <form action="" method="post" novalidate class="form">
+      {% with messages = get_flashed_messages(category_filter=["restore"]) %} {%
+      if messages %}
+      <p><i>{{ messages[0] }}</i></p>
+      {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+      <p style="width: 100%;">
+        <span class="eth_text" style="margin-left: 30%;">{{ form.new_private_key.label }}</span> <br />
+				<div class="dark_block" style="width: 60%; margin-left: 20%">
+					{{ form.new_private_key(size=256, class_="eth_input", style="margin-top: 2vh" ) }}
+				</div>
+        {% for error in
+        form.new_private_key.errors %}
+        <span style="color: red"> {{error}} </span>
+        {% endfor %}
+      </p>
+      <p>{{ form.submit(class_="submit") }}</p>
+    </form>
+  </div>
 </div>
 
 {% endblock %}

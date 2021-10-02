@@ -1,99 +1,199 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="small_card_container" {% if current_user.is_admin %}style="margin-top:5vh; min-height: 90vh;"{%endif%}>
-    <div class="small_card_flex" style="width: 60%; margin-left:20%;">
-        {% if current_user.is_admin %}
-            <div class="info_card_block">
-            <div class="info_card" style="margin-bottom: 3vh; display:block; padding:0;">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Баланс токенов вклада:</b> <span class="info_card_text green"><br>123123</span></p>
-                </div>
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Курс токена вклада:</b> <span class="info_card_text green"><br>1 КТ = 0.75 eth</span></p>
-                </div>
-            </div>
-
-            <div class="info_card" style="display:block; padding:0;">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Баланс токенов инвестиции в системе:</b> <span class="info_card_text red"><br>123123</span></p>
-                </div>
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Курс токена инвестиций:</b> <span class="info_card_text red"><br>1 КТ = 0.75 eth</span></p>
-                </div>
-            </div>
-
-        </div>
-        {% else %}
-            <div class="info_card" style="min-width:33%;">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-                    <p class="info_card_text green">123123</p>
-                </div>
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Курс токена вклада:</b></p>
-                    <p class="info_card_text green">1 КТ = 0.75 eth</p>
-                </div>
-            </div>
-        {% endif %}
-
-        <div class="small_card_rows">
-            {% if current_user.is_admin %}
-                <a href="/transactions" class="small_card small_card_special2" onmouseover="enlarge_block(31);" id="block31" onmouseleave="reduce_block(31);">
-                    <img class="small_card_img" src="/static/images/transactions.png">
-                    <p class="small_card_text">Транзакции</p>
-                </a>
-                <a href="/change_address" class="small_card small_card_special2" onmouseover="enlarge_block(32);" id="block32" onmouseleave="reduce_block(32);">
-                    <img class="small_card_img" src="/static/images/change_address.png">
-                    <p class="small_card_text" style="text-align:center;">Изменить адрес кошелька</p>
-                </a>
-                <a href="/manage_ktd" class="small_card small_card_special2" onmouseover="enlarge_block(35);" id="block35" onmouseleave="reduce_block(35);">
-                    <img class="small_card_img" src="/static/images/zamok.png">
-                    <p class="small_card_text" style="text-align:center;">Доступ к токенам вклада</p>
-                </a>
-                <a href="/transfer_ktd" class="small_card small_card_special2" onmouseover="enlarge_block(33);" id="block33" onmouseleave="reduce_block(33);" style="margin-bottom:0;">
-                    <img class="small_card_img" src="/static/images/change_tokens.png">
-                    <p class="small_card_text">Перевести токены</p>
-                </a>
-                <a href="/change_to_eth" class="small_card small_card_special2" onmouseover="enlarge_block(34);" id="block34" onmouseleave="reduce_block(34);" style="margin-bottom:0;">
-                    <img class="small_card_img" src="/static/images/change_eth.png">
-                    <p class="small_card_text">Обменять на eth</p>
-                </a>
-                <a href="/budget" class="small_card small_card_special2" onmouseover="enlarge_block(36);" id="block36" onmouseleave="reduce_block(36);" style="margin-bottom:0;">
-                    <img class="small_card_img" src="/static/images/budget.png">
-                    <p class="small_card_text" style="text-align:center;">Бюджет</p>
-                </a>
-
-            {% else %}
-
-                <a href="" class="small_card small_card_special" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);">
-                    <img class="small_card_img" src="/static/images/transactions.png">
-                    <p class="small_card_text">Транзакции</p>
-                </a>
-                <a href="/change_address" class="small_card small_card_special" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
-                    <img class="small_card_img" src="/static/images/change_address.png">
-                    <p class="small_card_text" style="text-align:center;">Изменить адрес кошелька</p>
-                </a>
-                <a href="/transfer_ktd" class="small_card small_card_special" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);" style="margin-bottom:0;">
-                    <img class="small_card_img" src="/static/images/change_tokens.png">
-                    <p class="small_card_text">Перевести токены</p>
-                </a>
-                <a href="/change_to_eth" class="small_card small_card_special" onmouseover="enlarge_block(14);" id="block14" onmouseleave="reduce_block(14);" style="margin-bottom:0;">
-                    <img class="small_card_img" src="/static/images/change_eth.png">
-                    <p class="small_card_text">Обменять на eth</p>
-                </a>
-            {% endif %}
-        </div>
-    </div>
+{% extends "base.html" %} {% block content %}
+<div
+  class="small_card_container"
+  {%
+  if
+  current_user.is_admin
+  %}style="margin-top:5vh; min-height: 90vh;"
+  {%endif%}
+>
+  <div class="small_card_flex" style="width: 60%; margin-left: 20%">
     {% if current_user.is_admin %}
-<div style="display:flex; justify-content:center; margin-top: 3vh;">
-    <a href="/manage_kti" style=" max-width:12%; min-width:12%;" class="small_card small_card_special2" onmouseover="enlarge_block(37);" id="block37" onmouseleave="reduce_block(37);">
-                    <img class="small_card_img" src="/static/images/zamok.png">
-                    <p class="small_card_text" style="text-align:center;">Доступ к токенам инвестиций</p>
-                </a>
-</div>
+    <div class="info_card_block">
+      <div
+        class="info_card"
+        style="margin-bottom: 3vh; display: block; padding: 0"
+      >
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Баланс токенов вклада:</b>
+            <span class="info_card_text green"><br />{{ ktd_balance }}</span>
+          </p>
+        </div>
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Курс токена вклада:</b>
+            <span class="info_card_text green"
+              ><br />1 КТ = {{ ktd_price }} eth</span
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="info_card" style="display: block; padding: 0">
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Баланс токенов инвестиции в системе:</b>
+            <span class="info_card_text red"><br />123123</span>
+          </p>
+        </div>
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Курс токена инвестиций:</b>
+            <span class="info_card_text red"><br />1 КТ = 0.75 eth</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="info_card" style="min-width: 33%">
+      <div class="info_card_text_block">
+        <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
+        <p class="info_card_text green">{{ ktd_balance }}</p>
+      </div>
+      <div class="info_card_text_block">
+        <p class="info_card_text"><b>Курс токена вклада:</b></p>
+        <p class="info_card_text green">1 КТ = {{ ktd_price }} eth</p>
+      </div>
+    </div>
     {% endif %}
+
+    <div class="small_card_rows">
+      {% if current_user.is_admin %}
+      <a
+        href="/transactions"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(31);"
+        id="block31"
+        onmouseleave="reduce_block(31);"
+      >
+        <img class="small_card_img" src="/static/images/transactions.png" />
+        <p class="small_card_text">Транзакции</p>
+      </a>
+      <a
+        href="/change_address"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(32);"
+        id="block32"
+        onmouseleave="reduce_block(32);"
+      >
+        <img class="small_card_img" src="/static/images/change_address.png" />
+        <p class="small_card_text" style="text-align: center">
+          Изменить адрес кошелька
+        </p>
+      </a>
+      <a
+        href="/manage_ktd"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(35);"
+        id="block35"
+        onmouseleave="reduce_block(35);"
+      >
+        <img class="small_card_img" src="/static/images/zamok.png" />
+        <p class="small_card_text" style="text-align: center">
+          Доступ к токенам вклада
+        </p>
+      </a>
+      <a
+        href="/transfer_ktd"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(33);"
+        id="block33"
+        onmouseleave="reduce_block(33);"
+        style="margin-bottom: 0"
+      >
+        <img class="small_card_img" src="/static/images/change_tokens.png" />
+        <p class="small_card_text">Перевести токены</p>
+      </a>
+      <a
+        href="/change_to_eth"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(34);"
+        id="block34"
+        onmouseleave="reduce_block(34);"
+        style="margin-bottom: 0"
+      >
+        <img class="small_card_img" src="/static/images/change_eth.png" />
+        <p class="small_card_text">Обменять на eth</p>
+      </a>
+      <a
+        href="/budget"
+        class="small_card small_card_special2"
+        onmouseover="enlarge_block(36);"
+        id="block36"
+        onmouseleave="reduce_block(36);"
+        style="margin-bottom: 0"
+      >
+        <img class="small_card_img" src="/static/images/budget.png" />
+        <p class="small_card_text" style="text-align: center">Бюджет</p>
+      </a>
+
+      {% else %}
+
+      <a
+        href=""
+        class="small_card small_card_special"
+        onmouseover="enlarge_block(11);"
+        id="block11"
+        onmouseleave="reduce_block(11);"
+      >
+        <img class="small_card_img" src="/static/images/transactions.png" />
+        <p class="small_card_text">Транзакции</p>
+      </a>
+      <a
+        href="/change_address"
+        class="small_card small_card_special"
+        onmouseover="enlarge_block(12);"
+        id="block12"
+        onmouseleave="reduce_block(12);"
+      >
+        <img class="small_card_img" src="/static/images/change_address.png" />
+        <p class="small_card_text" style="text-align: center">
+          Изменить адрес кошелька
+        </p>
+      </a>
+      <a
+        href="/transfer_ktd"
+        class="small_card small_card_special"
+        onmouseover="enlarge_block(13);"
+        id="block13"
+        onmouseleave="reduce_block(13);"
+        style="margin-bottom: 0"
+      >
+        <img class="small_card_img" src="/static/images/change_tokens.png" />
+        <p class="small_card_text">Перевести токены</p>
+      </a>
+      <a
+        href="/change_to_eth"
+        class="small_card small_card_special"
+        onmouseover="enlarge_block(14);"
+        id="block14"
+        onmouseleave="reduce_block(14);"
+        style="margin-bottom: 0"
+      >
+        <img class="small_card_img" src="/static/images/change_eth.png" />
+        <p class="small_card_text">Обменять на eth</p>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% if current_user.is_admin %}
+  <div style="display: flex; justify-content: center; margin-top: 3vh">
+    <a
+      href="/manage_kti"
+      style="max-width: 12%; min-width: 12%"
+      class="small_card small_card_special2"
+      onmouseover="enlarge_block(37);"
+      id="block37"
+      onmouseleave="reduce_block(37);"
+    >
+      <img class="small_card_img" src="/static/images/zamok.png" />
+      <p class="small_card_text" style="text-align: center">
+        Доступ к токенам инвестиций
+      </p>
+    </a>
+  </div>
+  {% endif %}
 </div>
-
-
 
 {% endblock %}
