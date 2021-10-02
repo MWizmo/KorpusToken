@@ -9,13 +9,13 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
-from app.forms import LoginForm, SignupForm, QuestionnairePersonal, \
-    QuestionnaireTeam, QuestionAdding, Teams, MemberAdding, TeamAdding, ChooseTeamForm, StartAssessmentForm, \
-    RestorePassword, ChangeAddress
+from app.forms import *
 from flask_login import current_user, login_user, logout_user, login_required
+from app import token_utils
+import calendar
 
 def log(action, user_id=None):
     if user_id is None:
@@ -630,10 +630,15 @@ def change_address():
     return render_template('change_address.html', title='Изменить адрес кошелька', form=form, current_address=current_address)
 
 
-@app.route('/transfer_ktd')
+@app.route('/transfer_ktd', methods=['GET', 'POST'])
 @login_required
 def transfer_ktd():
-    return render_template('transfer_ktd.html', title='Перевести токены вклада')
+    form = TransferKtdForm()
+    if form.validate_on_submit():
+        num = int(form.num.data)
+        address = form.address.data
+        token_utils.transferKTD(num, address)
+    return render_template('transfer_ktd.html', title='Перевести токены вклада', form=form)
 
 
 @app.route('/manage_ktd')
@@ -654,10 +659,17 @@ def budget():
     return render_template('budget.html', title='Бюджет')
 
 
-@app.route('/add_budget_item')
+@app.route('/add_budget_item', methods=['GET', 'POST'])
 @login_required
 def add_budget_item():
-    return render_template('add_budget_item.html', title='Добавить статью')
+    form = AddBudgetItemForm()
+    if form.validate_on_submit():
+        record = BudgetRecord(date=datetime.datetime.now(), item=form.item.data, summa=int(form.cost.data),
+                              who_added=f'{User.get_full_name(current_user.id)}')
+        db.session.add(record)
+        db.session.commit()
+        return redirect('/current_budget')
+    return render_template('add_budget_item.html', title='Добавить статью', form=form)
 
 
 @app.route('/write_to_blockchain')
@@ -672,10 +684,22 @@ def add_to_blockchain():
     return render_template('add_to_blockchain.html', title='Записать в блокчейн')
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    form = SignupForm()
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.surname = form.surname.data
+        current_user.tg_nickname = form.tg_nickname.data
+        current_user.birthday = form.birthday.data
+        current_user.education = form.education.data
+        current_user.work_exp = form.work_exp.data
+        current_user.vk_url = form.vk_url.data
+        current_user.fb_url = form.fb_url.data
+        current_user.inst_url = form.inst_url.data
+        current_user.courses = form.courses.data
+        db.session.commit()
     return render_template('profile.html', title='Профиль', form=form, script='signup.js', profile=True)
 
 

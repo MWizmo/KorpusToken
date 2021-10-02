@@ -5,6 +5,9 @@ from app.models import *
 from datetime import datetime, date, timedelta
 from app import db
 from flask_admin.contrib.sqla import ModelView
+import datetime, calendar
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -112,4 +115,12 @@ class CurrentBudgetView(ModelView):
     can_edit = False
     can_create = False
     can_delete = False
+
+    def render(self, template, **kwargs):
+        today = datetime.date.today()
+        month_dict = {'дек': 'декабрь', 'янв': 'январь', 'фев': 'февраль', 'мар': 'март', 'апр': 'апрель', 'май': 'май',
+                      'июн': 'июнь', 'июл': 'июль', 'авг': 'август', 'сен': 'сентябрь', 'окт': 'октябрь',
+                      'ноя': 'ноябрь'}
+        kwargs['month'] = month_dict[calendar.month_abbr[today.month % 12 + 1]]
+        return super(CurrentBudgetView, self).render(template, **kwargs)
 
