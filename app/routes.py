@@ -4,7 +4,7 @@ import threading
 import os
 import csv
 from sqlalchemy import func
-from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI
+from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts import graphs
 from app.scripts.service import get_access
@@ -600,11 +600,11 @@ def assessment_page():
 @app.route('/blockchain')
 @login_required
 def blockchain():
-    ktd_balance = User.get_ktd_balance(current_user.id)
+    ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_price = User.get_ktd_price(current_user.id)
     kti_price = User.get_kti_price(current_user.id)
 
-    kti_total = token_utils.get_KTI_total(kti_address)
+    kti_total = token_utils.get_KTI_total(kti_address) / KT_BITS_IN_KT
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
                           ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price)
@@ -613,16 +613,16 @@ def blockchain():
 @app.route('/change_to_eth', methods=['GET', 'POST'])
 @login_required
 def change_to_eth():
-    ktd_balance = User.get_ktd_balance(current_user.id)
+    ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_price = User.get_ktd_price(current_user.id)
     user = User.query.filter_by(id=current_user.id).first()
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
-      transaction = Transaction(type='Продажа токена', summa=int(form.amount.data),
+      transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
-      error = token_utils.sell_KTD(int(form.amount.data), user.private_key)
+      error = token_utils.sell_KTD(int(float(form.amount.data) * KT_BITS_IN_KT), user.private_key)
       if error:
         flash(error, 'error')
         transaction.status = 'Ошибка'
@@ -657,14 +657,14 @@ def change_address():
 @app.route('/transfer_ktd', methods=['GET', 'POST'])
 @login_required
 def transfer_ktd():
-    ktd_balance = User.get_ktd_balance(current_user.id)
+    ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     user = User.query.filter_by(id=current_user.id).first()
     form = TransferKtdForm()
     if form.validate_on_submit():
-        transaction = Transaction(type='Перевод токенов', summa=int(form.num.data),
+        transaction = Transaction(type='Перевод токенов', summa=float(form.num.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
-        num = int(form.num.data)
+        num = int(float(form.num.data) * KT_BITS_IN_KT)
         address = form.address.data
         error = token_utils.transfer_KTD(num, address, user.private_key)
         if error:
@@ -708,7 +708,7 @@ def manage_kti():
       return redirect(url_for('home'))
 
     contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
-    kti_total = token_utils.get_KTI_total(kti_address)
+    kti_total = token_utils.get_KTI_total(kti_address) / KT_BITS_IN_KT
 
     form = ManageKTIForm()
 

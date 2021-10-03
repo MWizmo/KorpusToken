@@ -19,6 +19,7 @@ kti_address = '0x1962a99aa03b1db4f48f7efc52d07705d3a860b0'
 ktd_address = '0x6df020997384117b6128de28339a0b32e20af00a'
 contract_address = '0x6ba9439286362d67b1f37fc95d18247ce931451d'
 ETH_IN_WEI = 1000000000000000000
+KT_BITS_IN_KT = 1000000000000000000
 
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
