@@ -543,11 +543,11 @@ def teams_crew():
 @app.route('/edit_team', methods=['GET', 'POST'])
 @login_required
 def edit_team():
-    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id,
-                                                                           int(request.args.get('tid')))):
-        log('Попытка просмотра страницы с редактированием команды (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id,
+    #                                                                        int(request.args.get('tid')))):
+    #     log('Попытка просмотра страницы с редактированием команды (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     tid = int(request.args.get('tid'))
     log('Просмотр страницы с редактированием команды с id {}'.format(tid))
     form = MemberAdding()
