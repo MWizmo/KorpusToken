@@ -178,7 +178,7 @@ def sell_KTD(amount, private_key):
                 transaction_hash = txn_hash.hex()
         except Exception as e:
             print(e)
-            return "Недостаточно токенов."
+            return "Недостаточно токенов на вашем счёте или на балансе смарт-контракта недостаточно эфира."
     else:
         return "Число токенов не должно быть меньше или равно нулю."
 
