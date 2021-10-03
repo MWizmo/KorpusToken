@@ -442,10 +442,10 @@ def start_questionnaire():
 @app.route('/users_list', methods=['POST', 'GET'])
 @login_required
 def users_list():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы со списком пользователей (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы со списком пользователей (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     log('Просмотр страницы со списком пользователей')
     users = User.query.all()
     info = list()
@@ -490,10 +490,10 @@ def delete_user():
 @app.route('/teams_list', methods=['POST', 'GET'])
 @login_required
 def teams_list():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с текущими командами (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы с текущими командами (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с текущими командами')
     form = TeamAdding()
