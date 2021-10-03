@@ -442,10 +442,10 @@ def start_questionnaire():
 @app.route('/users_list', methods=['POST', 'GET'])
 @login_required
 def users_list():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы со списком пользователей (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы со списком пользователей (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     log('Просмотр страницы со списком пользователей')
     users = User.query.all()
     info = list()
@@ -490,10 +490,10 @@ def delete_user():
 @app.route('/teams_list', methods=['POST', 'GET'])
 @login_required
 def teams_list():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с текущими командами (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы с текущими командами (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с текущими командами')
     form = TeamAdding()
@@ -523,10 +523,10 @@ def delete_team():
 @app.route('/teams_crew', methods=['POST', 'GET'])
 @login_required
 def teams_crew():
-    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
-        log('Попытка просмотра страницы с составами команд (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
+    #     log('Попытка просмотра страницы с составами команд (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     log('Просмотр страницы с составами команд')
     teams = Teams.query.all()
     info = list()
@@ -543,11 +543,11 @@ def teams_crew():
 @app.route('/edit_team', methods=['GET', 'POST'])
 @login_required
 def edit_team():
-    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id,
-                                                                           int(request.args.get('tid')))):
-        log('Попытка просмотра страницы с редактированием команды (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id,
+    #                                                                        int(request.args.get('tid')))):
+    #     log('Попытка просмотра страницы с редактированием команды (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     tid = int(request.args.get('tid'))
     log('Просмотр страницы с редактированием команды с id {}'.format(tid))
     form = MemberAdding()
@@ -846,12 +846,12 @@ def community():
 @app.route('/assessment', methods=['GET', 'POST'])
 @login_required
 def assessment():
-    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)
-            or User.check_teamlead(current_user.id)):
-        log('Попытка просмотра страницы с оценкой (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
+    # if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+    #         or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)
+    #         or User.check_teamlead(current_user.id)):
+    #     log('Попытка просмотра страницы с оценкой (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с оценкой')
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
@@ -1161,10 +1161,10 @@ def make_graphs():
 @app.route('/voting_progress', methods=['GET', 'POST'])
 @login_required
 def voting_progress():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с прогрессом оценки (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы с прогрессом оценки (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с прогрессом оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
