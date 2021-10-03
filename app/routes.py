@@ -523,10 +523,10 @@ def delete_team():
 @app.route('/teams_crew', methods=['POST', 'GET'])
 @login_required
 def teams_crew():
-    if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
-        log('Попытка просмотра страницы с составами команд (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id) or TeamRoles.check_team_lead(current_user.id)):
+    #     log('Попытка просмотра страницы с составами команд (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     log('Просмотр страницы с составами команд')
     teams = Teams.query.all()
     info = list()
