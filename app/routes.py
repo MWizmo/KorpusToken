@@ -846,12 +846,12 @@ def community():
 @app.route('/assessment', methods=['GET', 'POST'])
 @login_required
 def assessment():
-    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)
-            or User.check_teamlead(current_user.id)):
-        log('Попытка просмотра страницы с оценкой (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
+    # if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+    #         or User.check_expert(current_user.id) or User.check_chieftain(current_user.id)
+    #         or User.check_teamlead(current_user.id)):
+    #     log('Попытка просмотра страницы с оценкой (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с оценкой')
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
@@ -1161,10 +1161,10 @@ def make_graphs():
 @app.route('/voting_progress', methods=['GET', 'POST'])
 @login_required
 def voting_progress():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с прогрессом оценки (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы с прогрессом оценки (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+    #                            access=get_access(current_user))
 
     log('Просмотр страницы с прогрессом оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
