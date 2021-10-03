@@ -105,6 +105,13 @@ class User(UserMixin, db.Model):
       return User.get_eth_account(current_user_id).address
 
     @staticmethod
+    def get_eth_balance(current_user_id):
+      user = User.query.filter_by(id=current_user_id).first()
+      balance = w3.eth.getBalance(User.get_eth_address(current_user_id)) / ETH_IN_WEI
+
+      return balance
+
+    @staticmethod
     def get_ktd_balance(current_user_id):
       file = open("app/static/ABI/KTD_ABI.json", "r")
       Korpus_KTI = w3.eth.contract(

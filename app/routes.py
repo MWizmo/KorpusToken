@@ -603,11 +603,13 @@ def blockchain():
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_price = User.get_ktd_price(current_user.id)
     kti_price = User.get_kti_price(current_user.id)
+    eth_balance = User.get_eth_balance(current_user.id)
 
     kti_total = token_utils.get_KTI_total(kti_address) / KT_BITS_IN_KT
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
-                          ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price)
+                          ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
+                          eth_balance=eth_balance)
 
 
 @app.route('/change_to_eth', methods=['GET', 'POST'])

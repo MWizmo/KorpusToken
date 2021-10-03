@@ -30,7 +30,10 @@
         </div>
       </div>
 
-      <div class="info_card" style="display: block; padding: 0">
+      <div
+        class="info_card"
+        style="margin-bottom: 3vh; display: block; padding: 0"
+      >
         <div class="info_card_text_block">
           <p class="info_card_text">
             <b>Баланс токенов инвестиции в системе:</b>
@@ -46,16 +49,36 @@
           </p>
         </div>
       </div>
+
+      <div class="info_card" style="display: block; padding: 0">
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Количество эфира на вашем аккаунте: </b>
+            <span class="info_card_text blue"><br />{{ eth_balance }} eth</span>
+          </p>
+        </div>
+      </div>
     </div>
     {% else %}
-    <div class="info_card" style="min-width: 33%">
-      <div class="info_card_text_block">
-        <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-        <p class="info_card_text green">{{ ktd_balance }}</p>
+    <div class="info_card_block">
+      <div class="info_card" style="min-width: 33%">
+        <div class="info_card_text_block">
+          <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
+          <p class="info_card_text green">{{ ktd_balance }}</p>
+        </div>
+        <div class="info_card_text_block">
+          <p class="info_card_text"><b>Курс токена вклада:</b></p>
+          <p class="info_card_text green">1 КТ = {{ ktd_price }} eth</p>
+        </div>
       </div>
-      <div class="info_card_text_block">
-        <p class="info_card_text"><b>Курс токена вклада:</b></p>
-        <p class="info_card_text green">1 КТ = {{ ktd_price }} eth</p>
+
+      <div class="info_card" style="display: block; padding: 0">
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Количество эфира на вашем аккаунте: </b>
+            <span class="info_card_text blue"><br />{{ eth_balance }} eth</span>
+          </p>
+        </div>
       </div>
     </div>
     {% endif %}
@@ -107,6 +130,7 @@
         <img class="small_card_img" src="/static/images/change_tokens.png" />
         <p class="small_card_text">Перевести токены</p>
       </a>
+
       <a
         href="/change_to_eth"
         class="small_card small_card_special2"
@@ -128,6 +152,19 @@
       >
         <img class="small_card_img" src="/static/images/budget.png" />
         <p class="small_card_text" style="text-align: center">Бюджет</p>
+      </a>
+      <a
+        href="/manage_kti"
+        class="small_card small_card_special2"
+        style="margin-top: 3vh"
+        onmouseover="enlarge_block(37);"
+        id="block37"
+        onmouseleave="reduce_block(37);"
+      >
+        <img class="small_card_img" src="/static/images/zamok.png" />
+        <p class="small_card_text" style="text-align: center">
+          Доступ к токенам инвестиций
+        </p>
       </a>
 
       {% else %}
@@ -179,23 +216,6 @@
       {% endif %}
     </div>
   </div>
-  {% if current_user.is_admin %}
-  <div style="display: flex; justify-content: center; margin-top: 3vh">
-    <a
-      href="/manage_kti"
-      style="max-width: 12%; min-width: 12%"
-      class="small_card small_card_special2"
-      onmouseover="enlarge_block(37);"
-      id="block37"
-      onmouseleave="reduce_block(37);"
-    >
-      <img class="small_card_img" src="/static/images/zamok.png" />
-      <p class="small_card_text" style="text-align: center">
-        Доступ к токенам инвестиций
-      </p>
-    </a>
-  </div>
-  {% endif %}
 </div>
 
 {% endblock %}
