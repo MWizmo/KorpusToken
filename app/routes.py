@@ -622,9 +622,9 @@ def change_to_eth():
       transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
-      error = token_utils.sell_KTD(int(float(form.amount.data) * KT_BITS_IN_KT), user.private_key)
-      if error:
-        flash(error, 'error')
+      message, is_error = token_utils.sell_KTD(int(float(form.amount.data) * KT_BITS_IN_KT), user.private_key)
+      flash(message)
+      if is_error:
         transaction.status = 'Ошибка'
         db.session.add(transaction)
         db.session.commit()
@@ -666,9 +666,9 @@ def transfer_ktd():
                                 status='Успешно')
         num = int(float(form.num.data) * KT_BITS_IN_KT)
         address = form.address.data
-        error = token_utils.transfer_KTD(num, address, user.private_key)
-        if error:
-          flash(error, 'error')
+        message, is_error = token_utils.transfer_KTD(num, address, user.private_key)
+        flash(message)
+        if is_error:
           transaction.status = 'Ошибка'
           db.session.add(transaction)
           db.session.commit()
@@ -694,9 +694,10 @@ def manage_ktd():
 
     if form.validate_on_submit():
       address = form.address.data
-      token_utils.set_KTD_seller(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      message, is_error = token_utils.set_KTD_seller(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      flash(message)
 
-      return redirect(url_for('blockchain'))
+      return redirect(url_for('manage_ktd'))
     return render_template('manage_ktd.html', title='Доступ к токенам вклада',
                            contract_balance=contract_balance, ktd_total=ktd_total, form=form)
 
@@ -714,9 +715,10 @@ def manage_kti():
 
     if form.validate_on_submit():
       address = form.address.data
-      token_utils.set_KTI_buyer(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      message, is_error = token_utils.set_KTI_buyer(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      flash(message)
 
-      return redirect(url_for('blockchain'))
+      return redirect(url_for('manage_kti'))
 
     return render_template('manage_kti.html', title='Доступ к токенам инвестиций',
                            contract_balance=contract_balance, kti_total=kti_total, form=form)
@@ -805,7 +807,6 @@ def save_to_blockchain():
         budget_record.is_saved = True
       except Exception as err:
         print(err)
-        pass
     
     db.session.commit()
 

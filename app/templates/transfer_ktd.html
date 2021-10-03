@@ -1,6 +1,8 @@
 {% extends "base.html" %} {% block content %}
 <form class="small_card_container" method="post">
-  {{ form.hidden_tag() }}
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <p style="text-align: center; width: 100%"><i>{{ messages[0] }}</i></p>
+  {% endif %} {% endwith %} {{ form.hidden_tag() }}
   <div class="small_card_flex" style="width: 70%; margin-left: 15%">
     <div style="min-width: 33%">
       <div class="info_card">

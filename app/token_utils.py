@@ -29,8 +29,10 @@ def transfer_KTD(num, address, private_key):
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+        return txn_hash.hex(), True
     except Exception:
-        return "Недопустимый адрес или недостаточно токенов."
+        return "Недопустимый адрес или недостаточно токенов.", False
 
 def get_KTI_total(kti_address):
     file = open("app/static/ABI/KTI_ABI.json", "r")
@@ -79,7 +81,7 @@ def set_KTI_buyer(address, private_key):
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        return txn_hash.hex()
+        return txn_hash.hex(), True
     except Exception:
         return "Недопустимый адрес или недостаточно средств.", False
 
@@ -110,9 +112,9 @@ def set_KTD_seller(address, private_key):
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        return txn_hash.hex()
+        return txn_hash.hex(), True
     except Exception:
-        return "Недопустимый адрес или недостаточно средств."
+        return "Недопустимый адрес или недостаточно средств.", False
 
 def sell_KTD(amount, private_key):
     try:
@@ -176,9 +178,11 @@ def sell_KTD(amount, private_key):
                 signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
                 txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
                 transaction_hash = txn_hash.hex()
+
+                return transaction_hash, False
         except Exception as e:
             print(e)
-            return "Недостаточно токенов на вашем счёте или на балансе смарт-контракта недостаточно эфира."
+            return "Недостаточно токенов на вашем счёте или на балансе смарт-контракта недостаточно эфира.", False
     else:
-        return "Число токенов не должно быть меньше или равно нулю."
+        return "Число токенов не должно быть меньше или равно нулю.", False
 
