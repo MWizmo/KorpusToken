@@ -259,7 +259,7 @@ def sellKTD(value):   # обмен токенов вклада на эфир
                         break
                 except:
                     time.sleep(5)
-            print()
+
             if receipt.status == 1:
                 file = open("app/static/ABI/Contract_ABI.json", "r")
                 KorpusContract = w3.eth.contract(

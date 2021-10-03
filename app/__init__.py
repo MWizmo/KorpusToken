@@ -15,6 +15,11 @@ login = LoginManager(app)
 login.login_view = 'login'
 w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
 
+kti_address = '0x91f0ca3505c2b1d449b2cee338723bf5ea5a09da'
+ktd_address = '0xc408983fc1765c41acc42adc18d543929b11b217'
+contract_address = '0x14c843383d841a0c93f075c5a78115d2b897aba1'
+ETH_IN_WEI = 1000000000000000000
+
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 

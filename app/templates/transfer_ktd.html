@@ -1,38 +1,56 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <form class="small_card_container" method="post">
-    {{ form.hidden_tag() }}
-    <div class="small_card_flex" style="width: 70%; margin-left:15%;">
-      <div style="min-width:33%;">
-        <div class="info_card">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-                    <p class="info_card_text green">123123</p>
-                </div>
-            </div><br><br>
-        <div class="info_card">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Остаток токенов:</b></p>
-                    <p class="info_card_text green">123123</p>
-                </div>
-            </div>
-      </div>
-
-
-        <div class="input_eth_container" style="justify-content: space-between;">
-            <div class="dark_block">
-                <p class="info_card_text"><b>Сколько токенов перевести?</b></p>
-                {{ form.num(class_='eth_input') }}
-            </div>
-          <div class="dark_block" style="margin-bottom: 0;">
-                <p class="info_card_text"><b>Адрес получателя</b></p>
-              {{ form.address(class_='eth_input') }}
-            </div>
+  {{ form.hidden_tag() }}
+  <div class="small_card_flex" style="width: 70%; margin-left: 15%">
+    <div style="min-width: 33%">
+      <div class="info_card">
+        <div class="info_card_text_block">
+          <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
+          <p class="info_card_text green" id="balance">{{ ktd_balance }}</p>
         </div>
+      </div>
+      <br /><br />
+      <div class="info_card">
+        <div class="info_card_text_block">
+          <p class="info_card_text"><b>Остаток токенов:</b></p>
+          <p class="info_card_text green" id="remainder">{{ ktd_balance }}</p>
+        </div>
+      </div>
     </div>
-  <button class="eth_button" style="width: 40%; margin-left:30%; margin-top: 5vh;" type="submit">Подтвердить</button>
+
+    <div class="input_eth_container" style="justify-content: space-between">
+      <div class="dark_block num_input_">
+        <p class="info_card_text"><b>Сколько токенов перевести?</b></p>
+        {{ form.num(class_='eth_input') }}
+      </div>
+      <div class="dark_block" style="margin-bottom: 0">
+        <p class="info_card_text"><b>Адрес получателя</b></p>
+        {{ form.address(class_='eth_input') }}
+      </div>
+    </div>
+  </div>
+  <button
+    class="eth_button"
+    style="width: 40%; margin-left: 30%; margin-top: 5vh"
+    type="submit"
+  >
+    Подтвердить
+  </button>
 </form>
 
+<script>
+  'use strict';
 
+  const balance = document.querySelector('#balance');
+  const remainder = document.querySelector('#remainder');
+  const input = document.querySelector('.num_input_ input');
+
+  input.addEventListener('input', (event) => {
+    const amount = isFinite(event.target.value) ? event.target.value : 0;
+    const newRemainder = balance.textContent - amount;
+
+    remainder.textContent = newRemainder > 0 ? newRemainder : 0;
+  });
+</script>
 
 {% endblock %}

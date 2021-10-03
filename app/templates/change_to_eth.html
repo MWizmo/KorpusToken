@@ -1,32 +1,48 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="small_card_container">
-    <div class="small_card_flex" style="width: 60%; margin-left:20%;">
-            <div class="info_card" style="min-width:33%;">
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-                    <p class="info_card_text green">123123</p>
-                </div>
-                <div class="info_card_text_block">
-                    <p class="info_card_text"><b>Курс токена вклада:</b></p>
-                    <p class="info_card_text green">1 КТ = 0.75 eth</p>
-                </div>
-            </div>
-
-        <div class="input_eth_container">
-            <div class="dark_block">
-                <p class="info_card_text"><b>Сколько токенов обменять?</b></p>
-                <input class="eth_input">
-            </div>
-            <div class="dark_block">
-                <p class="info_card_text"><b>Вы получите:</b></p>
-                <p class="info_card_text blue">100500 eth</p>
-            </div>
-            <button class="eth_button">Подтвердить</button>
-        </div>
+{% extends "base.html" %} {% block content %}
+<form action="" method="post" novalidate class="form small_card_container">
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <p style="text-align: center; width: 100%"><i>{{ messages[0] }}</i></p>
+  {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+  <div class="small_card_flex" style="width: 60%; margin-left: 20%">
+    <div class="info_card" style="min-width: 33%">
+      <div class="info_card_text_block">
+        <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
+        <p class="info_card_text green">{{ ktd_balance }}</p>
+      </div>
+      <div class="info_card_text_block">
+        <p class="info_card_text"><b>Курс токена вклада:</b></p>
+        <p class="info_card_text green">
+          1 КТ = <span id="price">{{ ktd_price }}</span> eth
+        </p>
+      </div>
     </div>
-</div>
 
+    <div class="input_eth_container">
+      <div class="dark_block">
+        <p class="info_card_text"><b>Сколько токенов обменять?</b></p>
+        {{ form.amount(size=256, class_="eth_input" ) }}
+      </div>
+      <div class="dark_block">
+        <p class="info_card_text"><b>Вы получите:</b></p>
+        <p class="info_card_text blue" id="total">0 eth</p>
+      </div>
+      {{ form.submit(class_="submit") }}
+    </div>
+  </div>
+</form>
 
+<script>
+  'use strict';
+
+  const output = document.querySelector('#total');
+  const input = document.querySelector('.eth_input');
+  const price = document.querySelector('#price');
+
+  input.addEventListener('input', (event) => {
+    const amount = isFinite(event.target.value) ? event.target.value : 0;
+
+    output.textContent = `${amount * price.textContent} eth`;
+  });
+</script>
 
 {% endblock %}

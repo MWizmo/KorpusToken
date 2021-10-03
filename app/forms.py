@@ -142,3 +142,15 @@ class TransferKtdForm(FlaskForm):
 class AddBudgetItemForm(FlaskForm):
     item = StringField(validators=[DataRequired()])
     cost = StringField(validators=[DataRequired()])
+
+class ManageKTIForm(FlaskForm):
+    address = StringField(validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
+class ManageKTDForm(FlaskForm):
+    address = StringField(validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
+class ChangeToEthForm(FlaskForm):
+    amount = StringField(validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})

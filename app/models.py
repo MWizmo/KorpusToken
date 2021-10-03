@@ -2,7 +2,7 @@
 import datetime
 
 # import jdcal
-from app import db, login, w3
+from app import db, login, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI
 from web3.auto import Web3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -107,28 +107,42 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get_ktd_balance(current_user_id):
       file = open("app/static/ABI/KTD_ABI.json", "r")
-      KorpusContract = w3.eth.contract(
+      Korpus_KTI = w3.eth.contract(
         # вводим его адрес и ABI
-        Web3.toChecksumAddress("0x19Fcb1b2286f178C6070Dfb309bB5324Ac8823c9"),
+        Web3.toChecksumAddress(ktd_address),
         abi=file.read()
       )
       file.close()
       
-      return KorpusContract.functions.balanceOf(User.get_eth_address(current_user_id)).call()
+      return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
 
     @staticmethod
     def get_ktd_price(current_user_id):
       file = open("app/static/ABI/Contract_ABI.json", "r")
       KorpusContract = w3.eth.contract(
         # вводим его адрес и ABI
-        Web3.toChecksumAddress("0x47ae9eFf852D74f05FA3cc2F67C4563Ca2600B4C"),
+        Web3.toChecksumAddress(contract_address),
         abi=file.read()
       )
       file.close()
 
-      sellPrice = KorpusContract.functions.sellPrice().call()
+      sellPrice = KorpusContract.functions.getSellPriceKTD().call()
       
-      return sellPrice / 1000000000000000000
+      return sellPrice / ETH_IN_WEI
+      
+    @staticmethod
+    def get_kti_price(current_user_id):
+      file = open("app/static/ABI/Contract_ABI.json", "r")
+      KorpusContract = w3.eth.contract(
+        # вводим его адрес и ABI
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+      )
+      file.close()
+
+      buyPrice = KorpusContract.functions.getBuyPriceKTI().call()
+      
+      return buyPrice / ETH_IN_WEI
 
     @staticmethod
     def dict_of_responsibilities(current_user_id):
@@ -466,3 +480,4 @@ class BudgetRecord(db.Model):
     item = db.Column(db.String(128))
     summa = db.Column(db.Float)
     who_added = db.Column(db.String(128))
+    is_saved = db.Column(db.Boolean, default=False, nullable=False)

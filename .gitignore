@@ -11,3 +11,5 @@ app/static/graphs/
 app/static/graphs/*
 app/results
 app/results/
+
+.env

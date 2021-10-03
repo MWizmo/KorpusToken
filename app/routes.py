@@ -4,7 +4,8 @@ import threading
 import os
 import csv
 from sqlalchemy import func
-from app import app, db, w3
+from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI
+from web3.auto import Web3
 from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
@@ -601,15 +602,38 @@ def assessment_page():
 def blockchain():
     ktd_balance = User.get_ktd_balance(current_user.id)
     ktd_price = User.get_ktd_price(current_user.id)
+    kti_price = User.get_kti_price(current_user.id)
+
+    kti_total = token_utils.get_KTI_total(kti_address)
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
-		                      ktd_price=ktd_price)
+                          ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price)
 
 
-@app.route('/change_to_eth')
+@app.route('/change_to_eth', methods=['GET', 'POST'])
 @login_required
 def change_to_eth():
-    return render_template('change_to_eth.html', title='Обменять на eth')
+    ktd_balance = User.get_ktd_balance(current_user.id)
+    ktd_price = User.get_ktd_price(current_user.id)
+    user = User.query.filter_by(id=current_user.id).first()
+    form = ChangeToEthForm()
+
+    if form.validate_on_submit():
+      transaction = Transaction(type='Продажа токена', summa=int(form.amount.data),
+                                receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
+                                status='Успешно')
+      error = token_utils.sell_KTD(int(form.amount.data), user.private_key)
+      if error:
+        flash(error, 'error')
+        transaction.status = 'Ошибка'
+        db.session.add(transaction)
+        db.session.commit()
+
+        return redirect(url_for('change_to_eth'))
+      db.session.add(transaction)
+      db.session.commit()
+    return render_template('change_to_eth.html', title='Обменять на eth',
+                           ktd_balance=ktd_balance, ktd_price=ktd_price, form=form)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])
@@ -633,24 +657,69 @@ def change_address():
 @app.route('/transfer_ktd', methods=['GET', 'POST'])
 @login_required
 def transfer_ktd():
+    ktd_balance = User.get_ktd_balance(current_user.id)
+    user = User.query.filter_by(id=current_user.id).first()
     form = TransferKtdForm()
     if form.validate_on_submit():
+        transaction = Transaction(type='Перевод токенов', summa=int(form.num.data),
+                                receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
+                                status='Успешно')
         num = int(form.num.data)
         address = form.address.data
-        token_utils.transferKTD(num, address)
-    return render_template('transfer_ktd.html', title='Перевести токены вклада', form=form)
+        error = token_utils.transfer_KTD(num, address, user.private_key)
+        if error:
+          flash(error, 'error')
+          transaction.status = 'Ошибка'
+          db.session.add(transaction)
+          db.session.commit()
+
+          return redirect(url_for('transfer_ktd'))
+        db.session.add(transaction)
+        db.session.commit()
+    
+    return render_template('transfer_ktd.html', title='Перевести токены вклада', form=form,
+                           ktd_balance=ktd_balance)
 
 
-@app.route('/manage_ktd')
+@app.route('/manage_ktd', methods=['GET', 'POST'])
 @login_required
 def manage_ktd():
-    return render_template('manage_ktd.html', title='Доступ к токенам вклада')
+    if not current_user.is_admin:
+      return redirect(url_for('home'))
+
+    contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
+    ktd_total = token_utils.get_KTD_total(ktd_address)
+    
+    form = ManageKTIForm()
+
+    if form.validate_on_submit():
+      address = form.address.data
+      token_utils.set_KTD_seller(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+
+      return redirect(url_for('blockchain'))
+    return render_template('manage_ktd.html', title='Доступ к токенам вклада',
+                           contract_balance=contract_balance, ktd_total=ktd_total, form=form)
 
 
-@app.route('/manage_kti')
+@app.route('/manage_kti', methods=['GET', 'POST'])
 @login_required
 def manage_kti():
-    return render_template('manage_kti.html', title='Доступ к токенам инвестиций')
+    if not current_user.is_admin:
+      return redirect(url_for('home'))
+
+    contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
+    kti_total = token_utils.get_KTI_total(kti_address)
+
+    form = ManageKTIForm()
+
+    if form.validate_on_submit():
+      address = form.address.data
+      token_utils.set_KTI_buyer(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+
+      return redirect(url_for('blockchain'))
+
+    return render_template('manage_kti.html', title='Доступ к токенам инвестиций',
+                           contract_balance=contract_balance, kti_total=kti_total, form=form)
 
 
 @app.route('/budget')
@@ -663,9 +732,20 @@ def budget():
 @login_required
 def add_budget_item():
     form = AddBudgetItemForm()
+    existing_budget_record = BudgetRecord.query.filter_by(date=datetime.datetime.now().date(),
+                                                          item=form.item.data).first()
+
     if form.validate_on_submit():
-        record = BudgetRecord(date=datetime.datetime.now(), item=form.item.data, summa=int(form.cost.data),
-                              who_added=f'{User.get_full_name(current_user.id)}')
+        summa = round(float(form.cost.data), 2)
+        who_added = f'{User.get_full_name(current_user.id)}'
+        record = BudgetRecord(date=datetime.datetime.now().date(), item=form.item.data, summa=summa,
+                              who_added=who_added)
+        if existing_budget_record:
+          existing_budget_record.summa = summa
+          existing_budget_record.who_added = who_added
+          db.session.commit()
+
+          return redirect('/current_budget')
         db.session.add(record)
         db.session.commit()
         return redirect('/current_budget')
@@ -677,6 +757,59 @@ def add_budget_item():
 def write_to_blockchain():
     return render_template('write_to_blockchain.html', title='Записать в блокчейн')
 
+@app.route('/save_to_blockchain')
+@login_required
+def save_to_blockchain():
+    if not current_user.is_admin:
+      return redirect(url_for('home'))
+
+    account = w3.eth.account.privateKeyToAccount(os.environ.get('ADMIN_PRIVATE_KEY'))
+    
+    budget_records = BudgetRecord.query.filter_by(is_saved=False).all()
+
+    file = open("app/static/ABI/Contract_ABI.json", "r")
+    KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+    )
+    file.close()
+
+    for budget_record in budget_records:
+      date = budget_record.date
+      timestamp = datetime.datetime(year=date.year, month=date.month,
+                               day=date.day).timestamp()
+      budget_item = budget_record.item
+      cost = round(budget_record.summa, 2) * 100
+
+      nonce = w3.eth.getTransactionCount(account.address, 'pending')
+
+      estimateGas = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).estimateGas({
+        'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'),
+        'chainId': 3
+      })
+      transaction = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).buildTransaction(
+        {
+            'nonce': nonce,
+            'from': account.address,
+            'gas': estimateGas,
+            'gasPrice': w3.toWei('2', 'gwei'),
+            'chainId': 3
+        }
+      )
+      signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+
+      try:
+        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        budget_record.is_saved = True
+      except Exception as err:
+        print(err)
+        pass
+    
+    db.session.commit()
+
+    return redirect(url_for('budget'))
 
 @app.route('/add_to_blockchain')
 @login_required
@@ -1408,4 +1541,6 @@ def confirm_top_cadets():
 
 @app.route('/transactions', methods=['GET'])
 def transactions():
-		return render_template('transactions.html', title='Транзакции')
+    data = Transaction.query.all()
+
+    return render_template('transactions.html', title='Транзакции', data=data)

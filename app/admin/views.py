@@ -118,9 +118,9 @@ class CurrentBudgetView(ModelView):
 
     def render(self, template, **kwargs):
         today = datetime.date.today()
-        month_dict = {'дек': 'декабрь', 'янв': 'январь', 'фев': 'февраль', 'мар': 'март', 'апр': 'апрель', 'май': 'май',
-                      'июн': 'июнь', 'июл': 'июль', 'авг': 'август', 'сен': 'сентябрь', 'окт': 'октябрь',
-                      'ноя': 'ноябрь'}
+        month_dict = {'Dec': 'декабрь', 'Jan': 'январь', 'Feb': 'февраль', 'Mar': 'март', 'Apr': 'апрель', 'May': 'май',
+                      'Jun': 'июнь', 'Jul': 'июль', 'Aug': 'август', 'Sep': 'сентябрь', 'Oct': 'октябрь',
+                      'Nov': 'ноябрь'}
         kwargs['month'] = month_dict[calendar.month_abbr[today.month % 12 + 1]]
         return super(CurrentBudgetView, self).render(template, **kwargs)
 
