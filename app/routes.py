@@ -609,7 +609,7 @@ def blockchain():
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
                           ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
-                          eth_balance=eth_balance)
+                          eth_balance=eth_balance, contract_address=contract_address)
 
 
 @app.route('/change_to_eth', methods=['GET', 'POST'])
