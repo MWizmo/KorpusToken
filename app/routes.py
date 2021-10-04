@@ -622,6 +622,9 @@ def change_to_eth():
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
+      if ktd_balance < float(form.amount.data):
+        flash('Недостаточно токенов.')
+        return redirect('change_to_eth')
       transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')

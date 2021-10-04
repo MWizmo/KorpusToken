@@ -1,7 +1,12 @@
 {% extends "base.html" %} {% block content %} {% if has_access_to_sell %}
 <form action="" method="post" novalidate class="form small_card_container">
+  <p style="text-align: center; width: 100%">
+    <i id="status_message"></i>
+  </p>
   {% with messages = get_flashed_messages() %} {% if messages %}
-  <p style="text-align: center; width: 100%"><i>{{ messages[0] }}</i></p>
+  <p style="text-align: center; width: 100%">
+    <i id="flash_msg">{{ messages[0] }}</i>
+  </p>
   {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
   <div class="small_card_flex" style="width: 60%; margin-left: 20%">
     <div class="info_card" style="min-width: 33%">
@@ -43,11 +48,23 @@
   const output = document.querySelector('#total');
   const input = document.querySelector('.eth_input');
   const price = document.querySelector('#price');
+  const flashMessage = document.querySelector('#flash_msg');
 
   input.addEventListener('input', (event) => {
     const amount = isFinite(event.target.value) ? event.target.value : 0;
 
     output.textContent = `${amount * price.textContent} eth`;
+  });
+
+  const submit = document.querySelector('#submit');
+  const statusMessage = document.querySelector('#status_message');
+
+  submit.addEventListener('click', () => {
+    statusMessage.textContent = 'Получаем разрешение на использование токенов';
+
+    if (flashMessage) {
+      flashMessage.textContent = '';
+    }
   });
 </script>
 
