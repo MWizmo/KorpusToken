@@ -618,6 +618,7 @@ def change_to_eth():
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_price = User.get_ktd_price(current_user.id)
     user = User.query.filter_by(id=current_user.id).first()
+    has_access_to_sell = User.has_access_to_sell(user.id)
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
@@ -635,7 +636,8 @@ def change_to_eth():
       db.session.add(transaction)
       db.session.commit()
     return render_template('change_to_eth.html', title='Обменять на eth',
-                           ktd_balance=ktd_balance, ktd_price=ktd_price, form=form)
+                           ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
+                           has_access_to_sell=has_access_to_sell)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])
