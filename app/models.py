@@ -141,7 +141,6 @@ class User(UserMixin, db.Model):
     def get_kti_price(current_user_id):
       file = open("app/static/ABI/Contract_ABI.json", "r")
       KorpusContract = w3.eth.contract(
-        # вводим его адрес и ABI
         Web3.toChecksumAddress(contract_address),
         abi=file.read()
       )
@@ -150,6 +149,17 @@ class User(UserMixin, db.Model):
       buyPrice = KorpusContract.functions.getBuyPriceKTI().call()
       
       return buyPrice / ETH_IN_WEI
+
+    @staticmethod
+    def has_access_to_sell(current_user_id):
+      file = open("app/static/ABI/Contract_ABI.json", "r")
+      KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+      )
+      file.close()
+
+      return KorpusContract.functions.sellers(User.get_eth_address(current_user_id)).call()
 
     @staticmethod
     def dict_of_responsibilities(current_user_id):

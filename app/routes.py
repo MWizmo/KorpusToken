@@ -619,7 +619,7 @@ def blockchain():
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
                           ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
-                          eth_balance=eth_balance)
+                          eth_balance=eth_balance, contract_address=contract_address)
 
 
 @app.route('/change_to_eth', methods=['GET', 'POST'])
@@ -628,9 +628,13 @@ def change_to_eth():
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_price = User.get_ktd_price(current_user.id)
     user = User.query.filter_by(id=current_user.id).first()
+    has_access_to_sell = User.has_access_to_sell(user.id)
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
+      if ktd_balance < float(form.amount.data):
+        flash('Недостаточно токенов.')
+        return redirect('change_to_eth')
       transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
@@ -645,7 +649,8 @@ def change_to_eth():
       db.session.add(transaction)
       db.session.commit()
     return render_template('change_to_eth.html', title='Обменять на eth',
-                           ktd_balance=ktd_balance, ktd_price=ktd_price, form=form)
+                           ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
+                           has_access_to_sell=has_access_to_sell)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])

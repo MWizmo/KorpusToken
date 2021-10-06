@@ -4,7 +4,7 @@
   {%
   if
   current_user.is_admin
-  %}style="margin-top:5vh; min-height: 90vh;"
+  %}style="margin-top:1vh; min-height: 90vh;"
   {%endif%}
 >
   <div class="small_card_flex" style="width: 60%; margin-left: 20%">
@@ -58,6 +58,20 @@
           </p>
         </div>
       </div>
+
+      <div
+        class="info_card"
+        style="display: block; padding: 0; margin-top: 3vh"
+      >
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Адрес основного смарт-контракта: </b>
+            <span class="info_card_text purple" style="font-size: smaller"
+              ><br />{{ contract_address }}</span
+            >
+          </p>
+        </div>
+      </div>
     </div>
     {% else %}
     <div class="info_card_block">
@@ -72,11 +86,28 @@
         </div>
       </div>
 
-      <div class="info_card" style="display: block; padding: 0">
+      <div
+        class="info_card"
+        style="display: block; padding: 0; margin-top: 3vh"
+      >
         <div class="info_card_text_block">
           <p class="info_card_text">
             <b>Количество эфира на вашем аккаунте: </b>
             <span class="info_card_text blue"><br />{{ eth_balance }} eth</span>
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="info_card"
+        style="display: block; padding: 0; margin-top: 3vh"
+      >
+        <div class="info_card_text_block">
+          <p class="info_card_text">
+            <b>Адрес основного смарт-контракта: </b>
+            <span class="info_card_text purple" style="font-size: smaller"
+              ><br />{{ contract_address }}</span
+            >
           </p>
         </div>
       </div>
