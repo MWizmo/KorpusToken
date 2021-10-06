@@ -127,7 +127,8 @@ class ChooseTeamForm(FlaskForm):
 
 
 class StartAssessmentForm(FlaskForm):
-    month = StringField('Укажите, за какой период проводится оценка (например, "Март" или "Март-апрель")', validators=[DataRequired()])
+    month1 = StringField('Укажите, за какой период проводится оценка', validators=[DataRequired()])
+    month2 = StringField('Укажите, за какой период проводится оценка', validators=[DataRequired()])
     submit = SubmitField('Начать оценку',render_kw={"class": "nav__link border"})
 
 class ChangeAddress(FlaskForm):

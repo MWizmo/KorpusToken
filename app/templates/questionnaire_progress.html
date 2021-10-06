@@ -78,8 +78,22 @@
 
                         <form method="post">
                             {{ form.hidden_tag() }}
-                            {{form.month.label}}<br>
-                            {{form.month()}}<br><br>
+                            {{form.month1.label}}<br>
+                            <label>С</label>
+                            <select name="month1">
+                                <option selected disabled></option>
+                                {% for month in monthes %}
+                                    <option value="month">{{month}}</option>
+                                {% endfor %}
+                            </select>
+                            <label>По</label>
+                            <select name="month2">
+                                <option selected disabled></option>
+                                {% for month in monthes %}
+                                    <option value="month">{{month}}</option>
+                                {% endfor %}
+                            </select><br><br>
+
                             {{form.submit()}}
                         </form>
                         {% if msg %}

@@ -434,7 +434,8 @@ class VotingInfo(db.Model):
 class VotingTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(16))
-    month = db.Column(db.String(32))
+    month_from = db.Column(db.String(32))
+    month_to = db.Column(db.String(32))
 
     @staticmethod
     def is_opened():

@@ -172,7 +172,7 @@ def questionnaire_self():
             i += 1
         db.session.commit()
         log('Заполнение личной анкеты')
-        return redirect(url_for('home'))
+        return redirect('/questionnaire_team')
 
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
                            q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
@@ -213,10 +213,13 @@ def questionnaire_team():
     for teammate in lst_teammates_bd:
         if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
             continue
-        cur_user = User.query.filter_by(id=teammate.user_id).first()
-        name = cur_user.name
-        surname = cur_user.surname
-        teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
+        try:
+            cur_user = User.query.filter_by(id=teammate.user_id).first()
+            name = cur_user.name
+            surname = cur_user.surname
+            teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
+        except Exception as e:
+            pass
 
     form = QuestionnaireTeam()
     questions = Questions.query.filter_by(type=2)
@@ -244,7 +247,7 @@ def questionnaire_team():
         done_teams = [q.team_id for q in
                       Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
         if len(teams_id) == len(done_teams):
-            return redirect(url_for('home'))
+            return redirect('/assessment_page')
         else:
             return redirect(url_for('questionnaire_team'))
     team_title = Teams.query.filter_by(id=team_id).first().name
@@ -304,13 +307,29 @@ def questionnaire_progress():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
     log('Просмотр страницы с прогрессом анкетирования')
+    d1 = datetime.date.today()
+    d2 = datetime.date(d1.year - 1, d1.month, d1.day)
+    delta = d1 - d2
+    monthes = []
+    month_dict = {'December': 'декабрь', 'January': 'январь', 'February': 'февраль', 'March': 'март', 'April': 'апрель', 'May': 'май',
+                  'June': 'июнь', 'July': 'июль', 'August': 'август', 'September': 'сентябрь', 'October': 'октябрь',
+                  'November': 'ноябрь'}
+    for i in range(delta.days + 1):
+        month = (d2 + datetime.timedelta(i)).strftime('%B')
+        if month in month_dict:
+            month = month_dict[month]
+        row = f"{month} {(d2 + datetime.timedelta(i)).strftime('%Y')}г."
+        if row not in monthes:
+            monthes.append(row)
+    monthes = monthes[::-1]
+
     form = StartAssessmentForm()
     if form.validate_on_submit():
         if QuestionnaireTable.is_opened():
             return render_template('questionnaire_progress.html', title='Прогресс голосования',
                                    access=get_access(current_user), form=form,
                                    msg='Сначала надо завершить текущий процесс анкетирования')
-        assessment_status = VotingTable(status='Active', month=form.month.data)
+        assessment_status = VotingTable(status='Active', month_from=form.month1.data, month_to=form.month2.data)
         db.session.add(assessment_status)
         db.session.commit()
         log('Открыл оценку')
@@ -415,7 +434,7 @@ def questionnaire_progress():
                                not_participated_team=not_participated_team_info)
     elif QuestionnaireTable.is_in_assessment():
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования', ready=True,
-                               access=get_access(current_user), form=form)
+                               access=get_access(current_user), form=form, monthes=monthes)
     else:
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                                access=get_access(current_user))
@@ -881,6 +900,8 @@ def assessment():
     #                            access=get_access(current_user))
 
     log('Просмотр страницы с оценкой')
+    if QuestionnaireTable.is_opened() and User.check_can_be_marked(current_user.id):
+        return redirect('/questionnaire_self')
     if not VotingTable.is_opened():
         return render_template('voting_progress.html', title='Оценка', access=get_access(current_user))
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
