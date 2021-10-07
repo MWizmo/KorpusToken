@@ -172,7 +172,7 @@ def questionnaire_self():
             i += 1
         db.session.commit()
         log('Заполнение личной анкеты')
-        return redirect(url_for('home'))
+        return redirect('/questionnaire_team')
 
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
                            q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
@@ -213,10 +213,13 @@ def questionnaire_team():
     for teammate in lst_teammates_bd:
         if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
             continue
-        cur_user = User.query.filter_by(id=teammate.user_id).first()
-        name = cur_user.name
-        surname = cur_user.surname
-        teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
+        try:
+            cur_user = User.query.filter_by(id=teammate.user_id).first()
+            name = cur_user.name
+            surname = cur_user.surname
+            teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
+        except Exception as e:
+            pass
 
     form = QuestionnaireTeam()
     questions = Questions.query.filter_by(type=2)
@@ -244,7 +247,7 @@ def questionnaire_team():
         done_teams = [q.team_id for q in
                       Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
         if len(teams_id) == len(done_teams):
-            return redirect(url_for('home'))
+            return redirect('/assessment_page')
         else:
             return redirect(url_for('questionnaire_team'))
     team_title = Teams.query.filter_by(id=team_id).first().name
@@ -304,6 +307,33 @@ def questionnaire_progress():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
     log('Просмотр страницы с прогрессом анкетирования')
+    d1 = datetime.date.today()
+    d2 = datetime.date(d1.year - 1, d1.month, d1.day)
+    delta = d1 - d2
+    monthes = []
+    month_dict = {'December': 'декабрь', 'January': 'январь', 'February': 'февраль', 'March': 'март', 'April': 'апрель', 'May': 'май',
+                  'June': 'июнь', 'July': 'июль', 'August': 'август', 'September': 'сентябрь', 'October': 'октябрь',
+                  'November': 'ноябрь'}
+    for i in range(delta.days + 1):
+        month = (d2 + datetime.timedelta(i)).strftime('%B')
+        if month in month_dict:
+            month = month_dict[month]
+        row = f"{month} {(d2 + datetime.timedelta(i)).strftime('%Y')}г."
+        if row not in monthes:
+            monthes.append(row)
+    monthes = monthes[::-1]
+
+    form = StartAssessmentForm()
+    if form.validate_on_submit():
+        if QuestionnaireTable.is_opened():
+            return render_template('questionnaire_progress.html', title='Прогресс голосования',
+                                   access=get_access(current_user), form=form,
+                                   msg='Сначала надо завершить текущий процесс анкетирования')
+        assessment_status = VotingTable(status='Active', month_from=form.month1.data, month_to=form.month2.data)
+        db.session.add(assessment_status)
+        db.session.commit()
+        log('Открыл оценку')
+        return redirect('voting_progress')
     is_opened = QuestionnaireTable.is_opened()
     if is_opened:
         questionnaire = dict(
@@ -398,14 +428,13 @@ def questionnaire_progress():
         for i in range(len(not_participated_team_ids)):
             not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
                                                not_participated_team_surnames[i], not_participated_team_teams[i]])
-
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                                access=get_access(current_user),
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                                not_participated_team=not_participated_team_info)
     elif QuestionnaireTable.is_in_assessment():
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования', ready=True,
-                               access=get_access(current_user))
+                               access=get_access(current_user), form=form, monthes=monthes)
     else:
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                                access=get_access(current_user))
@@ -1039,7 +1068,7 @@ def save_to_blockchain():
       timestamp = datetime.datetime(year=date.year, month=date.month,
                                day=date.day).timestamp()
       budget_item = budget_record.item
-      cost = round(budget_record.summa, 2) * 100
+      cost = round(budget_record.summa.replace(' ',''), 2) * 100
 
       nonce = w3.eth.getTransactionCount(account.address, 'pending')
 
@@ -1070,9 +1099,18 @@ def save_to_blockchain():
 
     return redirect(url_for('budget'))
 
+
 @app.route('/add_to_blockchain')
 @login_required
 def add_to_blockchain():
+    return render_template('add_to_blockchain.html', title='Записать в блокчейн')
+
+
+@app.route('/delete_budget_row', methods=['POST'])
+@login_required
+def delete_budget_row():
+    row_id = int(request.form.get('id'))
+    BudgetRecord()
     return render_template('add_to_blockchain.html', title='Записать в блокчейн')
 
 
@@ -1113,6 +1151,10 @@ def assessment():
     #                            access=get_access(current_user))
 
     log('Просмотр страницы с оценкой')
+    if QuestionnaireTable.is_opened() and User.check_can_be_marked(current_user.id):
+        return redirect('/questionnaire_self')
+    if not VotingTable.is_opened():
+        return render_template('voting_progress.html', title='Оценка', access=get_access(current_user))
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
         + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id) + User.check_teamlead(
                 current_user.id)) > 1:  # and (Axis.is_available(1)
@@ -1435,23 +1477,26 @@ def voting_progress():
         relation_results = list()
         for cadet_id in top_cadets:
             cadet = User.query.filter_by(id=cadet_id).first()
-            voting_num = len(Voting.query.filter(Voting.user_id == cadet_id, Voting.axis_id == 1,
-                                                 Voting.voting_id==assessment.id).all())
-            relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
+            if cadet:
+                voting_num = len(Voting.query.filter(Voting.user_id == cadet_id, Voting.axis_id == 1,
+                                                     Voting.voting_id==assessment.id).all())
+                relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
 
         business_results = list()
         for user_id in trackers:
             user = User.query.filter_by(id=user_id).first()
-            voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2,
-                                                 Voting.voting_id==assessment.id).all())
-            business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
+            if user:
+                voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2,
+                                                     Voting.voting_id==assessment.id).all())
+                business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
         authority_results = list()
         for user_id in atamans:
             user = User.query.filter_by(id=user_id).first()
-            voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3,
-                                                 Voting.voting_id==assessment.id).all())
-            authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
+            if user:
+                voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3,
+                                                     Voting.voting_id==assessment.id).all())
+                authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
         # if Axis.is_available(1):
         #     rel_text = 'Запретить голосование по оси отношений'
@@ -1727,10 +1772,10 @@ def questionnaire_of_cadets():
 @app.route('/user_profile', methods=['GET'])
 @login_required
 def user_profile():
-    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
-        log('Попытка просмотра профиля пользователя (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
+    #     log('Попытка просмотра профиля пользователя (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     uid = request.args.get('user_id')
     user = User.query.filter_by(id=uid).first()
     if not user:

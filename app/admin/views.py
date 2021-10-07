@@ -6,8 +6,6 @@ from datetime import datetime, date, timedelta
 from app import db
 from flask_admin.contrib.sqla import ModelView
 import datetime, calendar
-import locale
-locale.setlocale(locale.LC_ALL, '')
 
 
 class MyAdminIndexView(AdminIndexView):
