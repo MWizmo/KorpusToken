@@ -88,6 +88,7 @@
         >
       </div>
     </div>
+    {% if total_score >= 0 %}
     <div
       class="info_card"
       style="
@@ -135,7 +136,9 @@
         >
       </div>
     </div>
+    {% endif %}
   </div>
+  {% if total_score >= 0 %}
   <div
     class="small_card_flex"
     style="width: 100%; justify-content: center; margin-top: 1rem"
@@ -198,6 +201,6 @@
       >Распределить токены вклада</a
     >
   </div>
-
+ {% endif %}
   {% endblock %}
 </div>

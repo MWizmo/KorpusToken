@@ -19,6 +19,16 @@
             <button class="nav__link" onclick="document.location='/edit_team?tid={{team[0].id}}'">Редактировать состав</button>
         {% endif %}
         {% endfor %}
+        <br><br>
+        {% if current_user.is_admin %}
+                <form  action="" method="post" class="form">
+                    {{ form.hidden_tag() }}
+                    {{ form.csrf_token() }}
+                    {{form.title}}
+                    {{form.type}}
+                    {{form.submit(class_='submit')}}
+                </form>
+            {% endif %}
     </div>
 </div>
 {% endblock %}
