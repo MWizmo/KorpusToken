@@ -18,40 +18,4 @@
             <p class="card_title">Сообщество</p>
         </a>
     </div>
-<!--div class="intro">
-	<div class="container">
-	    <h2 class="intro_title">Добро пожаловать в KorpusToken, {{ user.name }}!</h2>
-	</div>
-</div>
-
-	<div class="home_text" align="center">
-		<h3>{{message}}</h3><br>
-		{% if flag %}
-		 <a class="nav__link border" href="{{ url_for('choose_top_cadets') }}">Выбрать курсантов для оценки по оси отношений</a>
-		{% endif %}
-	</div>
-	{% if info %}
-	<div class="res_container">
-		<table class="result_table" cellspacing="0">
-			<thead>
-				<tr><td></td>
-				{% for c in criterions %}
-					<td>{{c}}</td>
-				{% endfor %}
-					<td>Сумма</td>
-				</tr>
-			</thead>
-			<tbody>
-				{% for row in info %}
-					<tr>
-						{% for cell in row %}
-							<td>{{cell}}</td>
-						{% endfor %}
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	</div>
-	{% endif %}
--->
 {% endblock %}

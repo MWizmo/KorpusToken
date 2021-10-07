@@ -31,31 +31,30 @@ def log(action, user_id=None):
 @login_required
 def home():
     log('Просмотр главной страницы')
-    user = {'name': User.query.filter_by(id=current_user.id).first().name}
-    message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
-              'мы все так давно ждали!  '
-    cur_voting = VotingTable.query.filter_by(status='Finished').all()
-    if cur_voting:
-        voting_id = cur_voting[-1].id
-        month = cur_voting[-1].month
-        filename = 'results_' + str(voting_id) + '.csv'
-        if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
-            user_info = list()
-            with open(os.path.join(app.root_path + '/results', filename)) as file:
-                reader = csv.reader(file)
-                next(reader)
-                for row in reader:
-                    user_marks = row[0].split(';')
-                    user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
-                    user_info.append(user_marks)
-            user_info.sort(key=lambda i: i[-1], reverse=True)
-            criterions = [c.name for c in Criterion.query.all()]
-            message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за {}.'.format(month)
-            return render_template('homepage.html', title='KorpusToken', user=user,
-                                   access=get_access(current_user),
-                                   criterions=criterions, info=user_info, message=message, flag=True)
-    return render_template('homepage.html', title='KorpusToken', user=user, access=get_access(current_user),
-                           message=message)
+    # user = {'name': User.query.filter_by(id=current_user.id).first().name}
+    # message = 'В настоящее время функционал портала ограничен. Очень скоро здесь появится всё то, чего ' \
+    #           'мы все так давно ждали!  '
+    # cur_voting = VotingTable.query.filter_by(status='Finished').all()
+    # if cur_voting:
+    #     voting_id = cur_voting[-1].id
+    #     month = cur_voting[-1].month
+    #     filename = 'results_' + str(voting_id) + '.csv'
+    #     if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+    #         user_info = list()
+    #         with open(os.path.join(app.root_path + '/results', filename)) as file:
+    #             reader = csv.reader(file)
+    #             next(reader)
+    #             for row in reader:
+    #                 user_marks = row[0].split(';')
+    #                 user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+    #                 user_info.append(user_marks)
+    #         user_info.sort(key=lambda i: i[-1], reverse=True)
+    #         criterions = [c.name for c in Criterion.query.all()]
+    #         message = message[:-1] + 'А пока вы можете посмотреть результаты оценки вклада за {}.'.format(month)
+    #         return render_template('homepage.html', title='KorpusToken', user=user,
+    #                                access=get_access(current_user),
+    #                                criterions=criterions, info=user_info, message=message, flag=True)
+    return render_template('homepage.html', title='KorpusToken', access=get_access(current_user))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -557,6 +556,12 @@ def teams_crew():
     #     return render_template('gryazniy_vzlomshik.html',
     #                            access=get_access(current_user))
     log('Просмотр страницы с составами команд')
+    form = TeamAdding()
+    if form.validate_on_submit():
+        team = Teams(name=form.title.data, type=int(form.type.data))
+        db.session.add(team)
+        db.session.commit()
+        log('Добавление команды с названием "{}"'.format(form.title.data))
     teams = Teams.query.all()
     info = list()
     for team in teams:
@@ -566,7 +571,7 @@ def teams_crew():
             info.append(
                 (team, Membership.get_crew_of_team(team.id), TeamRoles.check_team_lead(current_user.id, team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
-                           access=get_access(current_user))
+                           access=get_access(current_user), form=form)
 
 
 @app.route('/edit_team', methods=['GET', 'POST'])
