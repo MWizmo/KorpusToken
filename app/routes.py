@@ -919,15 +919,12 @@ def emission():
     ktd_emission = kti_emission * 3 / 7
 
     cur_voting = VotingTable.query.filter_by(status='Active').first()
-    if cur_voting:
-        voting_id = cur_voting.id
-    else:
+    try:
         voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
-    criterions = [c.name for c in Criterion.query.all()]
-    users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
+        users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
                  User.check_can_be_marked(user.id)]
-    marks_counter = 0
-    for user in users:
+        marks_counter = 0
+        for user in users:
             res = [user[1]]
             user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
                                                                              Voting.id == VotingInfo.voting_id).filter(
@@ -936,7 +933,9 @@ def emission():
             for mark in user_res:
                 if float(mark[0]) == 1.0:
                     marks_counter += 1
-
+    except Exception as e:
+        marks_counter = -1
+        users = []
     return render_template('emission.html', title='Эмиссия токенов', ktd_price=ktd_price,
                            kti_price=kti_price, current_budget=current_budget, exchange_rate=exchange_rate,
                            kti_emission=kti_emission, ktd_emission=ktd_emission,
