@@ -27,6 +27,12 @@
         </p>
         {{ form.address(size=256, class_="eth_input" ) }}
       </div>
+      <div class="dark_block">
+        <p class="info_card_text">
+          <b>Лимит</b>
+        </p>
+        {{ form.num(size=256, class_="eth_input" ) }}
+      </div>
     </div>
   </div>
   <p>{{ form.submit(class_="submit") }}</p>

@@ -145,12 +145,22 @@ class AddBudgetItemForm(FlaskForm):
 
 class ManageKTIForm(FlaskForm):
     address = StringField(validators=[DataRequired()])
+    num = StringField(validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
 
 class ManageKTDForm(FlaskForm):
     address = StringField(validators=[DataRequired()])
+    num = StringField(validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
 
 class ChangeToEthForm(FlaskForm):
     amount = StringField(validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
+class ChangeEthExchangeRate(FlaskForm):
+    price = StringField('Напишите актуальную стоимость 1 eth', validators=[DataRequired()])
+    submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
+class FixProfit(FlaskForm):
+    profit = StringField('Введите объём полученных средств в рублях', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})

@@ -30,6 +30,18 @@ class User(UserMixin, db.Model):
                 return True
         return False
 
+    @staticmethod
+    def check_accountant(current_user_id):
+      statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+      for status in statuses:
+        if status.status_id == 8:
+          return True
+      return False
+
+    @property
+    def is_accountant(self):
+      return User.check_accountant(self.id)
+
     @property
     def is_admin(self):
         return User.check_admin(self.id)
@@ -498,3 +510,13 @@ class BudgetRecord(db.Model):
     summa = db.Column(db.Float)
     who_added = db.Column(db.String(128))
     is_saved = db.Column(db.Boolean, default=False, nullable=False)
+
+class Profit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date)
+    summa = db.Column(db.Float)
+
+class EthExchangeRate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime)
+    exchange_rate = db.Column(db.Float)

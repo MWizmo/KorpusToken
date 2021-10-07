@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block content %}
+<div class="small_card_container">
+  <div class="small_card_flex" style="flex-direction: column">
+    <form action="" method="post" novalidate class="form">
+      {% with messages = get_flashed_messages() %} {%
+      if messages %}
+      <p><i>{{ messages[0] }}</i></p>
+      {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+      <p style="width: 100%;">
+        <span class="eth_text" style="margin-left: 35%;">{{ form.profit.label }}</span> <br />
+				<div class="dark_block" style="width: 60%; margin-left: 20%">
+					{{ form.profit(size=256, class_="eth_input", style="margin-top: 2vh" ) }}
+				</div>
+      </p>
+			<div style="width: 100%; display: flex; justify-content: center;">
+				{% for error in form.profit.errors %}
+        	<span style="color: red"> {{error}} </span>
+      	{% endfor %}
+			</div>
+			
+      <p>{{ form.submit(class_="submit") }}</p>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

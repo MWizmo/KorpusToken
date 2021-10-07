@@ -10,7 +10,7 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, Profit
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -605,7 +605,7 @@ def blockchain():
     kti_price = User.get_kti_price(current_user.id)
     eth_balance = User.get_eth_balance(current_user.id)
 
-    kti_total = token_utils.get_KTI_total(kti_address) / KT_BITS_IN_KT
+    kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
                           ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
@@ -701,7 +701,8 @@ def manage_ktd():
 
     if form.validate_on_submit():
       address = form.address.data
-      message, is_error = token_utils.set_KTD_seller(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      num = int(float(form.num.data) * KT_BITS_IN_KT)
+      message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY'))
       flash(message)
 
       return redirect(url_for('manage_ktd'))
@@ -722,7 +723,8 @@ def manage_kti():
 
     if form.validate_on_submit():
       address = form.address.data
-      message, is_error = token_utils.set_KTI_buyer(address, os.environ.get('ADMIN_PRIVATE_KEY'))
+      num = int(float(form.num.data) * KT_BITS_IN_KT)
+      message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY'))
       flash(message)
 
       return redirect(url_for('manage_kti'))
@@ -736,6 +738,255 @@ def manage_kti():
 def budget():
     return render_template('budget.html', title='Бюджет')
 
+@app.route('/change_eth_exchange_rate', methods=['GET', 'POST'])
+@login_required
+def change_eth_exchange_rate():
+    if not current_user.is_accountant:
+      return redirect(url_for('home'))
+
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
+
+    if (exchange_rate_record):
+      exchange_rate = exchange_rate_record.exchange_rate
+    else:
+      exchange_rate = 248000
+
+    form = ChangeEthExchangeRate()
+
+    if form.validate_on_submit():
+      price = float(form.price.data)
+      eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
+
+      db.session.add(eth_exchange_rate)
+      db.session.commit()
+
+      return redirect(url_for('emission'))
+	  
+    return render_template('change_eth_exchange_rate.html', title='Изменить курс eth', form=form,
+                           exchange_rate=exchange_rate)
+
+@app.route('/fix_profit', methods=['GET', 'POST'])
+@login_required
+def fix_profit():
+    if not current_user.is_accountant:
+      return redirect(url_for('home'))
+
+    form = FixProfit()
+
+    if form.validate_on_submit():
+      profit = float(form.profit.data)
+      profit_record = Profit(date=datetime.datetime.now(), summa=profit)
+
+      db.session.add(profit_record)
+      db.session.commit()
+
+      current_profit = db.session.query(func.sum(Profit.summa)).first()[0] or 0
+      current_ktd_price = User.get_ktd_price(current_user.id)
+      ktd_total = token_utils.get_KTD_total(ktd_address)
+      exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+      exchange_rate = 0
+
+      if (exchange_rate_record):
+        exchange_rate = exchange_rate_record.exchange_rate
+      else:
+        exchange_rate = 248000
+
+      new_ktd_price = (current_profit / (ktd_total / KT_BITS_IN_KT)) / exchange_rate
+
+      print(new_ktd_price)
+      
+      if new_ktd_price > current_ktd_price:
+        token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY'))
+        token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY'))
+
+      return redirect(url_for('emission'))
+	  
+    return render_template('fix_profit.html', title='Зафиксировать прибыль', form=form)
+
+@app.route('/confirm_emission')
+@login_required
+def confirm_emission():
+  if not current_user.is_accountant:
+      return redirect(url_for('home'))
+
+  return render_template('confirm_emission.html', title='Произвести эмиссию')
+
+@app.route('/make_emission')
+@login_required
+def make_emission():
+  if not current_user.is_accountant:
+      return redirect(url_for('home'))
+  kti_price = User.get_kti_price(current_user.id)
+  current_date = datetime.datetime.now()
+  current_year = current_date.year
+  current_month = current_date.month
+  current_budget = db.session.\
+    query(func.sum(BudgetRecord.summa)).\
+    filter(
+      BudgetRecord.date >= datetime.datetime(
+        current_year,
+        current_month,
+        1
+      )
+    ).\
+    filter(
+      BudgetRecord.date <= datetime.datetime(
+        current_year,
+        current_month,
+        31
+      )
+    ).first()[0] or 0
+  exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+  exchange_rate = 0
+
+  if (exchange_rate_record):
+    exchange_rate = exchange_rate_record.exchange_rate
+  else:
+    exchange_rate = 248000
+
+  kti_emission = int(((current_budget / exchange_rate) / kti_price) * KT_BITS_IN_KT)
+  ktd_emission = int((kti_emission * 3 / 7) * KT_BITS_IN_KT)
+
+  contract_checksum_address = Web3.toChecksumAddress(contract_address)
+
+  token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get('ADMIN_PRIVATE_KEY'))
+
+  return redirect(url_for('emission'))
+
+@app.route('/emission')
+@login_required
+def emission():
+    ktd_price = User.get_ktd_price(current_user.id)
+    kti_price = User.get_kti_price(current_user.id)
+    current_date = datetime.datetime.now()
+    current_year = current_date.year
+    current_month = current_date.month
+    current_budget = db.session.\
+      query(func.sum(BudgetRecord.summa)).\
+      filter(
+        BudgetRecord.date >= datetime.datetime(
+          current_year,
+          current_month,
+          1
+        )
+      ).\
+     	filter(
+        BudgetRecord.date <= datetime.datetime(
+          current_year,
+          current_month,
+          31
+        )
+      ).first()[0] or 0
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
+
+    if (exchange_rate_record):
+      exchange_rate = exchange_rate_record.exchange_rate
+    else:
+      exchange_rate = 248000
+
+    kti_emission = (current_budget / exchange_rate) / kti_price
+    ktd_emission = kti_emission * 3 / 7
+
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    if cur_voting:
+        voting_id = cur_voting.id
+    else:
+        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+    criterions = [c.name for c in Criterion.query.all()]
+    users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
+                 User.check_can_be_marked(user.id)]
+    marks_counter = 0
+    for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+                VotingInfo.criterion_id).all()
+            for mark in user_res:
+                if float(mark[0]) == 1.0:
+                    marks_counter += 1
+
+    return render_template('emission.html', title='Эмиссия токенов', ktd_price=ktd_price,
+                           kti_price=kti_price, current_budget=current_budget, exchange_rate=exchange_rate,
+                           kti_emission=kti_emission, ktd_emission=ktd_emission,
+                           amount_of_assesment_members=len(users), total_score=marks_counter)
+
+@app.route('/confirm_tokens_distribution')
+@login_required
+def confirm_tokens_distribution():
+    if not current_user.is_accountant:
+      return redirect(url_for('home'))
+
+    return render_template('confirm_tokens_distribution.html', title='Распределить токены')
+
+@app.route('/make_tokens_distribution')
+@login_required
+def make_tokens_distribution():
+    if not current_user.is_accountant:
+        return redirect(url_for('home'))
+    kti_price = User.get_kti_price(current_user.id)
+    current_date = datetime.datetime.now()
+    current_year = current_date.year
+    current_month = current_date.month
+    current_budget = db.session.\
+      query(func.sum(BudgetRecord.summa)).\
+      filter(
+        BudgetRecord.date >= datetime.datetime(
+          current_year,
+          current_month,
+          1
+        )
+      ).\
+     	filter(
+        BudgetRecord.date <= datetime.datetime(
+          current_year,
+          current_month,
+          31
+        )
+      ).first()[0] or 0
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
+
+    if (exchange_rate_record):
+      exchange_rate = exchange_rate_record.exchange_rate
+    else:
+      exchange_rate = 248000
+
+    kti_emission = (current_budget / exchange_rate) / kti_price
+    ktd_emission = kti_emission * 3 / 7
+    
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    if cur_voting:
+        voting_id = cur_voting.id
+    else:
+        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+    criterions = [c.name for c in Criterion.query.all()]
+    users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id)) for user in User.query.all() if
+                 User.check_can_be_marked(user.id)]
+    marks_counter = 0
+    for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+                VotingInfo.criterion_id).all()
+            for mark in user_res:
+                if float(mark[0]) == 1.0:
+                    marks_counter += 1
+    ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
+    for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+                VotingInfo.criterion_id).all()
+            marks = sum([int(current_res[0]) for current_res in user_res])
+            mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
+            token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY'))
+
+    return redirect(url_for('emission'))
 
 @app.route('/add_budget_item', methods=['GET', 'POST'])
 @login_required

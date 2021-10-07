@@ -1,12 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<div
-  class="small_card_container"
-  {%
-  if
-  current_user.is_admin
-  %}style="margin-top:1vh; min-height: 90vh;"
-  {%endif%}
->
+<div class="small_card_container" style="margin-top: 1vh; min-height: 90vh">
   <div class="small_card_flex" style="width: 60%; margin-left: 20%">
     {% if current_user.is_admin %}
     <div class="info_card_block">
@@ -243,6 +236,20 @@
       >
         <img class="small_card_img" src="/static/images/change_eth.png" />
         <p class="small_card_text">Обменять на eth</p>
+      </a>
+      {% endif %} {% if current_user.is_accountant %}
+      <a
+        href="/emission"
+        class="small_card small_card_special2"
+        style="margin-top: 3vh"
+        onmouseover="enlarge_block(38);"
+        id="block38"
+        onmouseleave="reduce_block(38);"
+      >
+        <img class="small_card_img" src="/static/images/emission.png" />
+        <p class="small_card_text" style="text-align: center">
+          Эмиссия токенов
+        </p>
       </a>
       {% endif %}
     </div>
