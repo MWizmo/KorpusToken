@@ -617,6 +617,24 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "TKNbits",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      }
+    ],
+    "name": "sendKTD",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "date",
         "type": "uint256"
       },

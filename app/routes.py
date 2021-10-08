@@ -729,7 +729,7 @@ def manage_ktd():
       return redirect(url_for('home'))
 
     contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
-    ktd_total = token_utils.get_KTD_total(ktd_address)
+    ktd_total = token_utils.get_main_contract_KTD_balance() / KT_BITS_IN_KT
     
     form = ManageKTIForm()
 
@@ -751,7 +751,7 @@ def manage_kti():
       return redirect(url_for('home'))
 
     contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
-    kti_total = token_utils.get_KTI_total(kti_address) / KT_BITS_IN_KT
+    kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
 
     form = ManageKTIForm()
 

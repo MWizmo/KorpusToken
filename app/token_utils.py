@@ -44,6 +44,16 @@ def get_main_contract_KTI_balance():
 
     return Korpus_KTI.functions.balanceOf(Web3.toChecksumAddress(contract_address)).call()
 
+def get_main_contract_KTD_balance():
+    file = open("app/static/ABI/KTD_ABI.json", "r")
+    Korpus_KTD = w3.eth.contract(
+      Web3.toChecksumAddress(ktd_address),
+      abi=file.read()
+    )
+    file.close()
+
+    return Korpus_KTD.functions.balanceOf(Web3.toChecksumAddress(contract_address)).call()
+
 def get_KTI_total(kti_address):
     file = open("app/static/ABI/KTI_ABI.json", "r")
     Korpus_KTI = w3.eth.contract(
