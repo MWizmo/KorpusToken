@@ -3,6 +3,8 @@ import datetime
 import threading
 import os
 import csv
+
+import requests
 from sqlalchemy import func
 from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
@@ -449,6 +451,9 @@ def finish_questionnaire():
     questionnaire = QuestionnaireTable.query.filter_by(status='Active').first()
     questionnaire.status = 'Ready for assessment'
     db.session.commit()
+    teams = Teams.query.all()
+    for t in teams:
+        requests.get(f'/make_graphs?team_id={t[0]}')
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
 

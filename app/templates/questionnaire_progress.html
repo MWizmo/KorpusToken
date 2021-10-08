@@ -64,13 +64,13 @@
         </p>
         <a class='nav__link border' href="{{ url_for('finish_questionnaire') }}">Завершить анкетирование</a>
         <br><br>
-        <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
+        <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
         {% else %}
             {% if ready %}
                 {% if access.assessment_opened %}
                     <h2>В настоящее время проходит оценка вклада</h2>
                     <br><br>
-                    <a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a>
+                    <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
                 {% else %}
                     {% if current_user.is_admin %}
                     <h2>Анкетирование завершено, можно приступать к оценке</h2>
