@@ -3,6 +3,8 @@ import datetime
 import threading
 import os
 import csv
+
+import requests
 from sqlalchemy import func
 from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
@@ -449,6 +451,9 @@ def finish_questionnaire():
     questionnaire = QuestionnaireTable.query.filter_by(status='Active').first()
     questionnaire.status = 'Ready for assessment'
     db.session.commit()
+    teams = Teams.query.all()
+    for t in teams:
+        requests.get(f'/make_graphs?team_id={t[0]}')
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
 
@@ -736,7 +741,7 @@ def manage_ktd():
     if form.validate_on_submit():
       address = form.address.data
       num = int(float(form.num.data) * KT_BITS_IN_KT)
-      message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY'))
+      message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
       flash(message)
 
       return redirect(url_for('manage_ktd'))
@@ -758,7 +763,7 @@ def manage_kti():
     if form.validate_on_submit():
       address = form.address.data
       num = int(float(form.num.data) * KT_BITS_IN_KT)
-      message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY'))
+      message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
       flash(message)
 
       return redirect(url_for('manage_kti'))
@@ -831,8 +836,8 @@ def fix_profit():
       print(new_ktd_price)
       
       if new_ktd_price > current_ktd_price:
-        token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY'))
-        token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY'))
+        token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
       return redirect(url_for('emission'))
 	  
@@ -884,7 +889,7 @@ def make_emission():
 
   contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
-  token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get('ADMIN_PRIVATE_KEY'))
+  token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
   return redirect(url_for('emission'))
 
@@ -1017,7 +1022,7 @@ def make_tokens_distribution():
                 VotingInfo.criterion_id).all()
             marks = sum([int(current_res[0]) for current_res in user_res])
             mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
-            token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY'))
+            token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
     return redirect(url_for('emission'))
 
@@ -1056,7 +1061,7 @@ def save_to_blockchain():
     if not current_user.is_admin:
       return redirect(url_for('home'))
 
-    account = w3.eth.account.privateKeyToAccount(os.environ.get('ADMIN_PRIVATE_KEY'))
+    account = w3.eth.account.privateKeyToAccount(os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     
     budget_records = BudgetRecord.query.filter_by(is_saved=False).all()
 

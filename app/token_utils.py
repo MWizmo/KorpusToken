@@ -311,6 +311,7 @@ def mint_KTD(amount, receiver, private_key):
     return "Число токенов должно быть больше нуля.", True
 
 def mint_KTI(amount, receiver, private_key):
+  print(private_key)
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
     account = w3.eth.account.privateKeyToAccount(private_key)
