@@ -70,9 +70,15 @@
                 {% if access.assessment_opened %}
                     <h2>В настоящее время проходит оценка вклада</h2>
                     <br><br>
+                    {% if current_user.is_chieftain %}
+                        <div class="">
+                            <a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a>
+                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Зафиксировать результаты оценки</a>
+                        </div>
+                    {% endif %}
                     <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
                 {% else %}
-                    {% if current_user.is_admin %}
+                    {% if current_user.is_chieftain %}
                     <h2>Анкетирование завершено, можно приступать к оценке</h2>
                     <div class="vote_progress">
 
@@ -101,16 +107,30 @@
                         {% endif %}
                         <!--a class='nav__link border' href="{{ url_for('start_assessment') }}">Начать оценку</a-->
                     </div>
+                    {% else %}
+                        <h2>Анкетирование завершено, ожидаем начала оценки</h2>
                     {% endif %}
                 {% endif %}
 
-
+            {% elif fixed_id %}
+                <h2>Результаты оценки вклада зафиксированы атаманами</h2>
+                    <br><br>
+                    {% if current_user.is_chieftain %}
+                        <div class="">
+                            <a class='nav__link border' href="{{ url_for('add_to_blockchain') }}">Записать результаты в блокчейн</a>
+                        </div>
+                    {% endif %}
+            {% elif emission_id %}
+                <h2>Результаты оценки вклада записаны в блокчейн<br><br>Ожидаем эмиссии токенов</h2>
             {% else %}
                 <h2>В данный момент нет активного анкетирования</h2>
                 <br><br>
+                {% if current_user.is_chieftain %}
                 <a class="nav__link border" href="{{url_for('start_questionnaire')}}">Начать новое анкетирование</a>
+                {% endif %}
             {% endif %}
         {% endif %}
+
     </div>
 
 

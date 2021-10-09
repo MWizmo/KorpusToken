@@ -303,10 +303,10 @@ def question_adding():
 @app.route('/questionnaire_progress', methods=['POST', 'GET'])
 @login_required
 def questionnaire_progress():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с прогрессом анкетирования (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
+    # if not User.check_admin(current_user.id):
+    #     log('Попытка просмотра страницы с прогрессом анкетирования (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html',
+    #                            access=get_access(current_user))
     log('Просмотр страницы с прогрессом анкетирования')
     d1 = datetime.date.today()
     d2 = datetime.date(d1.year - 1, d1.month, d1.day)
@@ -434,10 +434,22 @@ def questionnaire_progress():
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                                not_participated_team=not_participated_team_info)
     elif QuestionnaireTable.is_in_assessment():
-        return render_template('questionnaire_progress.html', title='Прогресс анкетирования', ready=True,
+        return render_template('questionnaire_progress.html', title='Прогресс оценки', ready=True,
                                access=get_access(current_user), form=form, monthes=monthes)
+    elif VotingTable.current_fixed_voting_id():
+        cur_id = VotingTable.current_fixed_voting_id()
+        return render_template('questionnaire_progress.html', title='Прогресс оценки', fixed_id=cur_id,
+                               access=get_access(current_user), )
+    elif VotingTable.current_emission_voting_id():
+        cur_id = VotingTable.current_emission_voting_id()
+        return render_template('questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
+                               access=get_access(current_user))
+    elif VotingTable.current_distribution_voting_id():
+        cur_id = VotingTable.current_distribution_voting_id()
+        return render_template('questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
+                               access=get_access(current_user))
     else:
-        return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
+        return render_template('questionnaire_progress.html', title='Прогресс оценки',
                                access=get_access(current_user))
 
 
@@ -843,6 +855,7 @@ def fix_profit():
 	  
     return render_template('fix_profit.html', title='Зафиксировать прибыль', form=form)
 
+
 @app.route('/confirm_emission')
 @login_required
 def confirm_emission():
@@ -890,7 +903,8 @@ def make_emission():
   contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
   token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-
+  VotingTable.query.get(VotingTable.current_emission_voting_id()).status = 'Distribution'
+  db.session.commit()
   return redirect(url_for('emission'))
 
 @app.route('/emission')
@@ -928,9 +942,9 @@ def emission():
     kti_emission = (current_budget / exchange_rate) / kti_price
     ktd_emission = kti_emission * 3 / 7
 
-    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    voting_id = VotingTable.current_emission_voting_id()
     try:
-        voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
+        # voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
         users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
                  User.check_can_be_marked(user.id)]
         marks_counter = 0
@@ -946,10 +960,13 @@ def emission():
     except Exception as e:
         marks_counter = -1
         users = []
+    #voting_id = VotingTable.current_fixed_voting_id()
+    distribution_id = VotingTable.current_distribution_voting_id()
     return render_template('emission.html', title='Эмиссия токенов', ktd_price=ktd_price,
                            kti_price=kti_price, current_budget=current_budget, exchange_rate=exchange_rate,
-                           kti_emission=kti_emission, ktd_emission=ktd_emission,
-                           amount_of_assesment_members=len(users), total_score=marks_counter)
+                           kti_emission=kti_emission, ktd_emission=ktd_emission, voting_id=voting_id,
+                           amount_of_assesment_members=len(users), total_score=marks_counter,
+                           distribution_id=distribution_id)
 
 @app.route('/confirm_tokens_distribution')
 @login_required
@@ -1115,12 +1132,23 @@ def add_to_blockchain():
     return render_template('add_to_blockchain.html', title='Записать в блокчейн')
 
 
+@app.route('/write_voting_progress')
+@login_required
+def write_voting_progress():
+    cur_id = VotingTable.current_fixed_voting_id()
+    # Запись результатов в блокчейн
+    VotingTable.query.get(cur_id).status = 'Emission'
+    db.session.commit()
+    return redirect('/questionnaire_progress')
+
+
 @app.route('/delete_budget_row', methods=['POST'])
 @login_required
 def delete_budget_row():
     row_id = int(request.form.get('id'))
-    BudgetRecord()
-    return render_template('add_to_blockchain.html', title='Записать в блокчейн')
+    BudgetRecord.query.filter_by(id=row_id).delete()
+    db.session.commit()
+    return redirect('/current_budget')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -1403,7 +1431,7 @@ def finish_assessment():
     if assessment_status:
         q = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
         q.status = 'Finished'
-        assessment_status.status = 'Finished'
+        assessment_status.status = 'Fixed'
         db.session.commit()
         log('Закрыл оценку')
 
@@ -1629,10 +1657,10 @@ def delete_status():
 @app.route('/sum_up_assessment', methods=['GET', 'POST'])
 @login_required
 def sum_up_assessment():
-    if not (User.check_admin(current_user.id)):
-        log('Попытка подведения результатов оценки (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
+    # if not (User.check_admin(current_user.id)):
+    #     log('Попытка подведения результатов оценки (ГВ)')
+    #     return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+    #                            access=get_access(current_user))
     cur_voting = VotingTable.query.filter_by(status='Active').first()
     if cur_voting:
         voting_id = cur_voting.id

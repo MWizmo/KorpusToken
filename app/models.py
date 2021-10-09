@@ -43,6 +43,10 @@ class User(UserMixin, db.Model):
       return User.check_accountant(self.id)
 
     @property
+    def is_chieftain(self):
+        return User.check_chieftain(self.id)
+
+    @property
     def is_admin(self):
         return User.check_admin(self.id)
 
@@ -456,6 +460,30 @@ class VotingTable(db.Model):
     @staticmethod
     def current_voting_id():
         return VotingTable.query.filter_by(status='Active').first().id
+
+    @staticmethod
+    def current_fixed_voting_id():
+        a = VotingTable.query.filter_by(status='Fixed').all()
+        if a:
+            return a[-1].id
+        else:
+            return 0
+
+    @staticmethod
+    def current_emission_voting_id():
+        a = VotingTable.query.filter_by(status='Emission').all()
+        if a:
+            return a[-1].id
+        else:
+            return 0
+
+    @staticmethod
+    def current_distribution_voting_id():
+        a = VotingTable.query.filter_by(status='Distribution').all()
+        if a:
+            return a[-1].id
+        else:
+            return 0
 
 
 class Log(db.Model):

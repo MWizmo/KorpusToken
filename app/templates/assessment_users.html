@@ -7,20 +7,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});">
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});" style="margin-left:10%;">
     <br>
     <a class="nav__link border" href="https://docs.google.com/document/d/1d7S4sbN-wfbttvzAalUktarkRDbSRJX23PgL8FUDz3s/edit" target="_blank">Расшифровка критериев оценки</a>
     <br><br>
     <div>
             {% if axis.id == 3 %}
-                <div class="vote_block">
+                <div class="vote_block" style="width:80%;">
                     <table class="vote_table2" cellpadding="0">
                     <tr><td><h3>Ось {{axis.name}}</h3></td></tr>
                         <tr><td><br></td></tr>
                     {% for c in criterions %}
                         <tr class="bottom_border"><td colspan="3"><h4 >{{c.name}} ({{questions[loop.index0].text}})</h4></td>
 
-                            <td><h4 class="bottom_border">Ответы из анкеты</h4></td>
+                            <td><h4 class="bottom_border left_border">Ответы из анкеты</h4></td>
                         </tr>
                         {% for member in team_members %}
                             <tr>

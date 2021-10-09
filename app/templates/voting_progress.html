@@ -30,12 +30,7 @@
             <a class='nav__link border' href="{{ url_for('axis_access', axis_id=2) }}">{{bus_text}}</a>
             <a class='nav__link border' href="{{ url_for('axis_access', axis_id=3) }}">{{auth_text}}</a>
         </div-->
-    {% if current_user.is_admin %}
-        <div class="vote_progress">
-            <a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Сформировать результаты оценки</a>
-            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Завершить оценку</a>
-        </div>
-    {% endif %}
+
     </div>
     {% else %}
     <div style="margin-left:10%;">
