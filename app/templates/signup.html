@@ -13,7 +13,7 @@
         <form action="" method="post">
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.email.label }}</span> <br>
                 {{ form.email(size=32) }}
                 {% for error in form.email.errors %}
@@ -21,7 +21,7 @@
                         {{ error }}
                     </span>
                 {% endfor %}
-            </p>
+            </p-->
             <p>
                 <span class="main_text">{{ form.login.label }}</span> <br>
                 {{ form.login(size=32) }}
@@ -111,7 +111,7 @@
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
                 {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
             </p>
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
                 {{ form.vk_url }}
             </p>
@@ -124,7 +124,7 @@
                 <span class="main_text">{{ form.inst_url.label }}</span> <br>
                 {{ form.inst_url }}<br>
                 <label>если нет, оставить -</label>
-            </p>
+            </p-->
             <p>
                 {{ form.submit(class_="submit") }}
             </p>
