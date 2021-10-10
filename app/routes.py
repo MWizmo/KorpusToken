@@ -1102,7 +1102,7 @@ def save_to_blockchain():
       timestamp = datetime.datetime(year=date.year, month=date.month,
                                day=date.day).timestamp()
       budget_item = budget_record.item
-      cost = round(budget_record.summa.replace(' ',''), 2) * 100
+      cost = round(budget_record.summa, 2) * 100
 
       nonce = w3.eth.getTransactionCount(account.address, 'pending')
 
