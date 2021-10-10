@@ -1020,7 +1020,7 @@ def make_tokens_distribution():
     kti_emission = (current_budget / exchange_rate) / kti_price
     ktd_emission = kti_emission * 3 / 7
     
-    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    cur_voting = VotingTable.query.filter_by(status='Distribution').first()
     if cur_voting:
         voting_id = cur_voting.id
     else:
@@ -1048,7 +1048,8 @@ def make_tokens_distribution():
             marks = sum([int(current_res[0]) for current_res in user_res])
             mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
             token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-
+    VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
+    db.session.commit()
     return redirect(url_for('emission'))
 
 @app.route('/add_budget_item', methods=['GET', 'POST'])
