@@ -429,8 +429,9 @@ def questionnaire_progress():
         for i in range(len(not_participated_team_ids)):
             not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
                                                not_participated_team_surnames[i], not_participated_team_teams[i]])
+        counter = len(TopCadetsVoting.query.all())
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
-                               access=get_access(current_user),
+                               access=get_access(current_user), counter=counter,
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                                not_participated_team=not_participated_team_info)
     elif QuestionnaireTable.is_in_assessment():
