@@ -1182,6 +1182,12 @@ def community():
     return render_template('community.html', title='Сообщество', team_id=teams[0].team_id if teams else None)
 
 
+@app.route('/participate')
+@login_required
+def participate():
+    return render_template('participate.html', title='Участвовать в оценке')
+
+
 @app.route('/assessment', methods=['GET', 'POST'])
 @login_required
 def assessment():

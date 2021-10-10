@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="small_card_container">
+    <div class="small_card_flex">
+        <a href="/assessment" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
+            <img class="small_card_img" src="/static/images/anketa.png">
+            <p class="small_card_text">Заполнить анкету</p>
+        </a>
+        <a href="/choose_top_cadets" class="small_card" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
+            <img class="small_card_img" src="/static/images/my_team.png">
+            <p class="small_card_text">Выбрать коллегию </p>
+        </a>
+    </div>
+
+    </div>
+
+{% endblock %}
