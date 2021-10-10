@@ -22,8 +22,8 @@ app.controller("ctrl", function ($scope, $http) {
     }
 
     $scope.confirm = function(){
-        if ($scope.counter < 5){
-                alert('Выберите 5 курсантов');
+        if ($scope.counter > 5){
+                alert('Выберите не более 5 курсантов');
             }
         else{
             let user_data = {
