@@ -465,7 +465,7 @@ def finish_questionnaire():
     db.session.commit()
     teams = Teams.query.all()
     for t in teams:
-        requests.get(f'/make_graphs?team_id={t[0]}')
+        requests.get(f'/make_graphs?team_id={t.id}')
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
 
