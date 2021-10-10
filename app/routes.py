@@ -590,7 +590,7 @@ def teams_crew():
             info.append((team, members_list, True))
         else:
             info.append(
-                (team, Membership.get_crew_of_team(team.id), TeamRoles.check_team_lead(current_user.id, team.id)))
+                (team, members_list, TeamRoles.check_team_lead(current_user.id, team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
                            access=get_access(current_user), form=form)
 
