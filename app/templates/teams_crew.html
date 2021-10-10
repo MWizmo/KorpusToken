@@ -8,7 +8,11 @@
                 {% if team[1] %}
                     <ol>
                         {% for member in team[1] %}
-                        <li class="main_text">{{member.name}} {{member.surname}}</li>
+                        <li class="main_text">{{member[1]}} {{member[2]}}
+                        {% if member[3] %}
+                             (тимлид)
+                            {% endif %}
+                        </li>
                         {% endfor %}
                     </ol>
 

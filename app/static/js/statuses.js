@@ -3,6 +3,7 @@ app.controller("ctrl", function ($scope, $http) {
 
     $scope.statuses = [];
     $scope.show_adding = false;
+    $scope.show_teams = false;
 
 	$scope.choose_user = function(){
 	        console.log(1);
@@ -26,18 +27,48 @@ app.controller("ctrl", function ($scope, $http) {
 
 	$scope.add_status = function(){
 	    status_id = $scope.status_selected;
-	    let user_data = {
+	    if(status_id == 4){
+            $http({
+                    method: 'GET',
+                    url: '/get_teams_of_user?user_id=' + user_id,
+                    async:false
+                }).then(function success (response) {
+                    $scope.teams = response.data['teams'];
+                    $scope.show_teams = true;
+                });
+	    }
+	    else{
+	        let user_data = {
                 'user_id':$scope.user_id,
                 'status_id':status_id
             };
-	    $http({
+            $http({
+                    method: 'POST',
+                    url: '/add_status',
+                    data: user_data,
+                    async:false
+                }).then(function success (response) {
+                    $scope.choose_user($scope.user_id);
+                });
+        }
+	}
+
+	$scope.add_teamlead = function(){
+	    team_id = $scope.team_selected;
+        let user_data = {
+            'user_id':$scope.user_id,
+            'team_id':team_id
+        };
+        $http({
                 method: 'POST',
-                url: '/add_status',
+                url: '/add_teamlead',
                 data: user_data,
                 async:false
             }).then(function success (response) {
+                $scope.show_teams = false;
                 $scope.choose_user($scope.user_id);
             });
+
 	}
 
 	$scope.delete_status = function(sender){

@@ -28,6 +28,12 @@
             <select ng-model="status_selected" ng-change="add_status();">
                 <option ng-repeat="status in new_statuses" value="{{status[1]}}">{{status[0]}}</option>
             </select>
+    </div>
+    <div ng-show="show_teams">
+            <p>Выберите команду</p>
+            <select ng-model="team_selected" ng-change="add_teamlead();">
+                <option ng-repeat="team in teams" value="{{team[1]}}">{{team[0]}}</option>
+            </select>
         {% endraw %}
     </div>
 </div>

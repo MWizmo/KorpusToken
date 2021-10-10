@@ -582,8 +582,12 @@ def teams_crew():
     teams = Teams.query.all()
     info = list()
     for team in teams:
+        members = Membership.get_crew_of_team(team.id)
+        members_list = []
+        for m in members:
+            members_list.append([m[0], m[1], m[2], TeamRoles.check_team_lead(m[0], team.id)])
         if User.check_admin(current_user.id):
-            info.append((team, Membership.get_crew_of_team(team.id), True))
+            info.append((team, members_list, True))
         else:
             info.append(
                 (team, Membership.get_crew_of_team(team.id), TeamRoles.check_team_lead(current_user.id, team.id)))
@@ -621,7 +625,8 @@ def edit_team():
 
     return render_template('edit_team.html', title='Редактировать состав команды',
                            team_title=title, members=members, tid=tid, form=form, users=users,
-                           access=get_access(current_user))
+                           access=get_access(current_user),
+                           can_edit=current_user.is_admin or TeamRoles.check_team_lead(current_user.id, tid))
 
 
 @app.route('/delete_member', methods=['GET'])
@@ -1631,6 +1636,17 @@ def get_statuses_of_user():
     return jsonify({'user_statuses': statuses, 'new_statuses': new_statuses})
 
 
+@app.route('/get_teams_of_user', methods=['GET'])
+def get_teams_of_user():
+    user_id = int(request.args.get('user_id'))
+    if user_id == 0:
+        teams = []
+    else:
+        teams_id = [m.team_id for m in Membership.query.filter_by(user_id=user_id).all()]
+        teams = [(Teams.query.get(t_id).name, t_id) for t_id in teams_id if not Teams.has_teamlead(t_id)]
+    return jsonify({'teams': teams})
+
+
 @app.route('/add_status', methods=['POST'])
 def add_status():
     data = request.json
@@ -1640,6 +1656,20 @@ def add_status():
     db.session.add(new_status)
     db.session.commit()
     log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
+    return jsonify({'response': 'ok'})
+
+
+@app.route('/add_teamlead', methods=['POST'])
+def add_teamlead():
+    data = request.json
+    user_id = int(data['user_id'])
+    team_id = int(data['team_id'])
+    new_status = UserStatuses(user_id=user_id, status_id=4)
+    team_role = TeamRoles(user_id=user_id, team_id=team_id, role_id=1)
+    db.session.add(team_role)
+    db.session.add(new_status)
+    db.session.commit()
+    # log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
     return jsonify({'response': 'ok'})
 
 
