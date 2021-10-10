@@ -466,7 +466,8 @@ def finish_questionnaire():
     db.session.commit()
     teams = Teams.query.all()
     for t in teams:
-        requests.get(f'/make_graphs?team_id={t.id}')
+        #requests.get(f'/f?team_id={t.id}')
+        make_all_graphs(t.id)
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
 
@@ -1476,6 +1477,24 @@ def graphs_teams():
                            access=get_access(current_user),
                            teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()])
 
+
+def make_all_graphs(team_id):
+    cur_quest = QuestionnaireTable.current_questionnaire_id()
+    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
+                                               Questionnaire.questionnaire_id == cur_quest).all()
+    res = list()
+    for q in questionaires:
+        user_res = [User.get_full_name(q.user_id)]
+        user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
+        for answer in user_answers:
+            user_res.append(User.get_full_name(int(answer.question_answ)))
+        res.append(user_res)
+
+    t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, cur_quest))
+    t.setDaemon(True)
+    t.start()
+
+    t.join()
 
 @app.route('/make_graphs')
 @login_required
