@@ -76,7 +76,7 @@
                     </span>
                 {% endfor %}
             </p>
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.courses.label }} </span><br>
                 {{ form.courses(size=64) }}
                 {% for error in form.courses.errors %}
@@ -84,7 +84,7 @@
                         {{ error }}
                     </span>
                 {% endfor %}
-            </p>
+            </p-->
             <p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
                 {{ form.birthday(id="date") }}
@@ -100,10 +100,10 @@
                 <span class="main_text">{{ form.education.label }} </span><br>
                 {{ form.education }}
             </p-->
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
                 {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
-            </p>
+            </p-->
             <!--p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
                 {{ form.vk_url }}
