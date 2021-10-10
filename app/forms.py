@@ -24,7 +24,7 @@ class LoginForm(FlaskForm):
 
 
 class SignupForm(FlaskForm):
-    email = StringField('Почта:', validators=[Email()])
+    email = StringField('Почта:')
     tg_nickname = StringField('Ник в Telegram:', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
     surname = StringField('Фамилия', validators=[DataRequired()])
