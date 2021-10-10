@@ -650,7 +650,8 @@ def delete_member():
 @app.route('/assessment_page')
 @login_required
 def assessment_page():
-    return render_template('assessment_page.html', title='Оценка вклада')
+    flag = QuestionnaireTable.is_opened()
+    return render_template('assessment_page.html', title='Оценка вклада', flag=flag)
 
 
 @app.route('/blockchain')
