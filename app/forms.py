@@ -48,10 +48,10 @@ class SignupForm(FlaskForm):
         if user is not None:
             raise ValidationError('Логин занят')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Email занят')
+    # def validate_email(self, email):
+    #     user = User.query.filter_by(email=email.data).first()
+    #     if user is not None:
+    #         raise ValidationError('Email занят')
 
 
 class ProfileForm(FlaskForm):
