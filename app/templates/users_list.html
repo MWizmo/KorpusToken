@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container">
+    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button>
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
         <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>

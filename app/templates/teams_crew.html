@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container" style="margin-left:10%;">
+    <button onclick="history.back();" class="nav__link">Назад</button>
     <div class="crew_div">
         {% for team in info %}
         <h3 class="team_title"><span>{{team[0].name}}</span></h3>
@@ -33,6 +34,7 @@
                     {{form.submit(class_='submit')}}
                 </form>
             {% endif %}
+
     </div>
 </div>
 {% endblock %}
