@@ -265,6 +265,14 @@ class Teams(db.Model):
     name = db.Column(db.String(128))
     type = db.Column(db.Integer)
 
+    @staticmethod
+    def has_teamlead(team_id):
+        members = Membership.get_crew_of_team(team_id)
+        for m in members:
+            if TeamRoles.check_team_lead(m[0], team_id):
+                return True
+        return False
+
 
 class TeamRoles(db.Model):
     @staticmethod

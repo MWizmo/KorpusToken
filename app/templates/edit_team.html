@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container">
+    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button>
     <div class="crew_div">
         <h2 class="team_title"  style="margin-left:10%;">{{team_title}}</h2>
         {% if members %}
@@ -11,7 +12,11 @@
             </thead>
             <tbody>
                 {% for member in members %}
-                    <tr><td class="main_text" style="font-size: 19px;">{{member.name}}  {{member.surname}}</td><td><a class="nav__link" style="text-transform: uppercase;" href="/delete_member?tid={{tid}}&uid={{member.id}}">Удалить</a></td></tr>
+                    <tr><td class="main_text" style="font-size: 19px;">{{member.name}}  {{member.surname}}</td>
+                        {% if can_edit %}
+                        <td><a class="nav__link" style="text-transform: uppercase;" href="/delete_member?tid={{tid}}&uid={{member.id}}">Удалить</a></td>
+                        {% endif %}
+                    </tr>
                 {% endfor %}
                 <tr class="tr"><td class="no_padding"><hr></td><td class="no_padding"><hr></td></tr>
             </tbody>
@@ -19,6 +24,7 @@
         {% else %}
         <h2 style="text-align: center" class="main_text">На данный момент нет участников</h2>
         {% endif %}
+        {% if can_edit %}
          <form  action="" method="post" class="form" style="margin: 0 auto; text-align: center;">
              {{ form.hidden_tag() }}
              {{ form.csrf_token() }}
@@ -38,6 +44,7 @@
                  <span class="main_text" style="text-align: center;">Список доступных пользователей пуст</span>
              {% endif %}
          </form>
+        {% endif %}
         <!--button class="submit_adding" style="margin-left: 0 auto;" onclick="document.location='/teams_crew'">Назад</button-->
     </div>
 </div>

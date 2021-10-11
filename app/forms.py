@@ -24,7 +24,7 @@ class LoginForm(FlaskForm):
 
 
 class SignupForm(FlaskForm):
-    email = StringField('Почта:', validators=[DataRequired(), Email()])
+    email = StringField('Почта:')
     tg_nickname = StringField('Ник в Telegram:', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
     surname = StringField('Фамилия', validators=[DataRequired()])
@@ -33,12 +33,12 @@ class SignupForm(FlaskForm):
     password2 = PasswordField('Повторите пароль: ', validators=[DataRequired(), EqualTo('password')])
     courses = StringField('Пройденные курсы в IT-Korpus:')
     participate = BooleanField('Я участвую в проекте Корпуса')
-    team = SelectField('Название команды:', choices=[*SuppClass.get_teams()])
+    #team = SelectField('Название команды:', choices=[*SuppClass.get_teams()])
     birthday = DateField('Дата рождения: ', render_kw={"placeholder": "YYYY-MM-DD"})
     sex = SelectField('Пол:', choices=[('man', 'Мужчина'), ('woman', 'Женщина')])
-    vk_url = StringField('Ссылка на профиль ВКонтакте:', validators=[DataRequired()])
-    fb_url = StringField('Ссылка на профиль Фейсбук:', validators=[DataRequired()])
-    inst_url = StringField('Ссылка на профиль Инстаграм:', validators=[DataRequired()])
+    vk_url = StringField('Ссылка на профиль ВКонтакте:')
+    fb_url = StringField('Ссылка на профиль Фейсбук:')
+    inst_url = StringField('Ссылка на профиль Инстаграм:')
     work_exp = TextAreaField('Опыт работы: ')
     education = StringField('Образование: ')
     submit = SubmitField('Зарегистрироваться')
@@ -48,10 +48,10 @@ class SignupForm(FlaskForm):
         if user is not None:
             raise ValidationError('Логин занят')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Email занят')
+    # def validate_email(self, email):
+    #     user = User.query.filter_by(email=email.data).first()
+    #     if user is not None:
+    #         raise ValidationError('Email занят')
 
 
 class ProfileForm(FlaskForm):

@@ -30,12 +30,14 @@
         <p class="info_card_text blue" id="total">0 eth</p>
       </div>
       {{ form.submit(class_="submit") }}
+      <p><button class="eth_button" type="button" onclick="history.back();" style="margin-left:25%; width:50%;">Назад</button> </p>
     </div>
   </div>
 </form>
 {% else %}
 <div class="intro">
   <div class="container">
+    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button><br><br>
     <h1 class="intro_title">У вас нет доступа к обмену токенов вклада.</h1>
   </div>
 </div>

@@ -3,6 +3,7 @@
 {% block content %}
 
 <div class="container" >
+    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button><br><br>
     {% if access.assessment_opened %}
         <h1 style="color:black; text-align:center;">Прогресс прохождения голосования</h1>
         <div class="vote_progress">

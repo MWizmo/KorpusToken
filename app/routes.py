@@ -429,8 +429,9 @@ def questionnaire_progress():
         for i in range(len(not_participated_team_ids)):
             not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
                                                not_participated_team_surnames[i], not_participated_team_teams[i]])
+        counter = len(TopCadetsVoting.query.all())
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
-                               access=get_access(current_user),
+                               access=get_access(current_user), counter=counter,
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
                                not_participated_team=not_participated_team_info)
     elif QuestionnaireTable.is_in_assessment():
@@ -465,7 +466,8 @@ def finish_questionnaire():
     db.session.commit()
     teams = Teams.query.all()
     for t in teams:
-        requests.get(f'/make_graphs?team_id={t[0]}')
+        #requests.get(f'/f?team_id={t.id}')
+        make_all_graphs(t.id)
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
 
@@ -582,11 +584,15 @@ def teams_crew():
     teams = Teams.query.all()
     info = list()
     for team in teams:
+        members = Membership.get_crew_of_team(team.id)
+        members_list = []
+        for m in members:
+            members_list.append([m[0], m[1], m[2], TeamRoles.check_team_lead(m[0], team.id)])
         if User.check_admin(current_user.id):
-            info.append((team, Membership.get_crew_of_team(team.id), True))
+            info.append((team, members_list, True))
         else:
             info.append(
-                (team, Membership.get_crew_of_team(team.id), TeamRoles.check_team_lead(current_user.id, team.id)))
+                (team, members_list, TeamRoles.check_team_lead(current_user.id, team.id)))
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
                            access=get_access(current_user), form=form)
 
@@ -621,7 +627,8 @@ def edit_team():
 
     return render_template('edit_team.html', title='Редактировать состав команды',
                            team_title=title, members=members, tid=tid, form=form, users=users,
-                           access=get_access(current_user))
+                           access=get_access(current_user),
+                           can_edit=current_user.is_admin or TeamRoles.check_team_lead(current_user.id, tid))
 
 
 @app.route('/delete_member', methods=['GET'])
@@ -645,7 +652,8 @@ def delete_member():
 @app.route('/assessment_page')
 @login_required
 def assessment_page():
-    return render_template('assessment_page.html', title='Оценка вклада')
+    flag = QuestionnaireTable.is_opened()
+    return render_template('assessment_page.html', title='Оценка вклада', flag=flag)
 
 
 @app.route('/blockchain')
@@ -1017,7 +1025,7 @@ def make_tokens_distribution():
     kti_emission = (current_budget / exchange_rate) / kti_price
     ktd_emission = kti_emission * 3 / 7
     
-    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    cur_voting = VotingTable.query.filter_by(status='Distribution').first()
     if cur_voting:
         voting_id = cur_voting.id
     else:
@@ -1045,7 +1053,8 @@ def make_tokens_distribution():
             marks = sum([int(current_res[0]) for current_res in user_res])
             mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
             token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-
+    VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
+    db.session.commit()
     return redirect(url_for('emission'))
 
 @app.route('/add_budget_item', methods=['GET', 'POST'])
@@ -1099,7 +1108,7 @@ def save_to_blockchain():
       timestamp = datetime.datetime(year=date.year, month=date.month,
                                day=date.day).timestamp()
       budget_item = budget_record.item
-      cost = round(budget_record.summa.replace(' ',''), 2) * 100
+      cost = round(budget_record.summa, 2) * 100
 
       nonce = w3.eth.getTransactionCount(account.address, 'pending')
 
@@ -1193,6 +1202,12 @@ def profile():
 def community():
     teams = Membership.query.filter_by(user_id=current_user.id).all()
     return render_template('community.html', title='Сообщество', team_id=teams[0].team_id if teams else None)
+
+
+@app.route('/participate')
+@login_required
+def participate():
+    return render_template('participate.html', title='Участвовать в оценке')
 
 
 @app.route('/assessment', methods=['GET', 'POST'])
@@ -1322,7 +1337,7 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
                         #if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = 5
+        current_month = 10
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
@@ -1481,6 +1496,24 @@ def graphs_teams():
                            access=get_access(current_user),
                            teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()])
 
+
+def make_all_graphs(team_id):
+    cur_quest = QuestionnaireTable.current_questionnaire_id()
+    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
+                                               Questionnaire.questionnaire_id == cur_quest).all()
+    res = list()
+    for q in questionaires:
+        user_res = [User.get_full_name(q.user_id)]
+        user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
+        for answer in user_answers:
+            user_res.append(User.get_full_name(int(answer.question_answ)))
+        res.append(user_res)
+
+    t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, cur_quest))
+    t.setDaemon(True)
+    t.start()
+
+    t.join()
 
 @app.route('/make_graphs')
 @login_required
@@ -1649,6 +1682,17 @@ def get_statuses_of_user():
     return jsonify({'user_statuses': statuses, 'new_statuses': new_statuses})
 
 
+@app.route('/get_teams_of_user', methods=['GET'])
+def get_teams_of_user():
+    user_id = int(request.args.get('user_id'))
+    if user_id == 0:
+        teams = []
+    else:
+        teams_id = [m.team_id for m in Membership.query.filter_by(user_id=user_id).all()]
+        teams = [(Teams.query.get(t_id).name, t_id) for t_id in teams_id if not Teams.has_teamlead(t_id)]
+    return jsonify({'teams': teams})
+
+
 @app.route('/add_status', methods=['POST'])
 def add_status():
     data = request.json
@@ -1658,6 +1702,20 @@ def add_status():
     db.session.add(new_status)
     db.session.commit()
     log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
+    return jsonify({'response': 'ok'})
+
+
+@app.route('/add_teamlead', methods=['POST'])
+def add_teamlead():
+    data = request.json
+    user_id = int(data['user_id'])
+    team_id = int(data['team_id'])
+    new_status = UserStatuses(user_id=user_id, status_id=4)
+    team_role = TeamRoles(user_id=user_id, team_id=team_id, role_id=1)
+    db.session.add(team_role)
+    db.session.add(new_status)
+    db.session.commit()
+    # log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
     return jsonify({'response': 'ok'})
 
 

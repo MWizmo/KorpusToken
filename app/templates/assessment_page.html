@@ -6,11 +6,18 @@
             <img class="small_card_img" src="/static/images/progress.png">
             <p class="small_card_text">Прогресс оценки</p>
         </a>
-        <a href="/assessment" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
+        {% if flag %}
+        <a href="/participate" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
             <img class="small_card_img" src="/static/images/go_to_assessment.png">
             <p class="small_card_text">Участвовать в оценке</p>
         </a>
-        <a href="" class="small_card" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
+        {% else %}
+        <a href="/assessment" class="small_card" onmouseover="enlarge_block(22);" id="block22" onmouseleave="reduce_block(22);">
+            <img class="small_card_img" src="/static/images/go_to_assessment.png">
+            <p class="small_card_text">Участвовать в оценке</p>
+        </a>
+        {% endif %}
+        <a href="/assessment_results" class="small_card" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
             <img class="small_card_img" src="/static/images/results.png">
             <p class="small_card_text">Результаты оценок</p>
         </a>

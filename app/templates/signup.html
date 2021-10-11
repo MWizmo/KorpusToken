@@ -13,7 +13,7 @@
         <form action="" method="post">
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.email.label }}</span> <br>
                 {{ form.email(size=32) }}
                 {% for error in form.email.errors %}
@@ -21,7 +21,7 @@
                         {{ error }}
                     </span>
                 {% endfor %}
-            </p>
+            </p-->
             <p>
                 <span class="main_text">{{ form.login.label }}</span> <br>
                 {{ form.login(size=32) }}
@@ -76,7 +76,7 @@
                     </span>
                 {% endfor %}
             </p>
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.courses.label }} </span><br>
                 {{ form.courses(size=64) }}
                 {% for error in form.courses.errors %}
@@ -84,21 +84,14 @@
                         {{ error }}
                     </span>
                 {% endfor %}
-            </p>
-            <!--p>
-                <span class="main_text">{{ form.participate.label }}</span>
-                {{ form.participate(class_="submit", id_='participate') }} <br>
-                <div id="teams" style="display: none;">
-                    {{ form.team(class_="submit_team") }}
-                </div>
             </p-->
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
                 {{ form.birthday(id="date") }}
                 {% for error in form.birthday.errors %}
                 <span style="color: red;"> {{error}} </span>
                 {% endfor %}
-            </p>
+            </p-->
             <p>
                 <span class="main_text">{{ form.sex.label }}</span> <br>
                 {{ form.sex(class_="submit_sex") }}
@@ -107,11 +100,11 @@
                 <span class="main_text">{{ form.education.label }} </span><br>
                 {{ form.education }}
             </p-->
-            <p>
+            <!--p>
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
                 {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
-            </p>
-            <p>
+            </p-->
+            <!--p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
                 {{ form.vk_url }}
             </p>
@@ -124,7 +117,7 @@
                 <span class="main_text">{{ form.inst_url.label }}</span> <br>
                 {{ form.inst_url }}<br>
                 <label>если нет, оставить -</label>
-            </p>
+            </p-->
             <p>
                 {{ form.submit(class_="submit") }}
             </p>

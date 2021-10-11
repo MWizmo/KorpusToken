@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="container">
-
+    <button onclick="history.back();" class="nav__link" style="margin-left:3%;">Назад</button>
     <div class="progress" style="width: 50%; margin: 50px;">
         {% if access.questionnaire_opened %}
         <h2>Прогресс прохождения анкетирования</h2>
@@ -12,6 +12,7 @@
             <span> Всего анкетируемых: <span class="main_text">{{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено личных анкет: <span class="main_text"> {{ questionnaire.already_self }} из {{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено командных анкет: <span class="main_text">{{ questionnaire.already_team }} из {{ questionnaire.all_team_particip }}</span></span><br>
+            <span> Выбрали коллегию для оценки по оси дела: <span class="main_text">{{ counter }}</span></span><br>
             {% if not_participated_self %}
                 <p>
                 <tbody>
