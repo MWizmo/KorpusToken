@@ -651,9 +651,11 @@ def assessment_page():
 @app.route('/blockchain')
 @login_required
 def blockchain():
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    ktd_price = User.get_ktd_price(current_user.id)
-    kti_price = User.get_kti_price(current_user.id)
+    ktd_price = User.get_ktd_price(current_user.id) * eth_exchange_rate
+    kti_price = User.get_kti_price(current_user.id) * eth_exchange_rate
     eth_balance = User.get_eth_balance(current_user.id)
 
     kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
@@ -666,8 +668,11 @@ def blockchain():
 @app.route('/change_to_eth', methods=['GET', 'POST'])
 @login_required
 def change_to_eth():
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    ktd_price = User.get_ktd_price(current_user.id)
+    ktd_eth_price = User.get_ktd_price(current_user.id)
+    ktd_price = ktd_eth_price * eth_exchange_rate
     user = User.query.filter_by(id=current_user.id).first()
     has_access_to_sell = User.has_access_to_sell(user.id)
     form = ChangeToEthForm()
@@ -691,7 +696,7 @@ def change_to_eth():
       db.session.commit()
     return render_template('change_to_eth.html', title='Обменять на eth',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
-                           has_access_to_sell=has_access_to_sell)
+                           has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])
