@@ -676,9 +676,11 @@ def assessment_page():
 @app.route('/blockchain')
 @login_required
 def blockchain():
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    ktd_price = User.get_ktd_price(current_user.id)
-    kti_price = User.get_kti_price(current_user.id)
+    ktd_price = User.get_ktd_price(current_user.id) * eth_exchange_rate
+    kti_price = User.get_kti_price(current_user.id) * eth_exchange_rate
     eth_balance = User.get_eth_balance(current_user.id)
 
     kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
@@ -691,8 +693,11 @@ def blockchain():
 @app.route('/change_to_eth', methods=['GET', 'POST'])
 @login_required
 def change_to_eth():
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    ktd_price = User.get_ktd_price(current_user.id)
+    ktd_eth_price = User.get_ktd_price(current_user.id)
+    ktd_price = ktd_eth_price * eth_exchange_rate
     user = User.query.filter_by(id=current_user.id).first()
     has_access_to_sell = User.has_access_to_sell(user.id)
     form = ChangeToEthForm()
@@ -716,7 +721,7 @@ def change_to_eth():
       db.session.commit()
     return render_template('change_to_eth.html', title='Обменять на eth',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
-                           has_access_to_sell=has_access_to_sell)
+                           has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])
@@ -1162,7 +1167,20 @@ def add_to_blockchain():
 @login_required
 def write_voting_progress():
     cur_id = VotingTable.current_fixed_voting_id()
-    # Запись результатов в блокчейн
+    voting_info = VotingInfo.query.filter_by(voting_id=cur_id).all()
+    users_info = [(User.query.filter_by(id=info.cadet_id).first(),
+                   Membership.query.filter_by(user_id=info.cadet_id).first(),
+                   info,
+                   Axis.query.filter_by(id=info.criterion_id).first()) for info in voting_info]
+    for user_data in users_info:
+      team = Teams.query.filter_by(id=user_data[1].team_id).first()
+      cur_date = datetime.datetime.now()
+      date = int(str(cur_date.year) + str(cur_date.month) + str(cur_date.day))
+      token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
+                                            date=date,
+                                            axis=user_data[3].name,
+                                            points=user_data[2].mark,
+                                            private_key=os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.get(cur_id).status = 'Emission'
     db.session.commit()
     return redirect('/questionnaire_progress')

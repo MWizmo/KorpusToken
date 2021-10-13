@@ -5,7 +5,10 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_admin import Admin
 from web3.auto import Web3
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+import os
+import atexit
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -25,6 +28,7 @@ from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 
 from app import routes, models
+from app import token_utils
 from app.token import routes
 from app.admin.views import MyAdminIndexView, TransactionView, AllBudgetRecordsView, CurrentBudgetView
 
@@ -32,3 +36,19 @@ admin = Admin(app, name='Korpus Token', index_view=MyAdminIndexView(url='/'), te
 admin.add_view(TransactionView(models.Transaction, db.session, name='Транзакции', endpoint='transactions'))
 admin.add_view(AllBudgetRecordsView(models.BudgetRecord, db.session, name='Все записи', endpoint='all_budget_records'))
 admin.add_view(CurrentBudgetView(models.BudgetRecord, db.session, name='Текущий бюджет', endpoint='current_budget'))
+
+jobstores = {
+    'default': SQLAlchemyJobStore(url=os.environ.get('DATABASE_URI')\
+        or 'mysql+pymysql://korpus_user:korpus_password@korpus-db/korpus_db')
+}
+
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 1
+}
+
+scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults)
+scheduler.start()
+if len(scheduler.get_jobs()) == 0:
+    scheduler.add_job(func=token_utils.set_token_price, max_instances=1, trigger='cron', day='1')
+atexit.register(lambda: scheduler.shutdown())

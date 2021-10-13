@@ -557,3 +557,9 @@ class EthExchangeRate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime)
     exchange_rate = db.Column(db.Float)
+
+class TokenExchangeRate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime)
+    exchange_rate_in_wei = db.Column(db.BigInteger)
+    is_default_calculation_method = db.Column(db.Boolean)

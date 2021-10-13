@@ -16,9 +16,7 @@
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text"><b>Курс токена вклада:</b></p>
-        <p class="info_card_text green">
-          1 КТ = <span id="price">{{ ktd_price }}</span> eth
-        </p>
+        <p class="info_card_text green">1 КТ = {{ ktd_price }}р</p>
       </div>
     </div>
 
@@ -44,6 +42,7 @@
   </div>
 </div>
 {% endif %}
+<span style="opacity: 0" id="price">{{ ktd_eth_price }}</span>
 <script>
   'use strict';
 
