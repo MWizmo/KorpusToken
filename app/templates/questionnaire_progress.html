@@ -4,7 +4,8 @@
 
 <div class="container">
     <button onclick="history.back();" class="nav__link" style="margin-left:3%;">Назад</button>
-    <div class="progress" style="width: 50%; margin: 50px;">
+    <div class="progress" style="{% if not fixed_id %} width:50%; {% endif %} margin: 50px;">
+
         {% if access.questionnaire_opened %}
         <h2>Прогресс прохождения анкетирования</h2>
 
@@ -13,57 +14,10 @@
             <span> Пройдено личных анкет: <span class="main_text"> {{ questionnaire.already_self }} из {{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено командных анкет: <span class="main_text">{{ questionnaire.already_team }} из {{ questionnaire.all_team_particip }}</span></span><br>
             <span> Выбрали коллегию для оценки по оси дела: <span class="main_text">{{ counter }}</span></span><br>
-            {% if not_participated_self %}
-                <p>
-                <tbody>
-                    <table class="table">
-                        <th colspan="4" class="th">Не прошли личную анкету:</th>
-                        <tr class="tr">
-                            <th class="th">ID</th>
-                            <th class="th">NAME</th>
-                            <th class="th">SURNAME</th>
-                            <th class="th">TEAM</th>
-                        </tr>
 
-                        {% for user in not_participated_self %}
-                        <tr class="tr">
-                            <td class="td_main">{{ user[0] }}</td>
-                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
-                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[2] }}</a></td>
-                            <td class="td_main">{{ user[3] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </tbody>
-                </p>
-            {% endif %}
-            {% if not_participated_team %}
-                <p>
-                <tbody>
-                    <table class="table">
-                        <th colspan="4" class="th">Не прошли командную анкету</th>
-                        <tr class="tr">
-                            <th class="th">ID</th>
-                            <th class="th">NAME</th>
-                            <th class="th">SURNAME</th>
-                            <th class="th">TEAM</th>
-                        </tr>
-
-                        {% for user in not_participated_team %}
-                        <tr class="tr">
-                            <td class="td_main">{{ user[0] }}</td>
-                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
-                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[2] }}</a></td>
-                            <td class="td_main">{{ user[3] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </tbody>
-                </p>
-
-            {% endif %}
         </p>
         <a class='nav__link border' href="{{ url_for('finish_questionnaire') }}">Завершить анкетирование</a>
+
         <br><br>
         <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
         {% else %}
@@ -73,8 +27,8 @@
                     <br><br>
                     {% if current_user.is_chieftain %}
                         <div class="">
-                            <a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a>
-                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Зафиксировать результаты оценки</a>
+                            <!--a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a-->
+                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Завершить оценку</a>
                         </div>
                     {% endif %}
                     <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
@@ -90,14 +44,14 @@
                             <select name="month1">
                                 <option selected disabled></option>
                                 {% for month in monthes %}
-                                    <option value="month">{{month}}</option>
+                                    <option value="{{month}}">{{month}}</option>
                                 {% endfor %}
                             </select>
                             <label>По</label>
                             <select name="month2">
                                 <option selected disabled></option>
                                 {% for month in monthes %}
-                                    <option value="month">{{month}}</option>
+                                    <option value="{{month}}">{{month}}</option>
                                 {% endfor %}
                             </select><br><br>
 
@@ -114,13 +68,34 @@
                 {% endif %}
 
             {% elif fixed_id %}
-                <h2>Результаты оценки вклада зафиксированы атаманами</h2>
+                <h2>Результаты оценки вклада зафиксированы атаманами<br>Вот ее результаты</h2>
                     <br><br>
                     {% if current_user.is_chieftain %}
                         <div class="">
                             <a class='nav__link border' href="{{ url_for('add_to_blockchain') }}">Записать результаты в блокчейн</a>
                         </div>
-                    {% endif %}
+                    {% endif %}<br><br>
+                    <table class="result_table" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                {% for c in criterions %}
+                                    <td>{{c}}</td>
+                                {% endfor %}
+                                <td>Сумма</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in user_info %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{cell}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
             {% elif emission_id %}
                 <h2>Результаты оценки вклада записаны в блокчейн<br><br>Ожидаем эмиссии токенов</h2>
             {% else %}
