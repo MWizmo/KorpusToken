@@ -83,7 +83,7 @@
                     {% for img in images %}
                         <input type="radio" name="slider2" id="slider2_{{loop.index0}}" checked="checked">
                         <label for="slider2_{{loop.index0}}"></label>
-                        <div><img src="{{img['src']}}" onError="this.onerror=null;this.src='{{url_for('static', filename='images/no_graph.png')}}';"> <p>{{img['text']}}</p></div>
+                        <div><img src="{{img['src']}}" style="width:500px; height:300px;" onError="this.onerror=null;this.src='{{url_for('static', filename='images/no_graph.png')}}';"> <p>{{img['text']}}</p></div>
                     {% endfor %}
                     </div>
 

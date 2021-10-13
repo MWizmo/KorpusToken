@@ -5,18 +5,22 @@
 <div class="container" style="margin-left:10%;">
     <div class="qustionnaire">
         {% if access.assessment_opened %}
-        <form class="form" style="padding-top: 15%; padding-left: 0%">
-            <h2>Выберите ось</h2>
-            {% if access.responsibilities.top_cadet%}
-                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
+            {% if not is_first and not is_second and not is_third %}
+                <h2 class="error">Ваш лимит голосований исчерпан</h2>
+            {% else %}
+                <form class="form" style="padding-top: 15%; padding-left: 0%">
+                    <h2>Выберите ось</h2>
+                    {% if access.responsibilities.top_cadet and is_first %}
+                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
+                    {% endif %}
+                    {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.teamlead) and is_second %}
+                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
+                    {% endif %}
+                    {% if access.responsibilities.chieftain and is_third %}
+                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[2][0]) }}" style="width: auto%; height: auto%;">{{ axises[2][1] }}</a>
+                    {% endif %}
+                </form>
             {% endif %}
-            {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.teamlead)%}
-                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
-            {% endif %}
-            {% if access.responsibilities.chieftain %}
-                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[2][0]) }}" style="width: auto%; height: auto%;">{{ axises[2][1] }}</a>
-            {% endif %}
-        </form>
         {% else %}
         <h2>В настоящее время нет активной оценки</h2>
         {% endif %}

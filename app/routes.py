@@ -300,6 +300,103 @@ def question_adding():
                            access=get_access(current_user))
 
 
+def get_questionnaire_progress():
+    questionnaire = dict(
+        max_particip=0,
+        already_self=0,
+        already_team=0,
+        all_team_particip=0,
+        participaters=[],
+        participaters_self_ids=[],
+        participaters_team_ids=[],
+        participated_self=[],
+        participated_team=[],
+    )
+    cur_questionnaire = QuestionnaireTable.query.filter_by(status='Active').first().id
+    if User.query.all():
+        for user in User.query.all():
+            if User.check_can_be_marked(user.id):
+                questionnaire['participaters'].append(user.id)
+                questionnaire['participaters_self_ids'].append(user.id)
+                questionnaire['max_particip'] += 1
+                questionnaire['all_team_particip'] += 1
+                questionnaire['participaters_team_ids'].append(user.id)
+
+            if Questionnaire.query.filter_by(user_id=user.id, type=1):
+                for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
+                    if qst.questionnaire_id == cur_questionnaire:
+                        questionnaire['already_self'] += 1
+                        questionnaire['participated_self'].append(user.id)
+
+            if Questionnaire.query.filter_by(user_id=user.id, type=2):
+                for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
+                    if qst.questionnaire_id == cur_questionnaire:
+                        questionnaire['already_team'] += 1
+                        questionnaire['participated_team'].append(user.id)
+
+    not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
+                                 if user not in questionnaire['participated_self']]
+    not_participated_self_names = [User.query.filter_by(id=user).first().name
+                                   for user in questionnaire['participaters_self_ids']
+                                   if user not in questionnaire['participated_self']]
+    not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
+                                      for user in questionnaire['participaters_self_ids']
+                                      if user not in questionnaire['participated_self']]
+    not_participated_self_statuses = [Statuses.query.filter_by(
+        id=UserStatuses.query.filter_by(
+            user_id=user).first().status_id).first().status
+                                      for user in questionnaire['participaters_self_ids']
+                                      if user not in questionnaire['participated_self']]
+    # not_participated_self_teams = [Teams.query.filter_by(
+    #     id=Membership.query.filter_by(user_id=user).first().team_id
+    # ).first().name
+    #                                for user in questionnaire['participaters_self_ids']
+    #                                if user not in questionnaire['participated_self']]
+    not_participated_self_teams = []
+    for user in questionnaire['participaters_self_ids']:
+        if user not in questionnaire['participated_self']:
+            teams = Membership.query.filter_by(user_id=user).all()
+            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+            teams_id = [t for t in teams_id if t]
+            if len(teams_id) > 0:
+                not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
+    not_participated_self_info = []
+
+    for i in range(len(not_participated_self_ids)):
+        not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
+                                           not_participated_self_surnames[i], not_participated_self_teams[i]])
+
+    not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
+                                 if user not in questionnaire['participated_team']]
+    not_participated_team_names = [User.query.filter_by(id=user).first().name
+                                   for user in questionnaire['participaters_team_ids']
+                                   if user not in questionnaire['participated_team']]
+    not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
+                                      for user in questionnaire['participaters_team_ids']
+                                      if user not in questionnaire['participated_team']]
+    not_participated_team_teams = []
+    for user in questionnaire['participaters_team_ids']:
+        if user not in questionnaire['participated_team']:
+            teams = Membership.query.filter_by(user_id=user).all()
+            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+            teams_id = [t for t in teams_id if t]
+            if len(teams_id) > 0:
+                not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
+    # not_participated_team_teams = [Teams.query.filter(
+    #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
+    # ).first().name
+    #                                for user in questionnaire['participaters_team_ids']
+    #                                if user not in questionnaire['participated_team']]
+
+    not_participated_team_info = []
+
+    for i in range(len(not_participated_team_ids)):
+        not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
+                                           not_participated_team_surnames[i], not_participated_team_teams[i]])
+    counter = len(TopCadetsVoting.query.all())
+    return counter, questionnaire, not_participated_team_info, not_participated_self_info
+
+
 @app.route('/questionnaire_progress', methods=['POST', 'GET'])
 @login_required
 def questionnaire_progress():
@@ -337,99 +434,7 @@ def questionnaire_progress():
         return redirect('voting_progress')
     is_opened = QuestionnaireTable.is_opened()
     if is_opened:
-        questionnaire = dict(
-            max_particip=0,
-            already_self=0,
-            already_team=0,
-            all_team_particip=0,
-            participaters=[],
-            participaters_self_ids=[],
-            participaters_team_ids=[],
-            participated_self=[],
-            participated_team=[],
-        )
-        cur_questionnaire = QuestionnaireTable.query.filter_by(status='Active').first().id
-        if User.query.all():
-            for user in User.query.all():
-                if User.check_can_be_marked(user.id):
-                    questionnaire['participaters'].append(user.id)
-                    questionnaire['participaters_self_ids'].append(user.id)
-                    questionnaire['max_particip'] += 1
-                    questionnaire['all_team_particip'] += 1
-                    questionnaire['participaters_team_ids'].append(user.id)
-
-                if Questionnaire.query.filter_by(user_id=user.id, type=1):
-                    for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
-                        if qst.questionnaire_id == cur_questionnaire:
-                            questionnaire['already_self'] += 1
-                            questionnaire['participated_self'].append(user.id)
-
-                if Questionnaire.query.filter_by(user_id=user.id, type=2):
-                    for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
-                        if qst.questionnaire_id == cur_questionnaire:
-                            questionnaire['already_team'] += 1
-                            questionnaire['participated_team'].append(user.id)
-
-        not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
-                                     if user not in questionnaire['participated_self']]
-        not_participated_self_names = [User.query.filter_by(id=user).first().name
-                                       for user in questionnaire['participaters_self_ids']
-                                       if user not in questionnaire['participated_self']]
-        not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
-                                          for user in questionnaire['participaters_self_ids']
-                                          if user not in questionnaire['participated_self']]
-        not_participated_self_statuses = [Statuses.query.filter_by(
-            id=UserStatuses.query.filter_by(
-                user_id=user).first().status_id).first().status
-                                          for user in questionnaire['participaters_self_ids']
-                                          if user not in questionnaire['participated_self']]
-        # not_participated_self_teams = [Teams.query.filter_by(
-        #     id=Membership.query.filter_by(user_id=user).first().team_id
-        # ).first().name
-        #                                for user in questionnaire['participaters_self_ids']
-        #                                if user not in questionnaire['participated_self']]
-        not_participated_self_teams = []
-        for user in questionnaire['participaters_self_ids']:
-            if user not in questionnaire['participated_self']:
-                teams = Membership.query.filter_by(user_id=user).all()
-                teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
-                teams_id = [t for t in teams_id if t]
-                if len(teams_id) > 0:
-                    not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
-        not_participated_self_info = []
-
-        for i in range(len(not_participated_self_ids)):
-            not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
-                                               not_participated_self_surnames[i], not_participated_self_teams[i]])
-
-        not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
-                                     if user not in questionnaire['participated_team']]
-        not_participated_team_names = [User.query.filter_by(id=user).first().name
-                                       for user in questionnaire['participaters_team_ids']
-                                       if user not in questionnaire['participated_team']]
-        not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
-                                          for user in questionnaire['participaters_team_ids']
-                                          if user not in questionnaire['participated_team']]
-        not_participated_team_teams = []
-        for user in questionnaire['participaters_team_ids']:
-            if user not in questionnaire['participated_team']:
-                teams = Membership.query.filter_by(user_id=user).all()
-                teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
-                teams_id = [t for t in teams_id if t]
-                if len(teams_id) > 0:
-                    not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
-        # not_participated_team_teams = [Teams.query.filter(
-        #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
-        # ).first().name
-        #                                for user in questionnaire['participaters_team_ids']
-        #                                if user not in questionnaire['participated_team']]
-
-        not_participated_team_info = []
-
-        for i in range(len(not_participated_team_ids)):
-            not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
-                                               not_participated_team_surnames[i], not_participated_team_teams[i]])
-        counter = len(TopCadetsVoting.query.all())
+        counter, questionnaire, not_participated_team_info, not_participated_self_info = get_questionnaire_progress()
         return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
                                access=get_access(current_user), counter=counter,
                                questionnaire=questionnaire, not_participated_self=not_participated_self_info,
@@ -439,8 +444,20 @@ def questionnaire_progress():
                                access=get_access(current_user), form=form, monthes=monthes)
     elif VotingTable.current_fixed_voting_id():
         cur_id = VotingTable.current_fixed_voting_id()
+        filename = 'results_' + str(cur_id) + '.csv'
+        #if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        user_info = list()
+        with open(os.path.join(app.root_path + '/results', filename)) as file:
+            reader = csv.reader(file)
+            next(reader)
+            for row in reader:
+                user_marks = row[0].split(';')
+                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                user_info.append(user_marks)
+        user_info.sort(key=lambda i: i[-1], reverse=True)
+        criterions = [c.name for c in Criterion.query.all()]
         return render_template('questionnaire_progress.html', title='Прогресс оценки', fixed_id=cur_id,
-                               access=get_access(current_user), )
+                               access=get_access(current_user), criterions=criterions, user_info=user_info)
     elif VotingTable.current_emission_voting_id():
         cur_id = VotingTable.current_emission_voting_id()
         return render_template('questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
@@ -1189,7 +1206,10 @@ def community():
 @app.route('/participate')
 @login_required
 def participate():
-    return render_template('participate.html', title='Участвовать в оценке')
+    if QuestionnaireTable.is_opened() and User.check_can_be_marked(current_user.id):
+        return render_template('participate.html', title='Участвовать в оценке')
+    else:
+        return redirect('/assessment')
 
 
 @app.route('/assessment', methods=['GET', 'POST'])
@@ -1237,8 +1257,17 @@ def assessment_axis():
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
     axises = [(axis.id, axis.name) for axis in Axis.query.all()]
-    return render_template('assessment_axis.html', title='Выбор оси',
-                           access=get_access(current_user), axises=axises)
+    teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+                        Voting.check_on_assessment(current_user.id, team.id, 1)]
+    is_first = True if len(teams) else False
+    teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+             Voting.check_on_assessment(current_user.id, team.id, 2)]
+    is_second = True if len(teams) else False
+    is_third = True
+    if not Voting.check_on_assessment(current_user.id, 0, 3):
+        is_third = False
+    return render_template('assessment_axis.html', title='Выбор оси', is_first=is_first,
+                           access=get_access(current_user), axises=axises, is_third=is_third, is_second=is_second)
 
 
 @app.route('/assessment_team', methods=['GET', 'POST'])
@@ -1441,12 +1470,31 @@ def finish_assessment():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
 
-    assessment_status = VotingTable.query.filter_by(status='Active').first()
-
-    if assessment_status:
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    voting_id = cur_voting.id
+    filename = 'results_' + str(voting_id) + '.csv'
+    with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
+        writer = csv.writer(output, delimiter=';')
+        criterions = [c.name for c in Criterion.query.all()]
+        writer.writerow([' '] + criterions)
+        users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
+                 User.check_can_be_marked(user.id)]
+        for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+                VotingInfo.criterion_id).all()
+            for mark in user_res:
+                if float(mark[0]) < 1.0:
+                    res.append(0)
+                else:
+                    res.append(1)
+            writer.writerow(res)
+    if cur_voting:
         q = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
         q.status = 'Finished'
-        assessment_status.status = 'Fixed'
+        cur_voting.status = 'Fixed'
         db.session.commit()
         log('Закрыл оценку')
 
@@ -1456,7 +1504,7 @@ def finish_assessment():
         questionnaire.assessment = 0
         db.session.commit()
 
-    return redirect('voting_progress')
+    return redirect('questionnaire_progress')
 
 
 @app.route('/assessment_error', methods=['GET'])
@@ -1538,10 +1586,20 @@ def voting_progress():
     #                            access=get_access(current_user))
 
     log('Просмотр страницы с прогрессом оценки')
+    is_opened = QuestionnaireTable.is_opened()
+    if is_opened:
+        counter, questionnaire, not_participated_team_info, not_participated_self_info = get_questionnaire_progress()
+        return render_template('voting_progress.html', title='Прогресс голосования',
+                               access=get_access(current_user), counter=counter, q=True,
+                               questionnaire=questionnaire, not_participated_self=not_participated_self_info,
+                               not_participated_team=not_participated_team_info)
     assessment = VotingTable.query.filter_by(status='Active').first()
     if assessment:
         top_cadets = [user.user_id for user in UserStatuses.query.filter_by(status_id=7).all()]
-        trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()+UserStatuses.query.filter_by(status_id=4).all()]
+        trackers = [user.user_id for user in UserStatuses.query.filter_by(status_id=5).all()]
+        for user in UserStatuses.query.filter_by(status_id=4).all():
+            if user.user_id not in trackers:
+                trackers.append(user.user_id)
         atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
         teams_for_voting = len(Teams.query.filter_by(type=1).all())
         relation_results = list()
@@ -1766,6 +1824,9 @@ def get_assessment_results():
 @app.route('/assessment_results', methods=['GET'])
 @login_required
 def assessment_results():
+    votings = VotingTable.query.all()
+    return render_template('assessment_results.html', title='Результаты оценки',
+                           access=get_access(current_user), votings=votings)
     cur_voting = VotingTable.query.filter_by(status='Active').first()
     if cur_voting:
         voting_id = cur_voting.id
@@ -1790,6 +1851,28 @@ def assessment_results():
     else:
         return render_template('assessment_results.html', title='Результаты оценки',
                                access=get_access(current_user))
+
+
+@app.route('/get_results_of_voting', methods=['GET'])
+@login_required
+def get_results_of_voting():
+    voting_id = int(request.args.get('voting_id'))
+    filename = 'results_' + str(voting_id) + '.csv'
+    log('Просмотр страницы результатов')
+    if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        user_info = list()
+        with open(os.path.join(app.root_path + '/results', filename)) as file:
+            reader = csv.reader(file)
+            next(reader)
+            for row in reader:
+                user_marks = row[0].split(';')
+                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                user_info.append(user_marks)
+        user_info.sort(key=lambda i: i[-1], reverse=True)
+        criterions = [c.name for c in Criterion.query.all()]
+        return jsonify({'criterions': criterions, 'user_info': user_info})
+    else:
+        return jsonify({'criterions': None, 'user_info': None})
 
 
 @app.route('/log_page', methods=['GET'])

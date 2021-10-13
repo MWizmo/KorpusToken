@@ -1,32 +1,49 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/voting_result.js')}}"></script>
+{% endblock %}
+
 {% block content %}
-<div class="res_container">
-    {% if criterions %}
-    <table class="result_table" cellspacing="0">
-        <thead>
-            <tr><td></td>
-            {% for c in criterions %}
-                <td>{{c}}</td>
-            {% endfor %}
-                <td>Сумма</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in info %}
+<div class="res_container" ng-app="app" ng-controller="ctrl" ng-cloak>
+    <button onclick="history.back();" class="nav__link">Назад</button><br><br>
+    <h2>Выберите оценку</h2>
+    <select ng-model="selected" ng-change="choose_voting();">
+        <option value="0"></option>
+        {% for v in votings %}
+            <option value="{{v.id}}">{{v.month_from}} - {{v.month_to}}</option>
+        {% endfor %}
+    </select><br><br>
+    <div ng-show="show_results">
+        <h2 ng-show="!results">Результаты еще не подведены</h2>
+        {% raw %}
+        <table ng-show="results" class="result_table" cellspacing="0">
+            <thead>
                 <tr>
-                    {% for cell in row %}
-                        <td>{{cell}}</td>
-                    {% endfor %}
+                    <td></td>
+                    <td ng-repeat="c in criterions">{{c}}</td>
+                    <td>Сумма</td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <tr ng-repeat = "row in user_info">
+                    <td ng-repeat="cell in row">
+                        {{cell.value}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {% endraw %}
+    </div>
+    {% if criterions %}
+
     <div class="vote_progress">
         <a class='nav__link border' href="{{ url_for('get_assessment_results') }}">Скачать файл с итоговыми оценками</a>
     </div>
     {% else %}
-    <h2>Результаты еще не подведены</h2>
+    <!--h2>Результаты еще не подведены</h2-->
     {% endif %}
 </div>
 {% endblock %}

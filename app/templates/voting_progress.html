@@ -4,6 +4,61 @@
 
 <div class="container" >
     <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button><br><br>
+    {% if q %}
+    <div style="margin-left:10%;">
+        <h2>В настоящее время проходит анкетирование</h2>
+</div>
+    <div style="margin-left:10%; display:flex;width:80%; justify-content:space-between;">
+        {% if not_participated_self %}
+                <p>
+                <tbody>
+                    <table class="table">
+                        <th colspan="4" class="th">Не прошли личную анкету:</th>
+                        <tr class="tr">
+                            <th class="th">ID</th>
+                            <th class="th">NAME</th>
+                            <th class="th">SURNAME</th>
+                            <th class="th">TEAM</th>
+                        </tr>
+
+                        {% for user in not_participated_self %}
+                        <tr class="tr">
+                            <td class="td_main">{{ user[0] }}</td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[2] }}</a></td>
+                            <td class="td_main">{{ user[3] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </tbody>
+                </p>
+            {% endif %}
+            {% if not_participated_team %}
+                <p>
+                <tbody>
+                    <table class="table">
+                        <th colspan="4" class="th">Не прошли командную анкету</th>
+                        <tr class="tr">
+                            <th class="th">ID</th>
+                            <th class="th">NAME</th>
+                            <th class="th">SURNAME</th>
+                            <th class="th">TEAM</th>
+                        </tr>
+
+                        {% for user in not_participated_team %}
+                        <tr class="tr">
+                            <td class="td_main">{{ user[0] }}</td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[1] }}</a></td>
+                            <td class="td_main"><a class="nav__link" href="/user_profile?user_id={{user[0]}}" target="_blank">{{ user[2] }}</a></td>
+                            <td class="td_main">{{ user[3] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </tbody>
+                </p>
+
+            {% endif %}</div>
+    {% else %}
     {% if access.assessment_opened %}
         <h1 style="color:black; text-align:center;">Прогресс прохождения голосования</h1>
         <div class="vote_progress">
@@ -38,4 +93,5 @@
         <h2>В настоящее время нет активной оценки</h2>
 </div>
     {% endif %}
+{%endif%}
 {% endblock %}
