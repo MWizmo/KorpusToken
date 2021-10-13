@@ -248,7 +248,7 @@ def questionnaire_team():
         done_teams = [q.team_id for q in
                       Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
         if len(teams_id) == len(done_teams):
-            return redirect('/assessment_page')
+            return redirect('/participate')
         else:
             return redirect(url_for('questionnaire_team'))
     team_title = Teams.query.filter_by(id=team_id).first().name
