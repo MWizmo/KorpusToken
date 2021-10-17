@@ -152,6 +152,19 @@ class User(UserMixin, db.Model):
       sellPrice = KorpusContract.functions.getSellPriceKTD().call()
       
       return sellPrice / ETH_IN_WEI
+
+    @staticmethod
+    def get_KTD_seller_limit(current_user_id):
+      seller_address = User.get_eth_address(current_user_id)
+      file = open("app/static/ABI/Contract_ABI.json", "r")
+      KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+      )
+      file.close()
+
+      return KorpusContract.functions.sellersLimits(seller_address).call()
+
       
     @staticmethod
     def get_kti_price(current_user_id):

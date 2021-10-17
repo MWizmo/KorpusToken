@@ -12,7 +12,7 @@
     <div class="info_card" style="min-width: 33%">
       <div class="info_card_text_block">
         <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-        <p class="info_card_text green">{{ ktd_balance }}</p>
+        <p class="info_card_text green" id="ktd_balance">{{ ktd_balance }}</p>
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text"><b>Курс токена вклада:</b></p>
@@ -30,37 +30,88 @@
         <p class="info_card_text blue" id="total">0 eth</p>
       </div>
       {{ form.submit(class_="submit") }}
-      <p><button class="eth_button" type="button" onclick="history.back();" style="margin-left:25%; width:50%;">Назад</button> </p>
+      <p>
+        <button
+          class="eth_button"
+          type="button"
+          onclick="history.back();"
+          style="margin-left: 25%; width: 50%"
+        >
+          Назад
+        </button>
+      </p>
     </div>
   </div>
 </form>
 {% else %}
 <div class="intro">
   <div class="container">
-    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button><br><br>
+    <button
+      onclick="history.back();"
+      class="nav__link"
+      style="margin-left: 10%"
+    >
+      Назад</button
+    ><br /><br />
     <h1 class="intro_title">У вас нет доступа к обмену токенов вклада.</h1>
   </div>
 </div>
 {% endif %}
 <span style="opacity: 0" id="price">{{ ktd_eth_price }}</span>
+<span style="opacity: 0" id="limit">{{ limit }}</span>
 <script>
   'use strict';
 
   const output = document.querySelector('#total');
   const input = document.querySelector('.eth_input');
   const price = document.querySelector('#price');
+  const limit = document.querySelector('#limit');
+  const ktdBalance = document.querySelector('#ktd_balance');
   const flashMessage = document.querySelector('#flash_msg');
 
+  const submit = document.querySelector('#submit');
+
   input.addEventListener('input', (event) => {
-    const amount = isFinite(event.target.value) ? event.target.value : 0;
+    const amount = isFinite(event.target.value) ? +event.target.value : 0;
+
+    if (amount > +limit.textContent) {
+      output.textContent = `Превышен лимит продажи токенов. Ваш лимит: ${
+        limit.textContent || 0
+      }`;
+
+      return submit.setAttribute('disabled', 'disabled');
+    }
+
+    if (amount > +ktdBalance.textContent) {
+      output.textContent = `Недостаточно токенов.`;
+
+      return submit.setAttribute('disabled', 'disabled');
+    }
+
+    if (amount === 0) {
+      output.textContent = '0 eth';
+
+      return submit.setAttribute('disabled', 'disabled');
+    }
+
+    submit.removeAttribute('disabled');
 
     output.textContent = `${amount * price.textContent} eth`;
   });
 
-  const submit = document.querySelector('#submit');
+  submit.setAttribute('disabled', 'disabled');
+
   const statusMessage = document.querySelector('#status_message');
 
-  submit.addEventListener('click', () => {
+  submit.addEventListener('click', (event) => {
+    if (
+      +limit.textContent < +input.value ||
+      +ktdBalance.textContent < +input.value ||
+      +input.value === 0
+    ) {
+      event.preventDefault();
+    }
+
     statusMessage.textContent = 'Получаем разрешение на использование токенов';
 
     if (flashMessage) {

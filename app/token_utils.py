@@ -155,11 +155,11 @@ def sell_KTD(amount, private_key):
             abi=file.read()
         )
         file.close()
-        estimateGas = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress(contract_address), value).estimateGas({
+        estimateGas = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).estimateGas({
           'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
         })
 
-        transaction = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress(contract_address), value).buildTransaction(
+        transaction = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).buildTransaction(
             {
                 'nonce': nonce,
                 'from': account.address,
@@ -197,7 +197,7 @@ def sell_KTD(amount, private_key):
             return transaction_hash, False
         except Exception as e:
             print(e)
-            return "Недостаточно токенов на вашем счёте или на балансе смарт-контракта недостаточно эфира.", True
+            return "Что-то пошло не так. Попробуйте позже.", True
     else:
         return "Число токенов не должно быть меньше или равно нулю.", True
 
