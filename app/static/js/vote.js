@@ -24,11 +24,13 @@ app.controller("ctrl", function ($scope, $http) {
         }
 
         $scope.finish_vote = function(team_id,axis_id){
+            document.getElementById("finish_button").disabled = true;
             let user_data = {
                 'team_id':team_id,
                  'axis':axis_id,
                  "results":$scope.results
             };
+
             $http({
                 method: 'POST',
                 url: '/finish_vote',
@@ -36,9 +38,8 @@ app.controller("ctrl", function ($scope, $http) {
                 async: false
             }).then(function success (response) {
                 console.log('Анкета успешно заполнена');
-                document.location.href = "assessment";
+                document.location.href = "assessment_page";
             });
-
         }
 
     });

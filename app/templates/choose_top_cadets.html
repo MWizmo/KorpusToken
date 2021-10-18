@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container" ng-app="app" ng-controller="ctrl" style="margin-left:10%;">
-    <h3>Выберите 5 курсантов для оценивания оси отношений</h3>
+<div class="container" ng-app="app" ng-controller="ctrl" style="margin-left:10%; width:80%;">
+    <h2>Выберите от 1 до 5 курсантов, которые будут оценивать ось отношений</h2>
     <div class="top_cadet_div" >
         {% for cadet in cadets %}
         <div class="top_cadet_card">
@@ -24,8 +24,9 @@
         </div>
 
         {% endfor %}
-    </div>
+    </div><br><br>
     <button class='nav__link border' ng-click="confirm();">Подтвердить выбор</button>
+    <button class='nav__link border' onclick="history.back();">Назад</button>
     <br><br><br>
 </div>
 {% endblock %}

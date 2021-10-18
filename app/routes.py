@@ -1253,13 +1253,31 @@ def assessment():
         return redirect(url_for('assessment_axis'))
 
     if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(current_user.id):# and Axis.is_available(2):
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                   Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
+            return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
+                                   access=get_access(current_user), axises=[], is_third=False,
+                                   is_second=False)
         return redirect(url_for('assessment_team', axis_id=2))
 
     if User.check_top_cadet(current_user.id):# and Axis.is_available(1):
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                   Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
+            return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
+                                   access=get_access(current_user), axises=[], is_third=False,
+                                   is_second=False)
         return redirect(url_for('assessment_team', axis_id=1))
 
     if User.check_chieftain(current_user.id):# and Axis.is_available(3):
-        return redirect(url_for('assessment_users', axis_id=3, team_id=0))
+        if Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                             Voting.voting_id == VotingTable.current_voting_id()).first():
+            return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
+                                   access=get_access(current_user), axises=[], is_third=False,
+                                   is_second=False)
+        else:
+            return redirect(url_for('assessment_users', axis_id=3, team_id=0))
 
     return render_template('assessment.html', title='Оценка',
                            access=get_access(current_user))
@@ -1998,6 +2016,11 @@ def choose_top_cadets():
     #                            user_roles=TeamRoles.dict_of_user_roles(current_user.id),
     #                            team=Membership.team_participation(current_user.id))
     log('Просмотр страницы с выбором топовых кадетов')
+    cur_voting = QuestionnaireTable.current_questionnaire_id()
+    if TopCadetsVoting.query.filter(TopCadetsVoting.voting_id == cur_voting,
+                                    TopCadetsVoting.voter_id == current_user.id).first():
+        return render_template('top_cadets_error.html', title='Выбор оценивающих по оси отношений',
+                               access=get_access(current_user))
     cadets = list()
     for user in User.query.all():
         if User.check_cadet(user.id):
@@ -2032,7 +2055,8 @@ def confirm_top_cadets():
         db.session.add(us)
     new_voting = TopCadetsVoting(voter_id=current_user.id, date=datetime.date(datetime.datetime.now().year,
                                                                               datetime.datetime.now().month,
-                                                                              datetime.datetime.now().day))
+                                                                              datetime.datetime.now().day),
+                                 voting_id=QuestionnaireTable.current_questionnaire_id())
     db.session.add(new_voting)
     db.session.commit()
     log('Выбор топовых кадетов')

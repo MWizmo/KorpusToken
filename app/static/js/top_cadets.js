@@ -26,18 +26,23 @@ app.controller("ctrl", function ($scope, $http) {
                 alert('Выберите не более 5 курсантов');
             }
         else{
-            let user_data = {
+            if($scope.counter < 1){
+                alert('Выберите не менее 1 курсанта');
+            }
+            else{
+                let user_data = {
                 'top_cadets':$scope.top_cadets
-            };
-	    $http({
-                method: 'POST',
-                url: '/confirm_top_cadets',
-                data: user_data,
-                async:false
-            }).then(function success (response) {
-            alert("Спасибо за ваш выбор!");
-                document.location.href = "home";
-            });
+                };
+                $http({
+                        method: 'POST',
+                        url: '/confirm_top_cadets',
+                        data: user_data,
+                        async:false
+                    }).then(function success (response) {
+                    alert("Спасибо за ваш выбор!");
+                        document.location.href = "assessment_page";
+                    });
+            }
         }
     }
     });

@@ -26,7 +26,7 @@
                             <tr>
                             <td class="vote_td"><b>{{member[1]}} {{member[2]}}</b></td>
                                 <td class="vote_td">Да<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},1)"></td>
-                                <td class="vote_td">Нет<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"></td>
+                                <td class="vote_td">Нет<input checked type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"></td>
                                 <td class="vote_td left_border">{{answers[c.id][loop.index0]}}</td>
                             </tr>
                         {% endfor %}
@@ -50,7 +50,7 @@
                             <tr>
                             <td class="vote_td"><b>{{member[1]}} {{member[2]}}</b></td>
                                 <td class="vote_td">Да<input type="radio" name="{{criterions[0].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[0].id}},1)"></td>
-                                <td class="vote_td">Нет<input type="radio" name="{{criterions[0].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[0].id}},0)"></td>
+                                <td class="vote_td">Нет<input checked type="radio" name="{{criterions[0].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[0].id}},0)"></td>
                                 <td class="vote_td left_border" >{{answers[loop.index0]}}</td>
                             </tr>
                         {% endfor %}
@@ -66,7 +66,7 @@
                                 <tr>
                                 <td><b>{{member[1]}} {{member[2]}}</b></td>
                                     <td>Да<input type="radio" name="{{criterions[1].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[1].id}},1)"></td>
-                                    <td>Нет<input type="radio" name="{{criterions[1].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)"></td>
+                                    <td>Нет<input checked type="radio" name="{{criterions[1].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)"></td>
                                     </tr>
                     {% endfor %}
                         <tr><td><br></td></tr>
@@ -75,7 +75,7 @@
                                 <tr>
                                 <td><b>{{member[1]}} {{member[2]}}</b></td>
                                     <td>Да<input type="radio" name="{{criterions[2].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[2].id}},1)"></td>
-                                    <td>Нет<input type="radio" name="{{criterions[2].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[2].id}},0)"></td>
+                                    <td>Нет<input checked type="radio" name="{{criterions[2].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[2].id}},0)"></td>
                                     </tr>
                         {% endfor %}
                     </table>
@@ -103,7 +103,7 @@
                                 <tr>
                                     <td><b>{{member[1]}} {{member[2]}}</b></td>
                                     <td>Да<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},1)"></td>
-                                    <td>Нет<input type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"></td>
+                                    <td>Нет<input checked type="radio" name="{{c.id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{c.id}},0)"></td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -132,7 +132,8 @@
                 {% endfor %}
                 </div>
             {% endif %}
-        <button class="nav__link finish_vote_btn" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
+        <button class="nav__link finish_vote_btn" id="finish_button" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
+        <br><br>
     </div>
 </div>
 

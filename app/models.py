@@ -510,6 +510,7 @@ class TopCadetsScore(db.Model):
 class TopCadetsVoting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     voter_id = db.Column(db.Integer)
+    voting_id = db.Column(db.Integer)
     date = db.Column(db.Date)
 
 
