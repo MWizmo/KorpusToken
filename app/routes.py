@@ -697,6 +697,7 @@ def change_to_eth():
     eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
     ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_eth_price = User.get_ktd_price(current_user.id)
+    limit = User.get_KTD_seller_limit(current_user.id) / KT_BITS_IN_KT
     ktd_price = ktd_eth_price * eth_exchange_rate
     user = User.query.filter_by(id=current_user.id).first()
     has_access_to_sell = User.has_access_to_sell(user.id)
@@ -705,6 +706,9 @@ def change_to_eth():
     if form.validate_on_submit():
       if ktd_balance < float(form.amount.data):
         flash('Недостаточно токенов.')
+        return redirect('change_to_eth')
+      if limit < float(form.amount.data):
+        flash('Превышен лимит продажи токенов.')
         return redirect('change_to_eth')
       transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
@@ -721,7 +725,8 @@ def change_to_eth():
       db.session.commit()
     return render_template('change_to_eth.html', title='Обменять на eth',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
-                           has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price)
+                           has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price,
+                           limit=limit)
 
 
 @app.route('/change_address', methods=['GET', 'POST'])

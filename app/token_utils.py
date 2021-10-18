@@ -34,9 +34,9 @@ def transfer_KTD(num, address, private_key):
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-        return txn_hash.hex(), True
+        return txn_hash.hex(), False
     except Exception:
-        return "Недопустимый адрес или недостаточно токенов.", False
+        return "Недопустимый адрес или недостаточно токенов.", True
 
 def get_main_contract_KTI_balance():
     file = open("app/static/ABI/KTI_ABI.json", "r")
@@ -105,14 +105,14 @@ def set_KTI_buyer(address, limit, private_key):
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        return txn_hash.hex(), True
+        return txn_hash.hex(), False
     except Exception:
-        return "Недопустимый адрес или недостаточно средств.", False
+        return "Недопустимый адрес или недостаточно средств.", True
 
 def set_KTD_seller(address, limit, private_key):
     w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address)
+    nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -136,9 +136,9 @@ def set_KTD_seller(address, limit, private_key):
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
     try:
         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        return txn_hash.hex(), True
+        return txn_hash.hex(), False
     except Exception:
-        return "Недопустимый адрес или недостаточно средств.", False
+        return "Недопустимый адрес или недостаточно средств.", True
 
 def sell_KTD(amount, private_key):
     try:
@@ -155,11 +155,11 @@ def sell_KTD(amount, private_key):
             abi=file.read()
         )
         file.close()
-        estimateGas = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress(contract_address), value).estimateGas({
+        estimateGas = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).estimateGas({
           'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
         })
 
-        transaction = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress(contract_address), value).buildTransaction(
+        transaction = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).buildTransaction(
             {
                 'nonce': nonce,
                 'from': account.address,
@@ -172,43 +172,34 @@ def sell_KTD(amount, private_key):
         try:
             txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
             transaction_hash = txn_hash.hex()
-            while True:
-                try:
-                    receipt = w3.eth.getTransactionReceipt(transaction_hash)
-                    if receipt is not None:
-                        break
-                except:
-                    time.sleep(5)
+            file = open("app/static/ABI/Contract_ABI.json", "r")
+            KorpusContract = w3.eth.contract(
+                Web3.toChecksumAddress(contract_address),
+                abi=file.read()
+            )
+            file.close()
+            nonce = w3.eth.getTransactionCount(account.address, "pending")
+            estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
+                {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3})
+            transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
+                {
+                    'nonce': nonce,
+                    'from': account.address,
+                    'gas': estimateGas,
+                    'gasPrice': w3.toWei('2', 'gwei'),
+                    'chainId': 3
+                }
+            )
+            signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+            txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+            transaction_hash = txn_hash.hex()
 
-            if receipt.status == 1:
-                file = open("app/static/ABI/Contract_ABI.json", "r")
-                KorpusContract = w3.eth.contract(
-                    Web3.toChecksumAddress(contract_address),
-                    abi=file.read()
-                )
-                file.close()
-                nonce = w3.eth.getTransactionCount(account.address, "pending")
-                estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
-                    {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3})
-                transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
-                    {
-                        'nonce': nonce,
-                        'from': account.address,
-                        'gas': estimateGas,
-                        'gasPrice': w3.toWei('2', 'gwei'),
-                        'chainId': 3
-                    }
-                )
-                signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
-                txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-                transaction_hash = txn_hash.hex()
-
-                return transaction_hash, False
+            return transaction_hash, False
         except Exception as e:
             print(e)
-            return "Недостаточно токенов на вашем счёте или на балансе смарт-контракта недостаточно эфира.", False
+            return "Что-то пошло не так. Попробуйте позже.", True
     else:
-        return "Число токенов не должно быть меньше или равно нулю.", False
+        return "Число токенов не должно быть меньше или равно нулю.", True
 
 def set_KTD_price(price, private_key):
     w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
