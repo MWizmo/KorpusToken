@@ -39,7 +39,7 @@ admin.add_view(CurrentBudgetView(models.BudgetRecord, db.session, name='Теку
 
 jobstores = {
     'default': SQLAlchemyJobStore(url=os.environ.get('DATABASE_URI')\
-        or 'mysql+pymysql://korpus_user:korpus_password@korpus-db/korpus_db')
+        or 'mysql+pymysql://korpus_user:korpus_password@localhost/korpus_db_test')
 }
 
 job_defaults = {
