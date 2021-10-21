@@ -55,7 +55,24 @@
             {% endfor %}
             </div>
             <div style="width:40%;">
-                <table cellspacing="0" cellpadding="10px" style="width:100%; border-collapse:0;">
+                <table class="rel_table" cellspacing="0">
+                    <tr>
+                        <td class="rel_cell2"><h4>{{criterions[1].name}}</h4></td><td class="rel_cell2" style="text-align:center;">Ваша оценка<br>Зачтено?</td>
+                    </tr>
+                    {% for member in team_members %}
+                        <tr>
+                            <td class="rel_cell2"><b>{{member[1]}} {{member[2]}}</b></td>
+                            <td class="rel_cell2">
+                                <div class="rel_flex">
+                                    <div><input type="radio" name="{{criterions[1].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[1].id}},1)">Да</div>
+                                    <div><input checked type="radio" name="{{criterions[1].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)">Нет</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <!--table cellspacing="0" cellpadding="10px" style="width:100%; border-collapse:0;">
                     <tr>
                         <td style="border-bottom:2px solid black;" class="rel_cell2"><h4>{{criterions[1].name}}</h4></td>
                         <td style="text-align:center;border:1px solid black;border-bottom:2px solid black;" class="rel_cell2" >Ваша оценка<br>Зачтено?</td></tr>
@@ -69,8 +86,24 @@
                                 </div>
                             </td></tr>
                 {% endfor %}
-                </table><br>
-                <table cellspacing="0" cellpadding="10px" style="width:100%; border-collapse:0;">
+                </table--><br>
+                <table class="rel_table" cellspacing="0">
+                    <tr>
+                        <td class="rel_cell2"><h4>{{criterions[2].name}}</h4></td><td class="rel_cell2" style="text-align:center;">Ваша оценка<br>Зачтено?</td>
+                    </tr>
+                    {% for member in team_members %}
+                        <tr>
+                            <td class="rel_cell2"><b>{{member[1]}} {{member[2]}}</b></td>
+                            <td class="rel_cell2">
+                                <div class="rel_flex">
+                                    <div><input type="radio" name="{{criterions[2].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[2].id}},1)">Да</div>
+                                    <div><input checked type="radio" name="{{criterions[2].id}}_{{member[0]}}" ng-click="vote_for({{member[0]}},{{criterions[2].id}},0)">Нет</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <!--table cellspacing="0" cellpadding="10px" style="width:100%; border-collapse:0;">
                     <tr><td style="border-bottom:2px solid black;" class="rel_cell2"><h4>{{criterions[2].name}}</h4></td>
                         <td style="text-align:center;border:1px solid black;border-bottom:2px solid black;" class="rel_cell2" >Ваша оценка<br>Зачтено?</td></tr>
                     {% for member in team_members %}
@@ -84,7 +117,7 @@
                             </td>
                             </tr>
                 {% endfor %}
-                </table><br><br>
+                </table--><br><br>
                 <button class="nav__link finish_vote_btn" id="finish_button" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
             </div>
 
