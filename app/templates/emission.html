@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<button onclick="history.back();" class="nav__link" style="margin-top:2vh; margin-left:5%;">Назад</button><br><br>
+<button class="nav__link finish_vote_btn" style="width:10%;margin-top:2vh;margin-left:5%;" onclick="history.back();">Назад</button>
 <div class="small_card_container">
   <div
     class="small_card_flex"
@@ -44,10 +44,24 @@
           >Изменить курс eth</a
         >
         <a
-          href="/fix_profit"
+          href="/change_token_exchange_rate"
           class="eth_button"
           style="
             margin-left: 25%;
+            margin-top: 2rem;
+            border: 1px solid black;
+            padding: 0.6rem;
+            text-align: center;
+          "
+          >Изменить курс токенов</a
+        >
+      </div>
+      <div class="small_card_flex">
+
+        <a
+          href="/fix_profit"
+          class="eth_button"
+          style="
             margin-top: 2rem;
             border: 1px solid black;
             padding: 0.6rem;

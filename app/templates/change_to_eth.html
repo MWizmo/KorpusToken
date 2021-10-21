@@ -3,11 +3,15 @@
   <p style="text-align: center; width: 100%">
     <i id="status_message"></i>
   </p>
-  {% with messages = get_flashed_messages() %} {% if messages %}
-  <p style="text-align: center; width: 100%">
-    <i id="flash_msg">{{ messages[0] }}</i>
-  </p>
-  {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+
+  {% with messages = get_flashed_messages(category_filter=["error"]) %} {% if messages %}
+  <p style="text-align: center; width: 100%"><i id="flash_msg">{{ messages[0] }}</i></p>
+  {% endif %} {% endwith %}
+  {% with messages = get_flashed_messages(category_filter=["success"]) %} {% if messages %}
+  <p style="text-align: center; width: 100%"><i id="flash_msg"><a href="https://ropsten.etherscan.io/tx/{{messages[0]}}">{{ messages[0] }}</a></i></p>
+  {% endif %} {% endwith %}
+
+  {{ form.csrf_token() }} {{ form.hidden_tag() }}
   <div class="small_card_flex" style="width: 60%; margin-left: 20%">
     <div class="info_card" style="min-width: 33%">
       <div class="info_card_text_block">

@@ -705,16 +705,16 @@ def change_to_eth():
 
     if form.validate_on_submit():
       if ktd_balance < float(form.amount.data):
-        flash('Недостаточно токенов.')
+        flash('Недостаточно токенов.', 'error')
         return redirect('change_to_eth')
       if limit < float(form.amount.data):
-        flash('Превышен лимит продажи токенов.')
+        flash('Превышен лимит продажи токенов.', 'error')
         return redirect('change_to_eth')
       transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
       message, is_error = token_utils.sell_KTD(int(float(form.amount.data) * KT_BITS_IN_KT), user.private_key)
-      flash(message)
+      flash(message, 'success')
       if is_error:
         transaction.status = 'Ошибка'
         db.session.add(transaction)
@@ -760,7 +760,10 @@ def transfer_ktd():
         num = int(float(form.num.data) * KT_BITS_IN_KT)
         address = form.address.data
         message, is_error = token_utils.transfer_KTD(num, address, user.private_key)
-        flash(message)
+        if is_error:
+            flash(message, 'error')
+        else:
+            flash(message, 'success')
         if is_error:
           transaction.status = 'Ошибка'
           db.session.add(transaction)
@@ -789,8 +792,10 @@ def manage_ktd():
       address = form.address.data
       num = int(float(form.num.data) * KT_BITS_IN_KT)
       message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-      flash(message)
-
+      if is_error:
+        flash(message, 'error')
+      else:
+          flash(message, 'success')
       return redirect(url_for('manage_ktd'))
     return render_template('manage_ktd.html', title='Доступ к токенам вклада',
                            contract_balance=contract_balance, ktd_total=ktd_total, form=form)
@@ -811,7 +816,10 @@ def manage_kti():
       address = form.address.data
       num = int(float(form.num.data) * KT_BITS_IN_KT)
       message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-      flash(message)
+      if is_error:
+          flash(message, 'error')
+      else:
+          flash(message, 'success')
 
       return redirect(url_for('manage_kti'))
 
@@ -823,6 +831,48 @@ def manage_kti():
 @login_required
 def budget():
     return render_template('budget.html', title='Бюджет')
+
+
+@app.route('/token_exchange_rate_by_default', methods=['POST'])
+@login_required
+def token_exchange_rate_by_default():
+    # some actions
+    return redirect('/emission')
+
+
+@app.route('/token_exchange_rate_by_profit', methods=['POST'])
+@login_required
+def token_exchange_rate_by_profit():
+    # some actions
+    return redirect('/profit_records')
+
+
+@app.route('/change_token_exchange_rate', methods=['GET', 'POST'])
+@login_required
+def change_token_exchange_rate():
+    if not current_user.is_accountant:
+        return redirect(url_for('home'))
+
+    exchange_rate_record = None#EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    if exchange_rate_record:
+        exchange_rate = exchange_rate_record.exchange_rate
+    else:
+        exchange_rate = 248000
+
+    form = ChangeEthExchangeRate()
+
+    if form.validate_on_submit():
+        price = float(form.price.data)
+        eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
+
+        db.session.add(eth_exchange_rate)
+        db.session.commit()
+
+        return redirect(url_for('emission'))
+
+    return render_template('change_token_exchange_rate.html', title='Изменить курс токенов', form=form,
+                           exchange_rate=exchange_rate)
+
 
 @app.route('/change_eth_exchange_rate', methods=['GET', 'POST'])
 @login_required
@@ -886,7 +936,8 @@ def fix_profit():
         token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
         token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
-      return redirect(url_for('emission'))
+      #return redirect(url_for('emission'))
+      return redirect('/profit_records')
 	  
     return render_template('fix_profit.html', title='Зафиксировать прибыль', form=form)
 
@@ -1389,13 +1440,18 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
                         #if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = 10
+        current_month = 7
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
         voting_results = []
+        voting_dict = {}
+        for user in team_members:
+            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+        dates_str = []
         for date in dates:
             date_info = {'date': f'{date[0].day}.{date[0].month}.{date[0].year}'}
+            dates_str.append(f'{date[0].day}.{date[0].month}.{date[0].year}')
             marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
                 filter(WeeklyVoting.date == date[0], WeeklyVoting.team_id == team_id, WeeklyVoting.finished == 1). \
                 group_by(WeeklyVoting.criterion_id).all()
@@ -1405,6 +1461,19 @@ def assessment_users():
             date_info['marks'] = mark_res
             teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date==date[0], WeeklyVotingMembers.team_id==team_id).all()
             teammates = [t[0] for t in teammates]
+            for user in voting_dict:
+                if user in teammates and mark_res[0]['mark'] == 1:
+                    voting_dict[user]['marks1'].append(1)
+                else:
+                    voting_dict[user]['marks1'].append(0)
+                if user in teammates and mark_res[1]['mark'] == 1:
+                    voting_dict[user]['marks2'].append(1)
+                else:
+                    voting_dict[user]['marks2'].append(0)
+                if user in teammates and mark_res[2]['mark'] == 1:
+                    voting_dict[user]['marks3'].append(1)
+                else:
+                    voting_dict[user]['marks3'].append(0)
             teammates_info = []
             for member in team_members:
                 if member[0] in teammates and len(teammates) > 0:
@@ -1413,9 +1482,9 @@ def assessment_users():
                     teammates_info.append(member)
             date_info['teammates'] = teammates_info
             voting_results.append(date_info)
-        return render_template('assessment_users.html', title='Ось дела',
-                               access=get_access(current_user), team_id=team_id, voting_results=voting_results,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
+        return render_template('business_voting.html', title='Ось дела',
+                               access=get_access(current_user), team_id=team_id, voting_results=voting_results, dates=dates_str,
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team, voting_dict=voting_dict)
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -2002,8 +2071,11 @@ def user_profile():
         return render_template('user_profile.html', title='Неизвестный пользователь',
                                access=get_access(current_user))
     log('Просмотр профиля пользователя с id {}'.format(uid))
-    date = str(user.birthday).split('-')
-    date = '{}.{}.{}'.format(date[2], date[1], date[0])
+    if user.birthday:
+        date = str(user.birthday).split('-')
+        date = '{}.{}.{}'.format(date[2], date[1], date[0])
+    else:
+        date = '-'
     return render_template('user_profile.html', title='Профиль - {} {}'.format(user.surname, user.name),
                            access=get_access(current_user), user=user,
                            date=date)
@@ -2071,5 +2143,28 @@ def confirm_top_cadets():
 @app.route('/transactions', methods=['GET'])
 def transactions():
     data = Transaction.query.all()
-
     return render_template('transactions.html', title='Транзакции', data=data)
+
+
+@app.route('/edit_profit_record', methods=['GET', 'POST'])
+@login_required
+def edit_profit_record():
+    record_id = int(request.args.get('id'))
+    record = Profit.query.get(record_id)
+    form = FixProfit()
+    if form.validate_on_submit():
+        record.summa = float(form.profit.data)
+        db.session.commit()
+        # may be another actions
+        return redirect('/profit_records')
+    return render_template('edit_profit_record.html', title='Изменить значение прибыли', edit_form=form, record=record)
+
+
+@app.route('/delete_profit_record', methods=['POST'])
+@login_required
+def delete_profit_record():
+    record_id = int(request.args.get('id'))
+    Profit.query.filter_by(id=record_id).delete()
+    db.session.commit()
+    # may be another actions
+    return redirect('/profit_records')

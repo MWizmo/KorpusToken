@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block content %}
-<div class="small_card_container">
+<button class="nav__link finish_vote_btn" style="width:10%; margin-top:2vh;margin-left:5%;" onclick="history.back();">Назад</button>
+<div class="small_card_container" style="min-height:80vh;">
   <div class="small_card_flex" style="flex-direction: column">
     <p class="eth_text">Текущий зафиксированный курс ethereum</p>
     <p class="eth_text purple">1 eth = {{ exchange_rate }}р</p>
@@ -9,7 +10,7 @@
       <p><i>{{ messages[0] }}</i></p>
       {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
       <p style="width: 100%;">
-        <span class="eth_text" style="margin-left: 35%;">{{ form.price.label }}</span> <br />
+        <span class="eth_text" style="margin-left: 35%;">Напишите актуальную стоимость 1 eth</span> <br />
 				<div class="dark_block" style="width: 60%; margin-left: 20%">
 					{{ form.price(size=256, class_="eth_input", style="margin-top: 2vh" ) }}
 				</div>
@@ -19,7 +20,7 @@
         	<span style="color: red"> {{error}} </span>
       	{% endfor %}
 			</div>
-			
+
       <p>{{ form.submit(class_="submit") }}</p>
     </form>
   </div>

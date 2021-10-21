@@ -1,8 +1,12 @@
 {% extends "base.html" %} {% block content %}
 <form action="" method="post" novalidate class="form small_card_container">
-  {% with messages = get_flashed_messages() %} {% if messages %}
+  {% with messages = get_flashed_messages(category_filter=["error"]) %} {% if messages %}
   <p style="text-align: center; width: 100%"><i>{{ messages[0] }}</i></p>
-  {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+  {% endif %} {% endwith %}
+  {% with messages = get_flashed_messages(category_filter=["success"]) %} {% if messages %}
+  <p style="text-align: center; width: 100%"><i><a href="https://ropsten.etherscan.io/tx/{{messages[0]}}">{{ messages[0] }}</a></i></p>
+  {% endif %} {% endwith %}
+  {{ form.csrf_token() }} {{ form.hidden_tag() }}
   <div class="small_card_flex" style="width: 70%; margin-left: 15%">
     <div style="min-width: 33%">
       <div class="info_card">

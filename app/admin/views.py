@@ -105,6 +105,16 @@ class AllBudgetRecordsView(ModelView):
     can_delete = False
 
 
+class ProfitRecordView(ModelView):
+    list_template = 'profit_records.html'
+    #edit_template = 'edit_profit_record.html'
+    column_exclude_list = ['id']
+    column_labels = {'date': 'Дата', 'summa': 'Сумма'}
+    can_edit = True
+    can_create = True
+    can_delete = True
+
+
 class CurrentBudgetView(ModelView):
     list_template = 'current_budget.html'
     column_exclude_list = ['id']

@@ -12,7 +12,7 @@ app.controller("ctrl", function ($scope, $http) {
                 $scope.members = response.data['members'];
                 $scope.results = [];
                 for(let i=0;i<$scope.members.length;i++){
-                    $scope.results[$scope.members[i][0]] = [0,0,0,0,0,0,0,0,0];
+                    $scope.results[$scope.members[i][0]] = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
                 }
             });
 	}
@@ -24,22 +24,35 @@ app.controller("ctrl", function ($scope, $http) {
         }
 
         $scope.finish_vote = function(team_id,axis_id){
-            document.getElementById("finish_button").disabled = true;
+            //document.getElementById("finish_button").disabled = true;
             let user_data = {
                 'team_id':team_id,
                  'axis':axis_id,
                  "results":$scope.results
             };
+            let flag = true
+            $scope.results.forEach(function(item, i, arr) {
+                for(let j=3 * (axis_id-1); j < 3 * axis_id; j++)
+                    if(item[j] == -1){
+                        flag = false;
 
-            $http({
-                method: 'POST',
-                url: '/finish_vote',
-                data: user_data,
-                async: false
-            }).then(function success (response) {
-                console.log('Анкета успешно заполнена');
-                document.location.href = "assessment_page";
+                        break;
+                    }
             });
+            if(flag){
+                $http({
+                    method: 'POST',
+                    url: '/finish_vote',
+                    data: user_data,
+                    async: false
+                }).then(function success (response) {
+                    console.log('Анкета успешно заполнена');
+                    document.location.href = "assessment_page";
+                });
+            }
+            else
+                alert('Оцените всех участников');
+
         }
 
     });
