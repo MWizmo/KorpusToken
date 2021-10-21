@@ -2,14 +2,15 @@
 
 {% block content %}
 
-<div class="container" style="margin-left:10%;">
+<div class="container" style="margin-left:10%;width:80%;">
+    <button class="nav__link finish_vote_btn" style="width:10%;" onclick="history.back();">Назад</button>
     <div class="qustionnaire">
         {% if access.assessment_opened %}
             {% if not is_first and not is_second and not is_third %}
                 <h2 class="error" style="margin-left:-20%;">Ваш лимит голосований исчерпан</h2>
                 <button class='nav__link border' onclick="history.back();" style="width:10%; margin-left:35%;margin-top:50px;">Назад</button>
             {% else %}
-                <form class="form" style="padding-top: 15%; padding-left: 0%">
+                <form class="form" style="padding-top: 15%; padding-left: 0%  ">
                     <h2>Выберите ось</h2>
                     {% if access.responsibilities.top_cadet and is_first %}
                         <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>

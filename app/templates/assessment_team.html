@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container" style="padding-top: 5%; margin-left:10%">
-    <div class="intro">
+<div class="container" style="margin-left:10%;width:80%;">
+    <button class="nav__link finish_vote_btn" style="width:10%;" onclick="history.back();">Назад</button>
+    <div class="intro" style="padding-top: 15%; padding-left: 0%  ">
         <h2>Ось {{axis}}</h2>
         <h3>Выберите команду для оценки</h3>
-        <form class="form">
+        <form class="form" >
         {% for team in team_lst %}
 
             <a class='nav__link' href="{{ url_for('assessment_users', axis_id=axis_id, team_id=team[0]) }}">{{ team[1] }}</a><br>
 
         {% endfor %}
-        </form>
+        </form><br><br><br>
+
     </div>
 </div>
 {% endblock %}

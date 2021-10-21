@@ -1378,7 +1378,7 @@ def assessment_users():
                                                        QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
                 else:
                     answers[q.id].append('Нет ответа')
-        return render_template('assessment_users.html', title='Оценка', answers=answers,
+        return render_template('authority_voting.html', title='Ось власти', answers=answers,
                                access=get_access(current_user), questions=questions,
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
     elif axis_id == '2':
@@ -1413,7 +1413,7 @@ def assessment_users():
                     teammates_info.append(member)
             date_info['teammates'] = teammates_info
             voting_results.append(date_info)
-        return render_template('assessment_users.html', title='Оценка',
+        return render_template('assessment_users.html', title='Ось дела',
                                access=get_access(current_user), team_id=team_id, voting_results=voting_results,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
     else:
@@ -1440,7 +1440,7 @@ def assessment_users():
                                                        filename='graphs/graph_{}_{}_{}.png'.format(team_id, q_id, i))}
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
-        return render_template('assessment_users.html', title='Оценка', answers=answers, images=images,
+        return render_template('relations_voting.html', title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id, #q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
 

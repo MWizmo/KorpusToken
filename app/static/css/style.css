@@ -364,6 +364,35 @@ font-family: 'Share Tech Mono', monospace;
     border-spacing: 0;
 }
 
+.rel_table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+.rel_cell1{
+    width:20%;
+}
+
+.rel_cell2{
+    width:50%;
+}
+
+.rel_cell3{
+    width:30%;
+
+}
+
+.rel_flex{
+    display:flex;
+    flex-direction:row;
+    justify-content:space-around;
+}
+
+.rel_table > tbody > tr > td{
+    padding:10px;
+    border:1px solid black;
+}
+
 .vote_td{
     border-bottom:0.5px solid black;
     padding:10px;
@@ -387,6 +416,8 @@ font-family: 'Share Tech Mono', monospace;
     display:flex;
     flex-direction:row;
     margin-bottom: 20px;
+    justify-content: space-between;
+    width:80%;
 }
 
 .tip{
@@ -400,7 +431,7 @@ font-family: 'Share Tech Mono', monospace;
         border: 1px solid #888;
         position: relative;
         text-align: center;
-        margin-left:10%;
+        /*margin-left:10%;*/
     }
 	.slide  input {
         display: none;
@@ -483,6 +514,9 @@ font-family: 'Share Tech Mono', monospace;
 .finish_vote_btn{
     padding:6px;
     font-size:18px;
+    color:white;
+    background:black;
+    border-radius:5px;
 }
 
 .vote_progress{
