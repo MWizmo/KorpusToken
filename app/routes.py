@@ -12,7 +12,7 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, Profit
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, Profit
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -836,7 +836,15 @@ def budget():
 @app.route('/token_exchange_rate_by_default', methods=['POST'])
 @login_required
 def token_exchange_rate_by_default():
-    # some actions
+    price = 4032250000000
+    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
+    kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
+    if (not is_ktd_error) and (not is_kti_error):
+      token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price, is_default_calculation_method=True)
+      db.session.add(token_exchange_rate)
+      db.session.commit()
+
     return redirect('/emission')
 
 
@@ -853,25 +861,31 @@ def change_token_exchange_rate():
     if not current_user.is_accountant:
         return redirect(url_for('home'))
 
-    exchange_rate_record = None#EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
-    if exchange_rate_record:
-        exchange_rate = exchange_rate_record.exchange_rate
+    eth_exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    if eth_exchange_rate_record:
+        eth_exchange_rate = eth_exchange_rate_record.exchange_rate
     else:
-        exchange_rate = 248000
+        eth_exchange_rate = 248000
+
+    token_exchange_rate_in_rub = User.get_kti_price(current_user.id) * eth_exchange_rate
 
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-        price = float(form.price.data)
-        eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
+        price = (float(form.price.data) / eth_exchange_rate) * ETH_IN_WEI
 
-        db.session.add(eth_exchange_rate)
-        db.session.commit()
+        private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+        ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key)
+        kti_message, is_kti_error = token_utils.set_KTI_price(int(price), private_key)
+        if (not is_ktd_error) and (not is_kti_error):
+          token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price, is_default_calculation_method=False)
+          db.session.add(token_exchange_rate)
+          db.session.commit()
 
         return redirect(url_for('emission'))
 
     return render_template('change_token_exchange_rate.html', title='Изменить курс токенов', form=form,
-                           exchange_rate=exchange_rate)
+                           exchange_rate=token_exchange_rate_in_rub)
 
 
 @app.route('/change_eth_exchange_rate', methods=['GET', 'POST'])
