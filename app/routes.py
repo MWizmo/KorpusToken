@@ -18,7 +18,7 @@ from werkzeug.urls import url_parse
 from app.forms import *
 from flask_login import current_user, login_user, logout_user, login_required
 from app import token_utils
-import calendar
+import math
 
 def log(action, user_id=None):
     if user_id is None:
@@ -836,7 +836,11 @@ def budget():
 @app.route('/token_exchange_rate_by_default', methods=['POST'])
 @login_required
 def token_exchange_rate_by_default():
-    price = 4032250000000
+    start_price = 4032250000000
+    start_month = 12 * 2017 + 5
+    current_month = datetime.datetime.now().year * 12 + datetime.datetime.now().month
+    n = current_month - start_month
+    price = start_price * math.pow(1.05, n - 1)
     private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
     ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
     kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
@@ -1452,7 +1456,7 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
                         #if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = 7
+        current_month = 10
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
