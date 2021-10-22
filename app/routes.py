@@ -840,7 +840,7 @@ def token_exchange_rate_by_default():
     start_month = 12 * 2017 + 5
     current_month = datetime.datetime.now().year * 12 + datetime.datetime.now().month
     n = current_month - start_month
-    price = start_price * math.pow(1.05, n - 1)
+    price = int(start_price * math.pow(1.05, n - 1))
     private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
     ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
     kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
