@@ -1206,7 +1206,7 @@ def save_to_blockchain():
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('11', 'gwei'),
+            'gasPrice': w3.toWei('29', 'gwei'),
             'chainId': 3
         }
       )
