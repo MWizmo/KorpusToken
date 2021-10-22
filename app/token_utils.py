@@ -18,7 +18,7 @@ def transfer_KTD(num, address, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.transfer(address, num).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3
     })
 
     transaction = KorpusToken_Deposit.functions.transfer(address, num).buildTransaction(
@@ -26,7 +26,7 @@ def transfer_KTD(num, address, private_key):
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
     )
@@ -90,7 +90,7 @@ def set_KTI_buyer(address, limit, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.addAddressToBuyers(address, limit).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3
     })
 
     transaction = KorpusContract.functions.addAddressToBuyers(address, limit).buildTransaction(
@@ -98,7 +98,7 @@ def set_KTI_buyer(address, limit, private_key):
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
     )
@@ -121,7 +121,7 @@ def set_KTD_seller(address, limit, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.addAddressToSellers(address, limit).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3
     })
 
     transaction = KorpusContract.functions.addAddressToSellers(address, limit).buildTransaction(
@@ -129,7 +129,7 @@ def set_KTD_seller(address, limit, private_key):
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
     )
@@ -156,7 +156,7 @@ def sell_KTD(amount, private_key):
         )
         file.close()
         estimateGas = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).estimateGas({
-          'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3
+          'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3
         })
 
         transaction = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).buildTransaction(
@@ -164,7 +164,7 @@ def sell_KTD(amount, private_key):
                 'nonce': nonce,
                 'from': account.address,
                 'gas': estimateGas,
-                'gasPrice': w3.toWei('2', 'gwei'),
+                'gasPrice': w3.toWei('11', 'gwei'),
                 'chainId': 3
             }
         )
@@ -180,13 +180,13 @@ def sell_KTD(amount, private_key):
             file.close()
             nonce = w3.eth.getTransactionCount(account.address, "pending")
             estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
-                {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3})
+                {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3})
             transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
                 {
                     'nonce': nonce,
                     'from': account.address,
                     'gas': estimateGas,
-                    'gasPrice': w3.toWei('2', 'gwei'),
+                    'gasPrice': w3.toWei('11', 'gwei'),
                     'chainId': 3
                 }
             )
@@ -213,7 +213,7 @@ def set_KTD_price(price, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.setSellPriceKTD(price).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3}
     )
 
     transaction = KorpusContract.functions.setSellPriceKTD(price).buildTransaction(
@@ -221,7 +221,7 @@ def set_KTD_price(price, private_key):
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
     )
@@ -247,7 +247,7 @@ def set_KTI_price(price, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.setBuyPriceKTI(price).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3}
     )
 
     transaction = KorpusContract.functions.setBuyPriceKTI(price).buildTransaction(
@@ -255,7 +255,7 @@ def set_KTI_price(price, private_key):
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
     )
@@ -282,7 +282,7 @@ def mint_KTD(amount, receiver, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.mint(receiver, amount).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3}
     )
 
     transaction = KorpusToken_Deposit.functions.mint(receiver, amount).buildTransaction(
@@ -290,7 +290,7 @@ def mint_KTD(amount, receiver, private_key):
         'nonce': nonce,
         'from': account.address,
         'gas': estimateGas,
-        'gasPrice': w3.toWei('2', 'gwei'),
+        'gasPrice': w3.toWei('11', 'gwei'),
         'chainId': 3
       }
     )
@@ -319,7 +319,7 @@ def mint_KTI(amount, receiver, private_key):
     file.close()
 
     estimateGas = KorpusToken_Investment.functions.mint(receiver, amount).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3}
     )
 
     transaction = KorpusToken_Investment.functions.mint(receiver, amount).buildTransaction(
@@ -327,7 +327,7 @@ def mint_KTI(amount, receiver, private_key):
         'nonce': nonce,
         'from': account.address,
         'gas': estimateGas,
-        'gasPrice': w3.toWei('2', 'gwei'),
+        'gasPrice': w3.toWei('11', 'gwei'),
         'chainId': 3
       }
     )
@@ -354,7 +354,7 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.setStudentResult(team, student, date, axis, points).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'), 'chainId': 3}
     )
 
     transaction = KorpusToken_Deposit.functions.setStudentResult(team, student, date, axis, points).buildTransaction(
@@ -362,7 +362,7 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
           'nonce': nonce,
           'from': account.address,
           'gas': estimateGas,
-          'gasPrice': w3.toWei('2', 'gwei'),
+          'gasPrice': w3.toWei('11', 'gwei'),
           'chainId': 3
       }
     )

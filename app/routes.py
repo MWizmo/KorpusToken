@@ -855,8 +855,25 @@ def token_exchange_rate_by_default():
 @app.route('/token_exchange_rate_by_profit', methods=['POST'])
 @login_required
 def token_exchange_rate_by_profit():
-    # some actions
-    return redirect('/profit_records')
+    current_profit = db.session.query(func.sum(Profit.summa)).first()[0] or 0
+    current_ktd_price = User.get_ktd_price(current_user.id)
+    ktd_total = token_utils.get_KTD_total(ktd_address)
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
+
+    if (exchange_rate_record):
+      exchange_rate = exchange_rate_record.exchange_rate
+    else:
+      exchange_rate = 248000
+
+    new_ktd_price = (current_profit / (ktd_total / KT_BITS_IN_KT)) / exchange_rate
+
+    print(new_ktd_price, current_ktd_price)
+
+    if new_ktd_price > current_ktd_price:
+      print(token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'))
+      token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    return redirect('/emission')
 
 
 @app.route('/change_token_exchange_rate', methods=['GET', 'POST'])
@@ -934,25 +951,6 @@ def fix_profit():
 
       db.session.add(profit_record)
       db.session.commit()
-
-      current_profit = db.session.query(func.sum(Profit.summa)).first()[0] or 0
-      current_ktd_price = User.get_ktd_price(current_user.id)
-      ktd_total = token_utils.get_KTD_total(ktd_address)
-      exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
-      exchange_rate = 0
-
-      if (exchange_rate_record):
-        exchange_rate = exchange_rate_record.exchange_rate
-      else:
-        exchange_rate = 248000
-
-      new_ktd_price = (current_profit / (ktd_total / KT_BITS_IN_KT)) / exchange_rate
-
-      print(new_ktd_price)
-      
-      if new_ktd_price > current_ktd_price:
-        token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-        token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
       #return redirect(url_for('emission'))
       return redirect('/profit_records')
@@ -1204,7 +1202,7 @@ def save_to_blockchain():
       nonce = w3.eth.getTransactionCount(account.address, 'pending')
 
       estimateGas = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).estimateGas({
-        'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'),
+        'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'),
         'chainId': 3
       })
       transaction = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).buildTransaction(
@@ -1212,7 +1210,7 @@ def save_to_blockchain():
             'nonce': nonce,
             'from': account.address,
             'gas': estimateGas,
-            'gasPrice': w3.toWei('2', 'gwei'),
+            'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
         }
       )
