@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container" style="margin-left:10%;">
+<div class="container" style="margin-left:10%;width:80%;">
     <button onclick="history.back();" class="nav__link">Назад</button>
     <div class="crew_div">
         {% for team in info %}
@@ -23,10 +23,13 @@
         {% if team[2] %}
             <button class="nav__link" onclick="document.location='/edit_team?tid={{team[0].id}}'">Редактировать состав</button>
         {% endif %}
+        {% if current_user.is_admin %}
+            <button class="nav__link" onclick="if(confirm('Действительно удалить команду \'{{team[0].name}}\'?')) document.location='/delete_team?tid={{team[0].id}}';">Удалить команду</button>
+        {% endif %}
         {% endfor %}
         <br><br>
         {% if current_user.is_admin %}
-                <form  action="" method="post" class="form">
+                <form  action="" method="post" class="form" id="form">
                     {{ form.hidden_tag() }}
                     {{ form.csrf_token() }}
                     {{form.title}}
@@ -34,7 +37,11 @@
                     {{form.submit(class_='submit')}}
                 </form>
             {% endif %}
-
+    {% if scroll %}
+        <script>
+            document.getElementById("form").scrollIntoView();
+        </script>
+    {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -578,10 +578,12 @@ def delete_team():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
     tid = request.args.get('tid')
+    TeamRoles.query.filter_by(team_id=tid).delete()
+    Membership.query.filter_by(team_id=tid).delete()
     Teams.query.filter_by(id=tid).delete()
     db.session.commit()
     log('Удаление команды с id {}'.format(tid))
-    return redirect('teams_list')
+    return redirect('/teams_crew')
 
 
 @app.route('/teams_crew', methods=['POST', 'GET'])
@@ -598,6 +600,7 @@ def teams_crew():
         db.session.add(team)
         db.session.commit()
         log('Добавление команды с названием "{}"'.format(form.title.data))
+        return redirect('/teams_crew?s=1')
     teams = Teams.query.all()
     info = list()
     for team in teams:
@@ -610,8 +613,9 @@ def teams_crew():
         else:
             info.append(
                 (team, members_list, TeamRoles.check_team_lead(current_user.id, team.id)))
+    s = 's' in request.args and request.args.get('s') == '1'
     return render_template('teams_crew.html', title='Текущие составы команд', info=info,
-                           access=get_access(current_user), form=form)
+                           access=get_access(current_user), form=form, scroll=s)
 
 
 @app.route('/edit_team', methods=['GET', 'POST'])
@@ -704,16 +708,16 @@ def change_to_eth():
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
-      if ktd_balance < float(form.amount.data):
+      if ktd_balance < float(form.amount.data.replace(' ', '')):
         flash('Недостаточно токенов.', 'error')
         return redirect('change_to_eth')
-      if limit < float(form.amount.data):
+      if limit < float(form.amount.data.replace(' ', '')):
         flash('Превышен лимит продажи токенов.', 'error')
         return redirect('change_to_eth')
-      transaction = Transaction(type='Продажа токена', summa=float(form.amount.data),
+      transaction = Transaction(type='Продажа токена', summa=float(form.amount.data.replace(' ', '')),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
-      message, is_error = token_utils.sell_KTD(int(float(form.amount.data) * KT_BITS_IN_KT), user.private_key)
+      message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '')) * KT_BITS_IN_KT), user.private_key)
       flash(message, 'success')
       if is_error:
         transaction.status = 'Ошибка'
@@ -754,7 +758,7 @@ def transfer_ktd():
     user = User.query.filter_by(id=current_user.id).first()
     form = TransferKtdForm()
     if form.validate_on_submit():
-        transaction = Transaction(type='Перевод токенов', summa=float(form.num.data),
+        transaction = Transaction(type='Перевод токенов', summa=float(form.num.data.replace(' ', '')),
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
         num = int(float(form.num.data) * KT_BITS_IN_KT)
@@ -790,7 +794,7 @@ def manage_ktd():
 
     if form.validate_on_submit():
       address = form.address.data
-      num = int(float(form.num.data) * KT_BITS_IN_KT)
+      num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
       message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
       if is_error:
         flash(message, 'error')
@@ -814,7 +818,7 @@ def manage_kti():
 
     if form.validate_on_submit():
       address = form.address.data
-      num = int(float(form.num.data) * KT_BITS_IN_KT)
+      num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
       message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
       if is_error:
           flash(message, 'error')
@@ -893,7 +897,7 @@ def change_token_exchange_rate():
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-        price = (float(form.price.data) / eth_exchange_rate) * ETH_IN_WEI
+        price = (float(form.price.data.replace(' ', '')) / eth_exchange_rate) * ETH_IN_WEI
 
         private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
         ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key)
@@ -926,7 +930,7 @@ def change_eth_exchange_rate():
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-      price = float(form.price.data)
+      price = float(form.price.data.replace(' ', ''))
       eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
 
       db.session.add(eth_exchange_rate)
@@ -946,7 +950,7 @@ def fix_profit():
     form = FixProfit()
 
     if form.validate_on_submit():
-      profit = float(form.profit.data)
+      profit = float(form.profit.data.replace(' ', ''))
       profit_record = Profit(date=datetime.datetime.now(), summa=profit)
 
       db.session.add(profit_record)
@@ -1154,7 +1158,7 @@ def add_budget_item():
                                                           item=form.item.data).first()
 
     if form.validate_on_submit():
-        summa = round(float(form.cost.data), 2)
+        summa = round(float(form.cost.data.replace(' ', '')), 2)
         who_added = f'{User.get_full_name(current_user.id)}'
         record = BudgetRecord(date=datetime.datetime.now().date(), item=form.item.data, summa=summa,
                               who_added=who_added)
