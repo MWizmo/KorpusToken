@@ -718,15 +718,16 @@ def change_to_eth():
                                 receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                 status='Успешно')
       message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '')) * KT_BITS_IN_KT), user.private_key)
-      flash(message, 'success')
+
       if is_error:
         transaction.status = 'Ошибка'
         db.session.add(transaction)
         db.session.commit()
-
+        flash(message, 'error')
         return redirect(url_for('change_to_eth'))
       db.session.add(transaction)
       db.session.commit()
+      flash(message, 'success')
     return render_template('change_to_eth.html', title='Обменять на eth',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
                            has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price,
