@@ -31,7 +31,6 @@ app.controller("ctrl", function ($scope, $http) {
                  "results":$scope.results
             };
             let flag = true;
-            console.log($scope.results);
             $scope.results.forEach(function(item, i, arr) {
                 for(let j=3 * (axis_id-1); j < 3 * axis_id; j++)
                     if(item[j] == -1){

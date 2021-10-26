@@ -1549,7 +1549,7 @@ def get_members_of_team():
         team_members = [(user.id,
                          User.query.filter_by(id=user.id).first().name,
                          User.query.filter_by(id=user.id).first().surname)
-                        for user in User.query.all() if User.check_can_be_marked(user.id)]
+                        for user in User.query.all() if User.check_can_be_marked(user.id) and current_user.id != user.id]
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
