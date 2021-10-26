@@ -836,7 +836,14 @@ def budget():
 @app.route('/token_exchange_rate_by_default', methods=['POST'])
 @login_required
 def token_exchange_rate_by_default():
-    start_price = 4032250000000
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
+
+    if (exchange_rate_record):
+      exchange_rate = exchange_rate_record.exchange_rate
+    else:
+      exchange_rate = 248000
+    start_price = (1 / exchange_rate) * ETH_IN_WEI
     start_month = 12 * 2017 + 5
     current_month = datetime.datetime.now().year * 12 + datetime.datetime.now().month
     n = current_month - start_month
