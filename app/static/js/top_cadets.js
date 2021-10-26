@@ -6,7 +6,7 @@ app.controller("ctrl", function ($scope, $http) {
 
     $scope.choose = function(cadet_id){
         let el = document.getElementById(cadet_id);
-        if (el.style.border == '2px solid blue'){
+        if (el.style.border == '7px solid black'){
                 el.style.border = '0';
                 $scope.counter -= 1;
                 for(let i=0; i<$scope.top_cadets.length; i++)
@@ -15,7 +15,7 @@ app.controller("ctrl", function ($scope, $http) {
             }
         else
             if ($scope.counter < 5){
-                el.style.border = '2px solid blue';
+                el.style.border = '7px solid black';
                 $scope.counter += 1;
                 $scope.top_cadets.push(cadet_id);
             }
