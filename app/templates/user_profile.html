@@ -6,11 +6,11 @@
         <h2>{{user.name}} {{user.surname}}</h2>
         <p><b>Дата рождения</b>: {{date}}</p>
         <br>
-        <p><b>Электронная почта</b>: {% id user.email %} {{user.email}} {% else %} - {% endif %}</p>
+        <p><b>Электронная почта</b>: {% if user.email %} {{user.email}} {% else %} - {% endif %}</p>
         <p><b>Профиль Telegram</b>: <a href="https://t.me/{{user.tg_nickname}}" target="_blank">t.me/{{user.tg_nickname}}</a></p>
         <br>
-        <p><b>Пройденные курсы</b>: {% id user.courses %} {{user.courses}} {% else %} - {% endif %}</p>
-        <p><b>Опыт работы</b>: {% id user.work_exp %} {{user.work_exp}} {% else %} - {% endif %}</p>
+        <p><b>Пройденные курсы</b>: {% if user.courses %} {{user.courses}} {% else %} - {% endif %}</p>
+        <p><b>Опыт работы</b>: {% if user.work_exp %} {{user.work_exp}} {% else %} - {% endif %}</p>
 
     {% else %}
         <h1>Этого пользователя не существует</h1>
