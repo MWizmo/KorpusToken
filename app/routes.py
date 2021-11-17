@@ -586,6 +586,26 @@ def delete_team():
     return redirect('/teams_crew')
 
 
+@app.route('/red_team', methods=['GET', 'POST'])
+@login_required
+def red_team():
+    if not User.check_admin(current_user.id):
+        log('Попытка удаления команды (ГВ)')
+        return render_template('gryazniy_vzlomshik.html',
+                               access=get_access(current_user))
+    form = RedTeamForm()
+    tid = request.args.get('tid')
+    team = Teams.query.get(tid)
+    statuses = [(1, 'Оценивается'), (2, 'Не оценивается'), (3, 'Состояние не определено'),
+                                                (4, 'Участвует в еженедельной оценке')]
+    if form.validate_on_submit():
+        team.name = form.title.data
+        team.type = form.status.data
+        db.session.commit()
+    return render_template('red_team.html', title='Редактирование команды', team=team,
+                           access=get_access(current_user), form=form, statuses=statuses)
+
+
 @app.route('/teams_crew', methods=['POST', 'GET'])
 @login_required
 def teams_crew():

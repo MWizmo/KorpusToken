@@ -165,3 +165,7 @@ class ChangeEthExchangeRate(FlaskForm):
 class FixProfit(FlaskForm):
     profit = StringField('Введите объём полученных средств в рублях', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
+class RedTeamForm(FlaskForm):
+    title = StringField()
+    status = StringField()

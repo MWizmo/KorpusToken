@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <button onclick="document.location='/teams_crew';" class="nav__link" style="margin-left:10%;">Назад</button>
+    <form class="crew_div" method="post" style="margin-left:10%;">
+        {{ form.hidden_tag() }}
+        <p>
+            <span class="main_text">Название</span> <br>
+            <input name="title" size="32" value="{{team.name}}"><br><br>
+        </p>
+        <p>
+            <span class="main_text">Статус</span> <br>
+            <select name="status">
+                {% for status in statuses %}
+                    {% if team.type == status[0] %}
+                        <option value="{{status[0]}}" selected>{{status[1]}}</option>
+                    {% else %}
+                        <option value="{{status[0]}}">{{status[1]}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </p>
+        <p>
+            <input name="submit" type="submit" class="_submit"  value="Сохранить">
+        </p>
+    </form>
+</div>
+{% endblock %}
