@@ -12,8 +12,12 @@
       </p>
       <p>
         У вас на балансе:
-        <span class="service_page_tokens">{{ user_balance }}</span> Токенов
-        Вклада
+        <span
+          class="service_page_tokens service_page_red"
+          id="user_balance_span"
+          >{{ user_balance }}</span
+        >
+        Токенов Вклада
         <span class="tooltip">
           <img
             src="/static/images/tooltip.png"
@@ -44,10 +48,31 @@
       <a href="/" style="text-decoration: none"
         ><button class="service_page_button">Отменить</button></a
       >
-      <a href="/house_rent_confirmation" style="text-decoration: none">
-        <button class="service_page_button">Подтвердить</button>
+      <a href="#" style="text-decoration: none" id="rent_confirmation_link">
+        <button
+          class="service_page_button service_page_button_disabled"
+          id="house_rent_confirmation"
+        >
+          Подтвердить
+        </button>
       </a>
     </div>
   </div>
 </div>
+<div style="opacity: 0" id="house_rent_price">{{ house_rent_price }}</div>
+<div style="opacity: 0" id="user_balance">{{ user_balance }}</div>
+<script>
+  const confirmationButton = document.querySelector('#house_rent_confirmation');
+  const confirmationLink = document.querySelector('#rent_confirmation_link');
+  const houseRentPrice =
+    document.querySelector('#house_rent_price')?.textContent;
+  const userBalance = document.querySelector('#user_balance')?.textContent;
+  const balanceSpan = document.querySelector('#user_balance_span');
+
+  if (+userBalance >= +houseRentPrice) {
+    confirmationButton.classList.remove('service_page_button_disabled');
+    balanceSpan.classList.remove('service_page_red');
+    confirmationLink.setAttribute('href', '/house_rent_confirmation');
+  }
+</script>
 {% endblock %}

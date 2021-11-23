@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="small_card_container" style="margin-top: 1vh; min-height: 90vh">
+  <div class="small_card_flex" style="width: 60%; margin-left: 20%">
+    <div class="info_card" style="display: block; max-width: 25rem">
+      <div class="info_card_text_block">
+        <p class="info_card_text">
+          С вашего счёта будет списано {{ house_rent_price }} токенов вклада.
+          Отменить эту транзакцию будет невозможно. Вы подтверждаете оплату
+          услуги "Аренда дома Корпус"
+        </p>
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          margin-top: 3.5rem;
+        "
+      >
+        <a
+          href="/confirm_house_rent"
+          class="eth_button"
+          style="
+            border: 1px solid black;
+            max-width: 30%;
+            text-align: center;
+            box-shadow: 0 0 1.1rem white;
+          "
+          >Подтвердить</a
+        >
+        <a
+          href="/"
+          class="eth_button"
+          style="
+            border: 1px solid black;
+            max-width: 30%;
+            text-align: center;
+            box-shadow: 0 0 1.1rem white;
+          "
+          >Отмена</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

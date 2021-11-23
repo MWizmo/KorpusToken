@@ -988,6 +988,15 @@ img {
   cursor: pointer;
 }
 
+.service_page_red {
+  color: #d01924;
+}
+
+.service_page_button_disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
 .service_page_buttons_container {
   display: flex;
   width: 30rem;

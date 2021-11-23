@@ -1166,6 +1166,37 @@ def house_rent():
   return render_template('house_rent.html', title='Аренда дома Корпус', house_rent_price=house_rent_price,
                                             user_balance=user_balance)
 
+@app.route('/house_rent_confirmation', methods=['GET'])
+@login_required
+def house_rent_confirmation():
+  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+  house_rent_price = house_rent_record.price if house_rent_record else 0
+
+  return render_template('house_rent_confirmation.html', title='Подтверждение операции', house_rent_price=house_rent_price)
+
+@app.route('/confirm_house_rent', methods=['GET'])
+@login_required
+def confirm_house_rent():
+  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+  house_rent_price = house_rent_record.price if house_rent_record else 0
+  user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+  user = User.query.filter_by(id=current_user.id).first()
+
+  user_address = user.get_eth_address(current_user_id=current_user.id)
+
+  if user_balance < house_rent_price:
+    return redirect('/house_rent')
+
+  result, is_error = token_utils.rent_house(user_address, int(house_rent_price * KT_BITS_IN_KT), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+
+  if is_error:
+    print(result)
+    return redirect('/house_rent')
+
+  print(result)
+
+  return redirect('/')
+
 @app.route('/add_budget_item', methods=['GET', 'POST'])
 @login_required
 def add_budget_item():

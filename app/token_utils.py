@@ -387,3 +387,18 @@ def set_token_price():
         token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=str(new_exchange_rate), is_default_calculation_method=True)
         db.session.add(token_exchange_rate)
         db.session.commit()
+
+def rent_house(address, price, private_key):
+    allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, private_key)
+
+    if is_allowing_failed:
+      return 'Не удалось получить разрешение на перевод токенов', True
+
+    transaction_hex, is_transfer_failed = transfer_KTD(price, Web3.toChecksumAddress(contract_address), private_key)
+
+    if is_transfer_failed:
+      return 'Не удалось перевести токены', True
+
+    set_KTD_seller(address, 0, private_key)
+
+    return transaction_hex, False
