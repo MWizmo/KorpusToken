@@ -12,7 +12,7 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, Profit
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, Profit, KorpusServices
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -982,6 +982,7 @@ def make_emission():
   current_date = datetime.datetime.now()
   current_year = current_date.year
   current_month = current_date.month
+  current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
   current_budget = db.session.\
     query(func.sum(BudgetRecord.summa)).\
     filter(
@@ -995,7 +996,7 @@ def make_emission():
       BudgetRecord.date <= datetime.datetime(
         current_year,
         current_month,
-        31
+        current_month_last_day
       )
     ).first()[0] or 0
   exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
@@ -1024,6 +1025,7 @@ def emission():
     current_date = datetime.datetime.now()
     current_year = current_date.year
     current_month = current_date.month
+    current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
     current_budget = db.session.\
       query(func.sum(BudgetRecord.summa)).\
       filter(
@@ -1037,7 +1039,7 @@ def emission():
         BudgetRecord.date <= datetime.datetime(
           current_year,
           current_month,
-          31
+          current_month_last_day
         )
       ).first()[0] or 0
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
@@ -1094,6 +1096,7 @@ def make_tokens_distribution():
     current_date = datetime.datetime.now()
     current_year = current_date.year
     current_month = current_date.month
+    current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
     current_budget = db.session.\
       query(func.sum(BudgetRecord.summa)).\
       filter(
@@ -1107,7 +1110,7 @@ def make_tokens_distribution():
         BudgetRecord.date <= datetime.datetime(
           current_year,
           current_month,
-          31
+          current_month_last_day
         )
       ).first()[0] or 0
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
@@ -1152,6 +1155,16 @@ def make_tokens_distribution():
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
     db.session.commit()
     return redirect(url_for('emission'))
+
+@app.route('/house_rent', methods=['GET'])
+@login_required
+def house_rent():
+  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+  house_rent_price = house_rent_record.price if house_rent_record else 0
+  user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+
+  return render_template('house_rent.html', title='Аренда дома Корпус', house_rent_price=house_rent_price,
+                                            user_balance=user_balance)
 
 @app.route('/add_budget_item', methods=['GET', 'POST'])
 @login_required
