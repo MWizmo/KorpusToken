@@ -50,6 +50,14 @@ class User(UserMixin, db.Model):
     def is_admin(self):
         return User.check_admin(self.id)
 
+    @property
+    def is_dealer(self):
+        statuses = UserStatuses.query.filter_by(user_id=self.id).all()
+        for status in statuses:
+            if status.status_id == 9:
+                return True
+        return False
+
     @staticmethod
     def check_teamlead(current_user_id):
         statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
@@ -580,5 +588,8 @@ class TokenExchangeRate(db.Model):
 
 class KorpusServices(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(128))
     price = db.Column(db.Float)
+    unit = db.Column(db.String(32))
+    description = db.Column(db.Text)
+    address = db.Column(db.String(128))

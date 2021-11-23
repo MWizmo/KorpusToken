@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="small_card_container" style="margin-top: 1vh; min-height: 85vh">
+    <div class="small_card_flex" style="width: 80%; margin-left: 10%">
+        <div class="info_card" style="display: block; max-width: 35rem">
+            <div class="info_card_text_block">
+                <p class="info_card_text">
+                    С вашего счёта будет списано {{price}} токенов вклада.
+                    Отменить эту транзакцию будет невозможно. Вы подтверждаете оплату
+                    услуги "{{service.name}}"
+                </p>
+            </div>
+            <div style="display: flex;justify-content: space-around;margin-top: 3.5rem;">
+                <a href="/confirm_pay?s_id={{service.id}}&price={{price}}" class="eth_button" style="
+            border: 1px solid black;
+            max-width: 30%;
+            text-align: center;
+            box-shadow: 0 0 1.1rem white;
+          " >Подтвердить</a>
+                <a href="/services" class="eth_button" style="
+            border: 1px solid black;
+            max-width: 30%;
+            text-align: center;
+            box-shadow: 0 0 1.1rem white;
+          " >Отмена</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

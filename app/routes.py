@@ -12,13 +12,15 @@ from app.scripts import graphs
 from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, Profit, KorpusServices
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
+    Profit, KorpusServices
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
 from flask_login import current_user, login_user, logout_user, login_required
 from app import token_utils
 import math
+
 
 def log(action, user_id=None):
     if user_id is None:
@@ -114,7 +116,7 @@ def signup():
             sex=form.sex.data,
             name=form.name.data,
             surname=form.surname.data,
-						private_key=ethAccount.privateKey.hex())
+            private_key=ethAccount.privateKey.hex())
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -199,7 +201,7 @@ def questionnaire_team():
     # lst_teammates_bd = Membership.query.filter_by(
     #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
     teams = Membership.query.filter_by(user_id=current_user.id).all()
-    teams_id = [Teams.query.filter(Teams.id==t.team_id, Teams.type==1).first() for t in teams]
+    teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
     teams_id = [t.id for t in teams_id if t]
     if len(teams_id) == 1:
         team_id = teams_id[0]
@@ -210,7 +212,8 @@ def questionnaire_team():
             return render_template('questionnaire_error.html', access=get_access(current_user))
         else:
             team_id = list(set(teams_id).difference(set(done_teams)))[0]
-    lst_teammates_bd = Membership.query.filter(Membership.team_id==team_id, Membership.user_id!=current_user.id).all()
+    lst_teammates_bd = Membership.query.filter(Membership.team_id == team_id,
+                                               Membership.user_id != current_user.id).all()
     for teammate in lst_teammates_bd:
         if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
             continue
@@ -409,7 +412,8 @@ def questionnaire_progress():
     d2 = datetime.date(d1.year - 1, d1.month, d1.day)
     delta = d1 - d2
     monthes = []
-    month_dict = {'December': 'декабрь', 'January': 'январь', 'February': 'февраль', 'March': 'март', 'April': 'апрель', 'May': 'май',
+    month_dict = {'December': 'декабрь', 'January': 'январь', 'February': 'февраль', 'March': 'март', 'April': 'апрель',
+                  'May': 'май',
                   'June': 'июнь', 'July': 'июль', 'August': 'август', 'September': 'сентябрь', 'October': 'октябрь',
                   'November': 'ноябрь'}
     for i in range(delta.days + 1):
@@ -445,7 +449,7 @@ def questionnaire_progress():
     elif VotingTable.current_fixed_voting_id():
         cur_id = VotingTable.current_fixed_voting_id()
         filename = 'results_' + str(cur_id) + '.csv'
-        #if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        # if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
         user_info = list()
         with open(os.path.join(app.root_path + '/results', filename)) as file:
             reader = csv.reader(file)
@@ -483,7 +487,7 @@ def finish_questionnaire():
     db.session.commit()
     teams = Teams.query.all()
     for t in teams:
-        #requests.get(f'/f?team_id={t.id}')
+        # requests.get(f'/f?team_id={t.id}')
         make_all_graphs(t.id)
     log('Закрытие анкетирования')
     return redirect('questionnaire_progress')
@@ -597,7 +601,7 @@ def red_team():
     tid = request.args.get('tid')
     team = Teams.query.get(tid)
     statuses = [(1, 'Оценивается'), (2, 'Не оценивается'), (3, 'Состояние не определено'),
-                                                (4, 'Участвует в еженедельной оценке')]
+                (4, 'Участвует в еженедельной оценке')]
     if form.validate_on_submit():
         team.name = form.title.data
         team.type = form.status.data
@@ -710,8 +714,8 @@ def blockchain():
     kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
 
     return render_template('blockchain.html', title='Блокчейн', ktd_balance=ktd_balance,
-                          ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
-                          eth_balance=eth_balance, contract_address=contract_address)
+                           ktd_price=ktd_price, kti_total=kti_total, kti_price=kti_price,
+                           eth_balance=eth_balance, contract_address=contract_address)
 
 
 @app.route('/change_to_eth', methods=['GET', 'POST'])
@@ -728,26 +732,27 @@ def change_to_eth():
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
-      if ktd_balance < float(form.amount.data.replace(' ', '')):
-        flash('Недостаточно токенов.', 'error')
-        return redirect('change_to_eth')
-      if limit < float(form.amount.data.replace(' ', '')):
-        flash('Превышен лимит продажи токенов.', 'error')
-        return redirect('change_to_eth')
-      transaction = Transaction(type='Продажа токена', summa=float(form.amount.data.replace(' ', '')),
-                                receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
-                                status='Успешно')
-      message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '')) * KT_BITS_IN_KT), user.private_key)
+        if ktd_balance < float(form.amount.data.replace(' ', '')):
+            flash('Недостаточно токенов.', 'error')
+            return redirect('change_to_eth')
+        if limit < float(form.amount.data.replace(' ', '')):
+            flash('Превышен лимит продажи токенов.', 'error')
+            return redirect('change_to_eth')
+        transaction = Transaction(type='Продажа токена', summa=float(form.amount.data.replace(' ', '')),
+                                  receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
+                                  status='Успешно')
+        message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '')) * KT_BITS_IN_KT),
+                                                 user.private_key)
 
-      if is_error:
-        transaction.status = 'Ошибка'
+        if is_error:
+            transaction.status = 'Ошибка'
+            db.session.add(transaction)
+            db.session.commit()
+            flash(message, 'error')
+            return redirect(url_for('change_to_eth'))
         db.session.add(transaction)
         db.session.commit()
-        flash(message, 'error')
-        return redirect(url_for('change_to_eth'))
-      db.session.add(transaction)
-      db.session.commit()
-      flash(message, 'success')
+        flash(message, 'success')
     return render_template('change_to_eth.html', title='Обменять на eth',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
                            has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price,
@@ -764,12 +769,13 @@ def change_address():
     current_address = user.get_eth_address(current_user_id=current_user.id)
 
     if form.validate_on_submit():
-      user.private_key = form.new_private_key.data
-      db.session.commit()
-      
-      return redirect(url_for('change_address'))
-      
-    return render_template('change_address.html', title='Изменить адрес кошелька', form=form, current_address=current_address)
+        user.private_key = form.new_private_key.data
+        db.session.commit()
+
+        return redirect(url_for('change_address'))
+
+    return render_template('change_address.html', title='Изменить адрес кошелька', form=form,
+                           current_address=current_address)
 
 
 @app.route('/transfer_ktd', methods=['GET', 'POST'])
@@ -780,8 +786,8 @@ def transfer_ktd():
     form = TransferKtdForm()
     if form.validate_on_submit():
         transaction = Transaction(type='Перевод токенов', summa=float(form.num.data.replace(' ', '')),
-                                receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
-                                status='Успешно')
+                                  receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
+                                  status='Успешно')
         num = int(float(form.num.data) * KT_BITS_IN_KT)
         address = form.address.data
         message, is_error = token_utils.transfer_KTD(num, address, user.private_key)
@@ -790,14 +796,14 @@ def transfer_ktd():
         else:
             flash(message, 'success')
         if is_error:
-          transaction.status = 'Ошибка'
-          db.session.add(transaction)
-          db.session.commit()
+            transaction.status = 'Ошибка'
+            db.session.add(transaction)
+            db.session.commit()
 
-          return redirect(url_for('transfer_ktd'))
+            return redirect(url_for('transfer_ktd'))
         db.session.add(transaction)
         db.session.commit()
-    
+
     return render_template('transfer_ktd.html', title='Перевести токены вклада', form=form,
                            ktd_balance=ktd_balance)
 
@@ -806,22 +812,23 @@ def transfer_ktd():
 @login_required
 def manage_ktd():
     if not current_user.is_admin:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
     contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
     ktd_total = token_utils.get_main_contract_KTD_balance() / KT_BITS_IN_KT
-    
+
     form = ManageKTIForm()
 
     if form.validate_on_submit():
-      address = form.address.data
-      num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
-      message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-      if is_error:
-        flash(message, 'error')
-      else:
-          flash(message, 'success')
-      return redirect(url_for('manage_ktd'))
+        address = form.address.data
+        num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
+        message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        if is_error:
+            flash(message, 'error')
+        else:
+            flash(message, 'success')
+        return redirect(url_for('manage_ktd'))
     return render_template('manage_ktd.html', title='Доступ к токенам вклада',
                            contract_balance=contract_balance, ktd_total=ktd_total, form=form)
 
@@ -830,7 +837,7 @@ def manage_ktd():
 @login_required
 def manage_kti():
     if not current_user.is_admin:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
     contract_balance = w3.eth.getBalance(Web3.toChecksumAddress(contract_address)) / ETH_IN_WEI
     kti_total = token_utils.get_main_contract_KTI_balance() / KT_BITS_IN_KT
@@ -838,15 +845,16 @@ def manage_kti():
     form = ManageKTIForm()
 
     if form.validate_on_submit():
-      address = form.address.data
-      num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
-      message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-      if is_error:
-          flash(message, 'error')
-      else:
-          flash(message, 'success')
+        address = form.address.data
+        num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
+        message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        if is_error:
+            flash(message, 'error')
+        else:
+            flash(message, 'success')
 
-      return redirect(url_for('manage_kti'))
+        return redirect(url_for('manage_kti'))
 
     return render_template('manage_kti.html', title='Доступ к токенам инвестиций',
                            contract_balance=contract_balance, kti_total=kti_total, form=form)
@@ -865,21 +873,23 @@ def token_exchange_rate_by_default():
     exchange_rate = 0
 
     if (exchange_rate_record):
-      exchange_rate = exchange_rate_record.exchange_rate
+        exchange_rate = exchange_rate_record.exchange_rate
     else:
-      exchange_rate = 248000
+        exchange_rate = 248000
     start_price = (1 / exchange_rate) * ETH_IN_WEI
     start_month = 12 * 2017 + 5
     current_month = datetime.datetime.now().year * 12 + datetime.datetime.now().month
     n = current_month - start_month
     price = int(start_price * math.pow(1.05, n - 1))
-    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    private_key = os.environ.get(
+        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
     ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
     kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
     if (not is_ktd_error) and (not is_kti_error):
-      token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price, is_default_calculation_method=True)
-      db.session.add(token_exchange_rate)
-      db.session.commit()
+        token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price,
+                                                is_default_calculation_method=True)
+        db.session.add(token_exchange_rate)
+        db.session.commit()
 
     return redirect('/emission')
 
@@ -894,17 +904,19 @@ def token_exchange_rate_by_profit():
     exchange_rate = 0
 
     if (exchange_rate_record):
-      exchange_rate = exchange_rate_record.exchange_rate
+        exchange_rate = exchange_rate_record.exchange_rate
     else:
-      exchange_rate = 248000
+        exchange_rate = 248000
 
     new_ktd_price = (current_profit / (ktd_total / KT_BITS_IN_KT)) / exchange_rate
 
     print(new_ktd_price, current_ktd_price)
 
     if new_ktd_price > current_ktd_price:
-      print(token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'))
-      token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        print(token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'))
+        token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     return redirect('/emission')
 
 
@@ -927,13 +939,15 @@ def change_token_exchange_rate():
     if form.validate_on_submit():
         price = (float(form.price.data.replace(' ', '')) / eth_exchange_rate) * ETH_IN_WEI
 
-        private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+        private_key = os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
         ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key)
         kti_message, is_kti_error = token_utils.set_KTI_price(int(price), private_key)
         if (not is_ktd_error) and (not is_kti_error):
-          token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price, is_default_calculation_method=False)
-          db.session.add(token_exchange_rate)
-          db.session.commit()
+            token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price,
+                                                    is_default_calculation_method=False)
+            db.session.add(token_exchange_rate)
+            db.session.commit()
 
         return redirect(url_for('emission'))
 
@@ -945,102 +959,108 @@ def change_token_exchange_rate():
 @login_required
 def change_eth_exchange_rate():
     if not current_user.is_accountant:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
     exchange_rate = 0
 
     if (exchange_rate_record):
-      exchange_rate = exchange_rate_record.exchange_rate
+        exchange_rate = exchange_rate_record.exchange_rate
     else:
-      exchange_rate = 248000
+        exchange_rate = 248000
 
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-      price = float(form.price.data.replace(' ', ''))
-      eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
+        price = float(form.price.data.replace(' ', ''))
+        eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
 
-      db.session.add(eth_exchange_rate)
-      db.session.commit()
+        db.session.add(eth_exchange_rate)
+        db.session.commit()
 
-      return redirect(url_for('emission'))
-	  
+        return redirect(url_for('emission'))
+
     return render_template('change_eth_exchange_rate.html', title='Изменить курс eth', form=form,
                            exchange_rate=exchange_rate)
+
 
 @app.route('/fix_profit', methods=['GET', 'POST'])
 @login_required
 def fix_profit():
     if not current_user.is_accountant:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
     form = FixProfit()
 
     if form.validate_on_submit():
-      profit = float(form.profit.data.replace(' ', ''))
-      profit_record = Profit(date=datetime.datetime.now(), summa=profit)
+        profit = float(form.profit.data.replace(' ', ''))
+        profit_record = Profit(date=datetime.datetime.now(), summa=profit)
 
-      db.session.add(profit_record)
-      db.session.commit()
+        db.session.add(profit_record)
+        db.session.commit()
 
-      #return redirect(url_for('emission'))
-      return redirect('/profit_records')
-	  
+        # return redirect(url_for('emission'))
+        return redirect('/profit_records')
+
     return render_template('fix_profit.html', title='Зафиксировать прибыль', form=form)
 
 
 @app.route('/confirm_emission')
 @login_required
 def confirm_emission():
-  if not current_user.is_accountant:
-      return redirect(url_for('home'))
+    if not current_user.is_accountant:
+        return redirect(url_for('home'))
 
-  return render_template('confirm_emission.html', title='Произвести эмиссию')
+    return render_template('confirm_emission.html', title='Произвести эмиссию')
+
 
 @app.route('/make_emission')
 @login_required
 def make_emission():
-  if not current_user.is_accountant:
-      return redirect(url_for('home'))
-  kti_price = User.get_kti_price(current_user.id)
-  current_date = datetime.datetime.now()
-  current_year = current_date.year
-  current_month = current_date.month
-  current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
-  current_budget = db.session.\
-    query(func.sum(BudgetRecord.summa)).\
-    filter(
-      BudgetRecord.date >= datetime.datetime(
-        current_year,
-        current_month,
-        1
-      )
-    ).\
-    filter(
-      BudgetRecord.date <= datetime.datetime(
-        current_year,
-        current_month,
-        current_month_last_day
-      )
+    if not current_user.is_accountant:
+        return redirect(url_for('home'))
+    kti_price = User.get_kti_price(current_user.id)
+    current_date = datetime.datetime.now()
+    current_year = current_date.year
+    current_month = current_date.month
+    current_month_last_day = (
+                datetime.date(current_year + int(current_month / 12), current_month % 12 + 1, 1) - datetime.timedelta(
+            days=1)).day
+    current_budget = db.session. \
+                         query(func.sum(BudgetRecord.summa)). \
+                         filter(
+        BudgetRecord.date >= datetime.datetime(
+            current_year,
+            current_month,
+            1
+        )
+    ). \
+                         filter(
+        BudgetRecord.date <= datetime.datetime(
+            current_year,
+            current_month,
+            current_month_last_day
+        )
     ).first()[0] or 0
-  exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
-  exchange_rate = 0
+    exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
+    exchange_rate = 0
 
-  if (exchange_rate_record):
-    exchange_rate = exchange_rate_record.exchange_rate
-  else:
-    exchange_rate = 248000
+    if (exchange_rate_record):
+        exchange_rate = exchange_rate_record.exchange_rate
+    else:
+        exchange_rate = 248000
 
-  kti_emission = int(((current_budget / exchange_rate) / kti_price) * KT_BITS_IN_KT)
-  ktd_emission = int((kti_emission * 3 / 7) * KT_BITS_IN_KT)
+    kti_emission = int(((current_budget / exchange_rate) / kti_price) * KT_BITS_IN_KT)
+    ktd_emission = int((kti_emission * 3 / 7) * KT_BITS_IN_KT)
 
-  contract_checksum_address = Web3.toChecksumAddress(contract_address)
+    contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
-  token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-  VotingTable.query.get(VotingTable.current_emission_voting_id()).status = 'Distribution'
-  db.session.commit()
-  return redirect(url_for('emission'))
+    token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get(
+        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    VotingTable.query.get(VotingTable.current_emission_voting_id()).status = 'Distribution'
+    db.session.commit()
+    return redirect(url_for('emission'))
+
 
 @app.route('/emission')
 @login_required
@@ -1050,30 +1070,32 @@ def emission():
     current_date = datetime.datetime.now()
     current_year = current_date.year
     current_month = current_date.month
-    current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
-    current_budget = db.session.\
-      query(func.sum(BudgetRecord.summa)).\
-      filter(
+    current_month_last_day = (
+                datetime.date(current_year + int(current_month / 12), current_month % 12 + 1, 1) - datetime.timedelta(
+            days=1)).day
+    current_budget = db.session. \
+                         query(func.sum(BudgetRecord.summa)). \
+                         filter(
         BudgetRecord.date >= datetime.datetime(
-          current_year,
-          current_month,
-          1
+            current_year,
+            current_month,
+            1
         )
-      ).\
-     	filter(
+    ). \
+                         filter(
         BudgetRecord.date <= datetime.datetime(
-          current_year,
-          current_month,
-          current_month_last_day
+            current_year,
+            current_month,
+            current_month_last_day
         )
-      ).first()[0] or 0
+    ).first()[0] or 0
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
     exchange_rate = 0
 
     if (exchange_rate_record):
-      exchange_rate = exchange_rate_record.exchange_rate
+        exchange_rate = exchange_rate_record.exchange_rate
     else:
-      exchange_rate = 248000
+        exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
     ktd_emission = kti_emission * 3 / 7
@@ -1096,7 +1118,7 @@ def emission():
     except Exception as e:
         marks_counter = -1
         users = []
-    #voting_id = VotingTable.current_fixed_voting_id()
+    # voting_id = VotingTable.current_fixed_voting_id()
     distribution_id = VotingTable.current_distribution_voting_id()
     return render_template('emission.html', title='Эмиссия токенов', ktd_price=ktd_price,
                            kti_price=kti_price, current_budget=current_budget, exchange_rate=exchange_rate,
@@ -1104,13 +1126,15 @@ def emission():
                            amount_of_assesment_members=len(users), total_score=marks_counter,
                            distribution_id=distribution_id)
 
+
 @app.route('/confirm_tokens_distribution')
 @login_required
 def confirm_tokens_distribution():
     if not current_user.is_accountant:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
     return render_template('confirm_tokens_distribution.html', title='Распределить токены')
+
 
 @app.route('/make_tokens_distribution')
 @login_required
@@ -1121,34 +1145,36 @@ def make_tokens_distribution():
     current_date = datetime.datetime.now()
     current_year = current_date.year
     current_month = current_date.month
-    current_month_last_day = (datetime.date(current_year + int(current_month/12), current_month%12+1, 1)-datetime.timedelta(days=1)).day
-    current_budget = db.session.\
-      query(func.sum(BudgetRecord.summa)).\
-      filter(
+    current_month_last_day = (
+                datetime.date(current_year + int(current_month / 12), current_month % 12 + 1, 1) - datetime.timedelta(
+            days=1)).day
+    current_budget = db.session. \
+                         query(func.sum(BudgetRecord.summa)). \
+                         filter(
         BudgetRecord.date >= datetime.datetime(
-          current_year,
-          current_month,
-          1
+            current_year,
+            current_month,
+            1
         )
-      ).\
-     	filter(
+    ). \
+                         filter(
         BudgetRecord.date <= datetime.datetime(
-          current_year,
-          current_month,
-          current_month_last_day
+            current_year,
+            current_month,
+            current_month_last_day
         )
-      ).first()[0] or 0
+    ).first()[0] or 0
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
     exchange_rate = 0
 
     if (exchange_rate_record):
-      exchange_rate = exchange_rate_record.exchange_rate
+        exchange_rate = exchange_rate_record.exchange_rate
     else:
-      exchange_rate = 248000
+        exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
     ktd_emission = kti_emission * 3 / 7
-    
+
     cur_voting = VotingTable.query.filter_by(status='Distribution').first()
     if cur_voting:
         voting_id = cur_voting.id
@@ -1156,71 +1182,151 @@ def make_tokens_distribution():
         voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
     criterions = [c.name for c in Criterion.query.all()]
     users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id)) for user in User.query.all() if
-                 User.check_can_be_marked(user.id)]
+             User.check_can_be_marked(user.id)]
     marks_counter = 0
     for user in users:
-            res = [user[1]]
-            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
-                                                                             Voting.id == VotingInfo.voting_id).filter(
-                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
-                VotingInfo.criterion_id).all()
-            for mark in user_res:
-                if float(mark[0]) == 1.0:
-                    marks_counter += 1
+        res = [user[1]]
+        user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                         Voting.id == VotingInfo.voting_id).filter(
+            Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+            VotingInfo.criterion_id).all()
+        for mark in user_res:
+            if float(mark[0]) == 1.0:
+                marks_counter += 1
     ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
     for user in users:
-            res = [user[1]]
-            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
-                                                                             Voting.id == VotingInfo.voting_id).filter(
-                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
-                VotingInfo.criterion_id).all()
-            marks = sum([int(current_res[0]) for current_res in user_res])
-            mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
-            token_utils.mint_KTD(mint_amount, user[2], os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        res = [user[1]]
+        user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                         Voting.id == VotingInfo.voting_id).filter(
+            Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+            VotingInfo.criterion_id).all()
+        marks = sum([int(current_res[0]) for current_res in user_res])
+        mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
+        token_utils.mint_KTD(mint_amount, user[2], os.environ.get(
+            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
     db.session.commit()
     return redirect(url_for('emission'))
 
+
+@app.route('/services')
+@login_required
+def services():
+    return render_template('services.html', title='Услуги', services=KorpusServices.query.all())
+
+
+@app.route('/change_service/<service_id>', methods=['GET', 'POST'])
+@login_required
+def change_service(service_id):
+    service = KorpusServices.query.get(service_id)
+    form = AddServiceForm()
+    if form.validate_on_submit():
+        service.name = form.name.data
+        service.price = form.price.data.replace(' ', '')
+        service.unit = form.unit.data.lower()
+        service.address = form.address.data
+        service.description = form.description.data
+        db.session.commit()
+        return redirect('/services')
+    return render_template('change_service.html', title='Изменить услугу', service=service, form=form)
+
+
+@app.route('/service/<service_id>', methods=['GET', 'POST'])
+@login_required
+def service_info(service_id):
+    service = KorpusServices.query.get(service_id)
+    form = PrePayServiceForm()
+    if form.validate_on_submit():
+        user_balance = 10000#User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+        form2 = ConfirmForm()
+        if form2.validate_on_submit() and form2.stub.data:
+            print(float(form2.stub.data))
+            return render_template('service_pay_confirmation.html', title='Подтверждение операции',
+                                   price=float(form2.stub.data), service=service)
+        return render_template('service_pay.html', title=service.name, service=service,
+                               price=int(form.amount.data) * service.price, user_balance=user_balance, form=form2)
+    return render_template('service_info.html', title=service.name, service=service, form=form)
+
+
+@app.route('/add_service', methods=['GET', 'POST'])
+@login_required
+def add_service():
+    form = AddServiceForm()
+    if form.validate_on_submit():
+        service = KorpusServices(name=form.name.data, price=form.price.data.replace(' ',''),
+                                 unit=form.unit.data.lower(),address=form.address.data,
+                                 description=form.description.data)
+        db.session.add(service)
+        db.session.commit()
+        return redirect('/services')
+    return render_template('add_service.html', title='Добавить услугу', form=form)
+
+
 @app.route('/house_rent', methods=['GET'])
 @login_required
 def house_rent():
-  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
-  house_rent_price = house_rent_record.price if house_rent_record else 0
-  user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+    house_rent_price = house_rent_record.price if house_rent_record else 0
+    user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
 
-  return render_template('house_rent.html', title='Аренда дома Корпус', house_rent_price=house_rent_price,
-                                            user_balance=user_balance)
+    return render_template('house_rent.html', title='Аренда дома Корпус', house_rent_price=house_rent_price,
+                           user_balance=user_balance)
+
 
 @app.route('/house_rent_confirmation', methods=['GET'])
 @login_required
 def house_rent_confirmation():
-  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
-  house_rent_price = house_rent_record.price if house_rent_record else 0
+    house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+    house_rent_price = house_rent_record.price if house_rent_record else 0
 
-  return render_template('house_rent_confirmation.html', title='Подтверждение операции', house_rent_price=house_rent_price)
+    return render_template('house_rent_confirmation.html', title='Подтверждение операции',
+                           house_rent_price=house_rent_price)
+
+
+@app.route('/confirm_pay')
+@login_required
+def confirm_pay():
+    s_id = int(request.args.get('s_id'))
+    service = KorpusServices.query.get(s_id)
+    price = float(request.args.get('price'))
+    user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    user = User.query.filter_by(id=current_user.id).first()
+    user_address = user.get_eth_address(current_user_id=current_user.id)
+    if user_balance < price:
+        return redirect(f'/service/{s_id}')
+    result, is_error = token_utils.rent_house(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
+        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    if is_error:
+        print(result)
+        return redirect(f'/service/{s_id}')
+    print(result)
+    return redirect('/services')
+
 
 @app.route('/confirm_house_rent', methods=['GET'])
 @login_required
 def confirm_house_rent():
-  house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
-  house_rent_price = house_rent_record.price if house_rent_record else 0
-  user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-  user = User.query.filter_by(id=current_user.id).first()
+    house_rent_record = KorpusServices.query.filter_by(name='HouseRent').first()
+    house_rent_price = house_rent_record.price if house_rent_record else 0
+    user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    user = User.query.filter_by(id=current_user.id).first()
 
-  user_address = user.get_eth_address(current_user_id=current_user.id)
+    user_address = user.get_eth_address(current_user_id=current_user.id)
 
-  if user_balance < house_rent_price:
-    return redirect('/house_rent')
+    if user_balance < house_rent_price:
+        return redirect('/house_rent')
 
-  result, is_error = token_utils.rent_house(user_address, int(house_rent_price * KT_BITS_IN_KT), os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    result, is_error = token_utils.rent_house(user_address, int(house_rent_price * KT_BITS_IN_KT), os.environ.get(
+        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
-  if is_error:
+    if is_error:
+        print(result)
+        return redirect('/house_rent')
+
     print(result)
-    return redirect('/house_rent')
 
-  print(result)
+    return redirect('/')
 
-  return redirect('/')
 
 @app.route('/add_budget_item', methods=['GET', 'POST'])
 @login_required
@@ -1235,11 +1341,11 @@ def add_budget_item():
         record = BudgetRecord(date=datetime.datetime.now().date(), item=form.item.data, summa=summa,
                               who_added=who_added)
         if existing_budget_record:
-          existing_budget_record.summa = summa
-          existing_budget_record.who_added = who_added
-          db.session.commit()
+            existing_budget_record.summa = summa
+            existing_budget_record.who_added = who_added
+            db.session.commit()
 
-          return redirect('/current_budget')
+            return redirect('/current_budget')
         db.session.add(record)
         db.session.commit()
         return redirect('/current_budget')
@@ -1251,14 +1357,16 @@ def add_budget_item():
 def write_to_blockchain():
     return render_template('write_to_blockchain.html', title='Записать в блокчейн')
 
+
 @app.route('/save_to_blockchain')
 @login_required
 def save_to_blockchain():
     if not current_user.is_admin:
-      return redirect(url_for('home'))
+        return redirect(url_for('home'))
 
-    account = w3.eth.account.privateKeyToAccount(os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-    
+    account = w3.eth.account.privateKeyToAccount(
+        os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+
     budget_records = BudgetRecord.query.filter_by(is_saved=False).all()
 
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -1269,37 +1377,37 @@ def save_to_blockchain():
     file.close()
 
     for budget_record in budget_records:
-      date = budget_record.date
-      timestamp = datetime.datetime(year=date.year, month=date.month,
-                               day=date.day).timestamp()
-      budget_item = budget_record.item
-      cost = round(budget_record.summa, 2) * 100
+        date = budget_record.date
+        timestamp = datetime.datetime(year=date.year, month=date.month,
+                                      day=date.day).timestamp()
+        budget_item = budget_record.item
+        cost = round(budget_record.summa, 2) * 100
 
-      nonce = w3.eth.getTransactionCount(account.address, 'pending')
+        nonce = w3.eth.getTransactionCount(account.address, 'pending')
 
-      estimateGas = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).estimateGas({
-        'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'),
-        'chainId': 3
-      })
-      transaction = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).buildTransaction(
-        {
-            'nonce': nonce,
-            'from': account.address,
-            'gas': estimateGas,
-            'gasPrice': w3.toWei('29', 'gwei'),
+        estimateGas = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).estimateGas({
+            'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'),
             'chainId': 3
-        }
-      )
-      signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+        })
+        transaction = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).buildTransaction(
+            {
+                'nonce': nonce,
+                'from': account.address,
+                'gas': estimateGas,
+                'gasPrice': w3.toWei('29', 'gwei'),
+                'chainId': 3
+            }
+        )
+        signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
 
-      try:
-        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        transaction_hash = txn_hash.hex()
+        try:
+            txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+            transaction_hash = txn_hash.hex()
 
-        budget_record.is_saved = True
-      except Exception as err:
-        print(err)
-    
+            budget_record.is_saved = True
+        except Exception as err:
+            print(err)
+
     db.session.commit()
 
     return redirect(url_for('budget'))
@@ -1321,14 +1429,15 @@ def write_voting_progress():
                    info,
                    Axis.query.filter_by(id=info.criterion_id).first()) for info in voting_info]
     for user_data in users_info:
-      team = Teams.query.filter_by(id=user_data[1].team_id).first()
-      cur_date = datetime.datetime.now()
-      date = int(str(cur_date.year) + str(cur_date.month) + str(cur_date.day))
-      token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
-                                            date=date,
-                                            axis=user_data[3].name,
-                                            points=user_data[2].mark,
-                                            private_key=os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        team = Teams.query.filter_by(id=user_data[1].team_id).first()
+        cur_date = datetime.datetime.now()
+        date = int(str(cur_date.year) + str(cur_date.month) + str(cur_date.day))
+        token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
+                                              date=date,
+                                              axis=user_data[3].name,
+                                              points=user_data[2].mark,
+                                              private_key=os.environ.get(
+                                                  'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.get(cur_id).status = 'Emission'
     db.session.commit()
     return redirect('/questionnaire_progress')
@@ -1400,7 +1509,8 @@ def assessment():
         #         2) or Axis.is_available(3)):
         return redirect(url_for('assessment_axis'))
 
-    if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(current_user.id):# and Axis.is_available(2):
+    if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(
+            current_user.id):  # and Axis.is_available(2):
         teams_for_voting = len(Teams.query.filter_by(type=1).all())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
@@ -1409,7 +1519,7 @@ def assessment():
                                    is_second=False)
         return redirect(url_for('assessment_team', axis_id=2))
 
-    if User.check_top_cadet(current_user.id):# and Axis.is_available(1):
+    if User.check_top_cadet(current_user.id):  # and Axis.is_available(1):
         teams_for_voting = len(Teams.query.filter_by(type=1).all())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
@@ -1418,9 +1528,9 @@ def assessment():
                                    is_second=False)
         return redirect(url_for('assessment_team', axis_id=1))
 
-    if User.check_chieftain(current_user.id):# and Axis.is_available(3):
+    if User.check_chieftain(current_user.id):  # and Axis.is_available(3):
         if Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
-                                             Voting.voting_id == VotingTable.current_voting_id()).first():
+                               Voting.voting_id == VotingTable.current_voting_id()).first():
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
                                    access=get_access(current_user), axises=[], is_third=False,
                                    is_second=False)
@@ -1435,14 +1545,15 @@ def assessment():
 @login_required
 def assessment_axis():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(
+                current_user.id)):
         log('Попытка просмотра страницы с выбором оси для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
     axises = [(axis.id, axis.name) for axis in Axis.query.all()]
     teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
-                        Voting.check_on_assessment(current_user.id, team.id, 1)]
+             Voting.check_on_assessment(current_user.id, team.id, 1)]
     is_first = True if len(teams) else False
     teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
              Voting.check_on_assessment(current_user.id, team.id, 2)]
@@ -1458,7 +1569,8 @@ def assessment_axis():
 @login_required
 def assessment_team():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(
+                current_user.id)):
         log('Попытка просмотра страницы с выбором команды для оценки (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
@@ -1490,11 +1602,12 @@ def assessment_team():
 @login_required
 def assessment_users():
     if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
-            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(current_user.id)):
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(
+                current_user.id)):
         log('Попытка просмотра страницы с оценкой пользователей (ГВ)')
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
-    #q_ids = []
+    # q_ids = []
     team_id = int(request.args.get('team_id'))
     axis_id = request.args.get('axis_id')
     log('Просмотр страницы с оценкой по оси id {} команды с id {}'.format(axis_id, team_id))
@@ -1514,7 +1627,7 @@ def assessment_users():
                 questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id,
                                                            Questionnaire.user_id == c[0], Questionnaire.type == 1).all()
                 if questionnaire:
-                    #q_ids.append(questionnaire.id)
+                    # q_ids.append(questionnaire.id)
                     questionnaire = questionnaire[-1]
                     answers[q.id].append(
                         QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
@@ -1530,7 +1643,7 @@ def assessment_users():
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=team_id)
                         if User.check_cadet(member.user_id)]
-                        #if current_user.id != member.user_id and User.check_cadet(member.user_id)]
+        # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
         current_month = 10
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
@@ -1551,7 +1664,8 @@ def assessment_users():
             for mark in marks:
                 mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
             date_info['marks'] = mark_res
-            teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date==date[0], WeeklyVotingMembers.team_id==team_id).all()
+            teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date[0],
+                                                                              WeeklyVotingMembers.team_id == team_id).all()
             teammates = [t[0] for t in teammates]
             for user in voting_dict:
                 if user in teammates and mark_res[0]['mark'] == 1:
@@ -1575,8 +1689,10 @@ def assessment_users():
             date_info['teammates'] = teammates_info
             voting_results.append(date_info)
         return render_template('business_voting.html', title='Ось дела',
-                               access=get_access(current_user), team_id=team_id, voting_results=voting_results, dates=dates_str,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team, voting_dict=voting_dict)
+                               access=get_access(current_user), team_id=team_id, voting_results=voting_results,
+                               dates=dates_str,
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team,
+                               voting_dict=voting_dict)
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -1586,10 +1702,11 @@ def assessment_users():
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
-            questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id, Questionnaire.user_id == member[0],
+            questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id,
+                                                       Questionnaire.user_id == member[0],
                                                        Questionnaire.type == 1).all()
             if questionnaire:
-                #q_ids.append(questionnaire.id)
+                # q_ids.append(questionnaire.id)
                 questionnaire = questionnaire[-1]
                 answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
                                                               QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
@@ -1602,7 +1719,7 @@ def assessment_users():
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('relations_voting.html', title='Ось отношений', answers=answers, images=images,
-                               access=get_access(current_user), team_id=team_id, #q_ids=q_ids,
+                               access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team)
 
 
@@ -1614,7 +1731,8 @@ def get_members_of_team():
         team_members = [(user.id,
                          User.query.filter_by(id=user.id).first().name,
                          User.query.filter_by(id=user.id).first().surname)
-                        for user in User.query.all() if User.check_can_be_marked(user.id) and current_user.id != user.id]
+                        for user in User.query.all() if
+                        User.check_can_be_marked(user.id) and current_user.id != user.id]
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -1747,6 +1865,7 @@ def make_all_graphs(team_id):
 
     t.join()
 
+
 @app.route('/make_graphs')
 @login_required
 def make_graphs():
@@ -1809,7 +1928,7 @@ def voting_progress():
             cadet = User.query.filter_by(id=cadet_id).first()
             if cadet:
                 voting_num = len(Voting.query.filter(Voting.user_id == cadet_id, Voting.axis_id == 1,
-                                                     Voting.voting_id==assessment.id).all())
+                                                     Voting.voting_id == assessment.id).all())
                 relation_results.append(('{} {}'.format(cadet.name, cadet.surname), voting_num))
 
         business_results = list()
@@ -1817,7 +1936,7 @@ def voting_progress():
             user = User.query.filter_by(id=user_id).first()
             if user:
                 voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 2,
-                                                     Voting.voting_id==assessment.id).all())
+                                                     Voting.voting_id == assessment.id).all())
                 business_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
         authority_results = list()
@@ -1825,7 +1944,7 @@ def voting_progress():
             user = User.query.filter_by(id=user_id).first()
             if user:
                 voting_num = len(Voting.query.filter(Voting.user_id == user_id, Voting.axis_id == 3,
-                                                     Voting.voting_id==assessment.id).all())
+                                                     Voting.voting_id == assessment.id).all())
                 authority_results.append(('{} {}'.format(user.name, user.surname), voting_num))
 
         # if Axis.is_available(1):
@@ -1850,8 +1969,8 @@ def voting_progress():
         return render_template('voting_progress.html', title='Прогресс голосования',
                                access=get_access(current_user),
                                teams_number=teams_for_voting, relation=relation_results,
-                               business=business_results, authority=authority_results, form=form)#,
-                               #rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
+                               business=business_results, authority=authority_results, form=form)  # ,
+        # rel_text=rel_text, bus_text=bus_text, auth_text=auth_text)
     else:
         form = StartAssessmentForm()
         if form.validate_on_submit():

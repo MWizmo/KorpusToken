@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/service.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<form class="service_page_container" method="post">
+    {{ form.hidden_tag() }}
+    <div class="service_page_content" ng-app="app" ng-controller="ctrl" ng-init="init({{service.price}});" ng-cloak>
+        <div class="service_page_title">
+            Услуга: &ldquo;{{service.name}}&rdquo;
+        </div>
+        <div class="service_page_text">
+            <p>
+                <b>Стоимость</b>: {{service.price}} Токенов Вклада за 1 {{service.unit}}
+            </p>
+            <p>
+                <b>Описание</b>: {{service.description}}
+            </p>
+            <p>
+                Какое количество хотите оплатить?<br>
+                <input style="width:20%;" name="amount" required ng-model="amount" ng-change="change_amount();">
+            </p>
+            {% raw %}
+            <p>Сумма к оплате: <span class="service_page_tokens">{{res}}</span> Токенов Вклада</p>
+            {% endraw %}
+        </div>
+        <div class="service_page_buttons_container">
+            <button class="service_page_button" type="submit" id="button" disabled>Подтвердить</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

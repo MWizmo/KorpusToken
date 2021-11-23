@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block content %}
+<div class="service_page_container">
+    <div class="service_page_content">
+        <div class="service_page_title">
+            Услуга: &ldquo;{{service.name}}&rdquo;
+        </div>
+        <div class="service_page_text">
+            <p>Сумма к оплате:<span class="service_page_tokens">{{price}}</span> Токенов Вклада</p>
+            <p>
+                У вас на балансе:
+                {% if price > user_balance %}
+                <span class="service_page_tokens service_page_red">{{ user_balance }}</span>
+                {% else %}
+                <span class="service_page_tokens">{{ user_balance }}</span>
+                {% endif %}
+                Токенов Вклада
+                <span class="tooltip">
+          <img
+                  src="/static/images/tooltip.png"
+                  alt="Tooltip"
+                  width="20px"
+                  height="20px"
+                  style="position: relative; top: 4px"
+          />
+          <span class="tooltiptext">
+            Система автоматически отслеживает баланс вашего кошелька, но т.к.
+            обновления происходят несколько раз в день, данные могут отличаться
+            от актуальных. Актуальный баланс вы всегда сможете посмотреть на
+            своём кошельке.
+          </span>
+        </span>
+            </p>
+            <p>После подтверждения токены вклада автоматически спишутся с вашего счёта.</p>
+            <p>Как только транзакция будет успешно завершена, вам в telegram придёт уведомление с кодом, подтверждающим оплату.</p>
+            <p>Предъявите этот код для получения услуги.</p>
+        </div>
+        <div class="service_page_buttons_container">
+            <button class="service_page_button" onclick="document.location.href='/service/{{service.id}}';">Отменить</button>
+            {% if price > user_balance %}
+            <button class="service_page_button service_page_button_disabled">Подтвердить</button>
+            {% else %}
+            <form method="post">
+                {{ form.hidden_tag() }}
+                <input name="stub" value="{{price}}" type="hidden">
+                <button class="service_page_button" type="submit">Подтвердить</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

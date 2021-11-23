@@ -169,3 +169,16 @@ class FixProfit(FlaskForm):
 class RedTeamForm(FlaskForm):
     title = StringField()
     status = StringField()
+
+class AddServiceForm(FlaskForm):
+    name = StringField()
+    price = StringField()
+    unit = StringField()
+    address = StringField()
+    description = TextAreaField()
+
+class PrePayServiceForm(FlaskForm):
+    amount = StringField()
+
+class ConfirmForm(FlaskForm):
+    stub = StringField()

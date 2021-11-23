@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="margin-left:10%;width:80%;">
+    <button class="nav__link finish_vote_btn" style="width:10%;margin-left:0;margin-bottom:2vh;" onclick="document.location.href='/community';">Назад</button>
+    <h3>Выберите интересуюшую вас услугу из списка</h3><br>
+    {% if current_user.is_dealer %}
+    <button class="nav__link finish_vote_btn" style="margin-left:0;" onclick="document.location.href='/add_service';">+ добавить услугу</button>
+    {% endif %}
+    {% if not services %}
+        <br><br><h3>Список услуг пока пуст</h3><br>
+    {% endif %}
+    <table class="services_table">
+        <tr>
+            <td>
+                <div class="scroll_block">
+                    <table class="scroll_table" cellpadding="0" cellspacing="0">
+                        {% for s in services %}
+                        <tr >
+                            <td class="services_td">
+                                <div class="services_name_block">
+                                    {{s.name}}
+                                </div>
+                                <div class="services_price_block">
+                                    {{s.price}} кт/{{s.unit}}
+                                </div>
+                                <div class="services_button_block">
+                                    {% if current_user.is_dealer %}
+                                    <button class="nav__link finish_vote_btn" style="padding:10px 50px;border-radius:7px;color:black;background:white;" onclick="document.location.href='/change_service/{{s.id}}';">Изменить</button>
+                                    {% endif %}
+                                    <button class="nav__link finish_vote_btn" style="padding:10px 50px;border-radius:7px;" onclick="window.open('/service/{{s.id}}');">Подробнее</button>
+
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+            </td>
+        </tr>
+
+    </table>
+</div>
+{% endblock %}
