@@ -1237,7 +1237,7 @@ def service_info(service_id):
     service = KorpusServices.query.get(service_id)
     form = PrePayServiceForm()
     if form.validate_on_submit():
-        user_balance = 10000#User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+        user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
         form2 = ConfirmForm()
         if form2.validate_on_submit() and form2.stub.data:
             print(float(form2.stub.data))
