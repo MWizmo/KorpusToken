@@ -1,0 +1,78 @@
+{% extends "base.html" %} {% block content %}
+<div class="service_page_container">
+  <div class="service_page_content">
+    <div class="service_page_title">
+      Услуга: &ldquo;Аренда дома Корпус&rdquo;
+    </div>
+    <div class="service_page_text">
+      <p>
+        Сумма к оплате:
+        <span class="service_page_tokens">{{ house_rent_price }}</span> Токенов
+        Вклада
+      </p>
+      <p>
+        У вас на балансе:
+        <span
+          class="service_page_tokens service_page_red"
+          id="user_balance_span"
+          >{{ user_balance }}</span
+        >
+        Токенов Вклада
+        <span class="tooltip">
+          <img
+            src="/static/images/tooltip.png"
+            alt="Tooltip"
+            width="20px"
+            height="20px"
+            style="position: relative; top: 4px"
+          />
+          <span class="tooltiptext">
+            Система автоматически отслеживает баланс вашего кошелька, но т.к.
+            обновления происходят несколько раз в день, данные могут отличаться
+            от актуальных. Актуальный баланс вы всегда сможете посмотреть на
+            своём кошельке.
+          </span>
+        </span>
+      </p>
+      <p>
+        После подтверждения, токены вклада автоматически спишутся с вашего
+        счёта.
+      </p>
+      <p>
+        Как только транзакция будет успешно завершена, вам в telegram придёт
+        уведомление с кодом, подтверждающим оплату.
+      </p>
+      <p>Предъявите этот код для получения услуги.</p>
+    </div>
+    <div class="service_page_buttons_container">
+      <a href="/" style="text-decoration: none"
+        ><button class="service_page_button">Отменить</button></a
+      >
+      <a href="#" style="text-decoration: none" id="rent_confirmation_link">
+        <button
+          class="service_page_button service_page_button_disabled"
+          id="house_rent_confirmation"
+        >
+          Подтвердить
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+<div style="opacity: 0" id="house_rent_price">{{ house_rent_price }}</div>
+<div style="opacity: 0" id="user_balance">{{ user_balance }}</div>
+<script>
+  const confirmationButton = document.querySelector('#house_rent_confirmation');
+  const confirmationLink = document.querySelector('#rent_confirmation_link');
+  const houseRentPrice =
+    document.querySelector('#house_rent_price')?.textContent;
+  const userBalance = document.querySelector('#user_balance')?.textContent;
+  const balanceSpan = document.querySelector('#user_balance_span');
+
+  if (+userBalance >= +houseRentPrice) {
+    confirmationButton.classList.remove('service_page_button_disabled');
+    balanceSpan.classList.remove('service_page_red');
+    confirmationLink.setAttribute('href', '/house_rent_confirmation');
+  }
+</script>
+{% endblock %}

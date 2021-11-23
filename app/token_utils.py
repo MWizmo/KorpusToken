@@ -380,10 +380,25 @@ def set_token_price():
     last_exchange_rate = TokenExchangeRate.query.order_by(TokenExchangeRate.date.desc()).first()
     if not last_exchange_rate.is_default_calculation_method:
         return
-    new_exchange_rate = int(last_exchange_rate.exchange_rate_in_wei * 1.05)
+    new_exchange_rate = int(int(last_exchange_rate.exchange_rate_in_wei) * 1.05)
     ktd_message, is_ktd_error = set_KTD_price(new_exchange_rate, private_key)
     kti_message, is_kti_error = set_KTI_price(new_exchange_rate, private_key)
     if (not is_ktd_error) and (not is_kti_error):
-        token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=new_exchange_rate, is_default_calculation_method=True)
+        token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=str(new_exchange_rate), is_default_calculation_method=True)
         db.session.add(token_exchange_rate)
         db.session.commit()
+
+def rent_house(address, price, private_key):
+    allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, private_key)
+
+    if is_allowing_failed:
+      return 'Не удалось получить разрешение на перевод токенов', True
+
+    transaction_hex, is_transfer_failed = transfer_KTD(price, Web3.toChecksumAddress(contract_address), private_key)
+
+    if is_transfer_failed:
+      return 'Не удалось перевести токены', True
+
+    set_KTD_seller(address, 0, private_key)
+
+    return transaction_hex, False
