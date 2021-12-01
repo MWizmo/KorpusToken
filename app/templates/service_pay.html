@@ -36,13 +36,6 @@
         </div>
         <div class="service_page_buttons_container">
             <button class="service_page_button" onclick="document.location.href='/service/{{service.id}}';">Отменить</button>
-
-            <form method="post">
-                {{ form.hidden_tag() }}
-                <input name="stub" value="{{price}}" type="hidden">
-                <button class="service_page_button" type="submit">Подтвердить</button>
-            </form>
-
             {% if price > user_balance %}
                 <button class="service_page_button service_page_button_disabled">Подтвердить</button>
             {% else %}

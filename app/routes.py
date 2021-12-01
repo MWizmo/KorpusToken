@@ -3,7 +3,6 @@ import datetime
 import threading
 import os
 import csv
-import telebot
 import requests
 from sqlalchemy import func
 from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
@@ -1309,9 +1308,7 @@ def confirm_pay():
                               code=code, date=datetime.datetime.now())
     db.session.add(payment)
     db.session.commit()
-    bot = telebot.TeleBot('573817226:AAHM6cFFyr64GS7c5ZWw6z_j6UHGNKQldBU')
-    bot.send_message(current_user.chat_id, 'Ваш промокод: ' + code)
-    del bot
+    requests.post('https://bot.eos.korpus.io/promocode', data={'user_id': current_user.id, 'code': code})
     return redirect('/services')
 
 
