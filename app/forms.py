@@ -182,3 +182,13 @@ class PrePayServiceForm(FlaskForm):
 
 class ConfirmForm(FlaskForm):
     stub = StringField()
+
+
+class CheckCodeForm(FlaskForm):
+    code = StringField()
+    submit = SubmitField('Проверить')
+
+
+class CheckCodeForm2(FlaskForm):
+    code2 = StringField()
+    submit2 = SubmitField('Использовать')

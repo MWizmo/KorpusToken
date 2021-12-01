@@ -593,3 +593,13 @@ class KorpusServices(db.Model):
     unit = db.Column(db.String(32))
     description = db.Column(db.Text)
     address = db.Column(db.String(128))
+
+
+class ServicePayments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)
+    paid_amount = db.Column(db.Integer)
+    code = db.Column(db.String(256))
+    active = db.Column(db.Boolean)
+    date = db.Column(db.Date)

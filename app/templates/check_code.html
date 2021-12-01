@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if info %}
+<form class="service_page_container" method="post">
+    <div class="service_page_content">
+        <div class="service_page_text">
+            {{ form2.hidden_tag() }}
+            <table style="width:100%;">
+                <tr>
+                    <td style="width:15%;"><h3>Введите код в поле</h3></td>
+                    <td style="width:85%;"><input style="width:30%;margin-left:5%;" name="code2" value="{{info['code']}}"></td>
+                </tr>
+            </table>
+        </div>
+        <br><br>
+        {% if message %}
+            <div class="service_page_text">
+                <h3>{{message}}</h3><br><br>
+            </div>
+        {% endif %}
+        <div class="service_page_text">
+            <p>Услуга - {{info['service']}}</p>
+            <p>Код принадлежит пользователю - {{info['user']}}</p>
+            <p>Сколько было оплачено ({{info['unit']}}) - {{info['paid_amount']}}</p>
+            <p>Статус кода - {{info['status']}}</p>
+            <p>Дата оплаты - {{info['date']}}</p>
+        </div>
+        <div class="service_page_buttons_container">
+            <button class="service_page_button" onclick="document.location.href='/services';" type="button">Отменить</button>
+            {% if info ['active'] %}
+                {{ form2.submit2(class_='service_page_button') }}
+            {% else %}
+                <button class="service_page_button" name="submit2" type="submit" disabled>Использовать</button>
+            {% endif %}
+        </div>
+    </div>
+</form>
+
+{% else %}
+
+<form class="service_page_container" method="post">
+    <div class="service_page_content">
+        <div class="service_page_text">
+            {{ form.hidden_tag() }}
+            <table style="width:100%;">
+                <tr>
+                    <td style="width:15%;"><h3>Введите код в поле</h3></td>
+                    <td style="width:85%;"><input style="width:30%;margin-left:5%;" name="code" required></td>
+                </tr>
+            </table>
+        </div>
+        <br><br>
+        {% if message %}
+            <div class="service_page_text">
+                <h3>{{message}}</h3><br><br>
+            </div>
+        {% endif %}
+        <div class="service_page_buttons_container">
+            <button class="service_page_button" onclick="document.location.href='/services';" type="button">Отменить</button>
+            {{ form.submit(class_='service_page_button') }}
+        </div>
+    </div>
+</form>
+{% endif %}
+
+{% endblock %}

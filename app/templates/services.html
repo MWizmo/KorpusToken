@@ -6,6 +6,7 @@
     <h3>Выберите интересуюшую вас услугу из списка</h3><br>
     {% if current_user.is_dealer %}
     <button class="nav__link finish_vote_btn" style="margin-left:0;" onclick="document.location.href='/add_service';">+ добавить услугу</button>
+    <button class="nav__link finish_vote_btn" style="margin-left:0;" onclick="document.location.href='/check_code';">проверить код</button>
     {% endif %}
     {% if not services %}
         <br><br><h3>Список услуг пока пуст</h3><br>

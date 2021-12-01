@@ -3,7 +3,7 @@ import datetime
 import threading
 import os
 import csv
-
+import telebot
 import requests
 from sqlalchemy import func
 from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
@@ -13,7 +13,7 @@ from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
-    Profit, KorpusServices
+    Profit, KorpusServices, ServicePayments
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -1289,18 +1289,57 @@ def confirm_pay():
     s_id = int(request.args.get('s_id'))
     service = KorpusServices.query.get(s_id)
     price = float(request.args.get('price'))
-    user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    user = User.query.filter_by(id=current_user.id).first()
-    user_address = user.get_eth_address(current_user_id=current_user.id)
-    if user_balance < price:
-        return redirect(f'/service/{s_id}')
-    result, is_error = token_utils.rent_house(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-    if is_error:
-        print(result)
-        return redirect(f'/service/{s_id}')
-    print(result)
+
+    # Оплата услуги через блокчейн
+    # user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    # user = User.query.filter_by(id=current_user.id).first()
+    # user_address = user.get_eth_address(current_user_id=current_user.id)
+    # if user_balance < price:
+    #     return redirect(f'/service/{s_id}')
+    # result, is_error = token_utils.rent_house(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
+    #     'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    # if is_error:
+    #     print(result)
+    #     return redirect(f'/service/{s_id}')
+    # print(result)
+    # На выходе - промокод
+    payments = ServicePayments.query.all()
+    code = f'code{len(payments) + 1}'
+    payment = ServicePayments(service_id=s_id, user_id=current_user.id, paid_amount=price / service.price, active=True,
+                              code=code, date=datetime.datetime.now())
+    db.session.add(payment)
+    db.session.commit()
+    bot = telebot.TeleBot('573817226:AAHM6cFFyr64GS7c5ZWw6z_j6UHGNKQldBU')
+    bot.send_message(current_user.chat_id, 'Ваш промокод: ' + code)
+    del bot
     return redirect('/services')
+
+
+@app.route('/check_code', methods=['GET', 'POST'])
+@login_required
+def check_code():
+    form = CheckCodeForm()
+    form2 = CheckCodeForm2()
+    if form.submit.data and form.validate_on_submit():
+        code = form.code.data
+        payment = ServicePayments.query.filter_by(code=code).first()
+        if payment:
+            user = User.query.get(payment.user_id)
+            service = KorpusServices.query.get(payment.service_id)
+            status = 'Активен' if payment.active else 'Использован'
+            info = {'user': f'{user.name} {user.surname}', 'service': service.name, 'unit': service.unit,
+                    'paid_amount': payment.paid_amount, 'date': payment.date, 'status': status,
+                    'active': payment.active, 'code': code}
+            return render_template('check_code.html', title='Проверить код', form2=form2, info=info)
+        else:
+            return render_template('check_code.html', title='Проверить код', form=form, message='Промокод не найден')
+    if form2.submit2.data and form2.validate_on_submit():
+        code = form2.code2.data
+        payment = ServicePayments.query.filter_by(code=code).first()
+        payment.active = False
+        db.session.commit()
+        return render_template('check_code.html', title='Проверить код', form=form, message='Промокод активирован')
+    return render_template('check_code.html', title='Проверить код', form=form)
 
 
 @app.route('/confirm_house_rent', methods=['GET'])
