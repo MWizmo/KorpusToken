@@ -583,7 +583,7 @@ class EthExchangeRate(db.Model):
 class TokenExchangeRate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime)
-    exchange_rate_in_wei = db.Column(db.String)
+    exchange_rate_in_wei = db.Column(db.String(256))
     is_default_calculation_method = db.Column(db.Boolean)
 
 class KorpusServices(db.Model):
@@ -601,5 +601,6 @@ class ServicePayments(db.Model):
     user_id = db.Column(db.Integer)
     paid_amount = db.Column(db.Integer)
     code = db.Column(db.String(256))
+    transaction_hash = db.Column(db.String(256))
     active = db.Column(db.Boolean)
     date = db.Column(db.Date)

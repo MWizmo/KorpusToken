@@ -388,7 +388,7 @@ def set_token_price():
         db.session.add(token_exchange_rate)
         db.session.commit()
 
-def rent_house(address, price, private_key):
+def make_payment(address, price, private_key):
     allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, private_key)
 
     if is_allowing_failed:
