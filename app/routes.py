@@ -1290,21 +1290,21 @@ def confirm_pay():
     price = float(request.args.get('price'))
 
     # Оплата услуги через блокчейн
-    user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
-    user = User.query.filter_by(id=current_user.id).first()
-    user_address = user.get_eth_address(current_user_id=current_user.id)
-    if user_balance < price:
-        return redirect(f'/service/{s_id}')
-    result, is_error = token_utils.make_payment(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
-    if is_error:
-        print(result)
-        return redirect(f'/service/{s_id}')
+    # user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    # user = User.query.filter_by(id=current_user.id).first()
+    # user_address = user.get_eth_address(current_user_id=current_user.id)
+    # if user_balance < price:
+    #     return redirect(f'/service/{s_id}')
+    # result, is_error = token_utils.make_payment(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
+    #     'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    # if is_error:
+    #     print(result)
+    #     return redirect(f'/service/{s_id}')
     # На выходе - промокод
     payments = ServicePayments.query.all()
     code = f'{len(payments) + 1}'
     payment = ServicePayments(service_id=s_id, user_id=current_user.id, paid_amount=price / service.price, active=True,
-                              code=code, date=datetime.datetime.now(), transaction_hash=result)
+                              code=code, date=datetime.datetime.now(), transaction_hash='')
     db.session.add(payment)
     db.session.commit()
     requests.post('https://bot.eos.korpus.io/promocode', data={'user_id': current_user.id, 'code': code})
