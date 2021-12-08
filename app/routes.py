@@ -1301,9 +1301,9 @@ def confirm_pay():
         return redirect(f'/service/{s_id}')
     # На выходе - промокод
     payments = ServicePayments.query.all()
-    code = f'{len(payments) + 1}'
+    code = result #f'{len(payments) + 1}'
     payment = ServicePayments(service_id=s_id, user_id=current_user.id, paid_amount=price / service.price, active=True,
-                              code=code, date=datetime.datetime.now(), transaction_hash=result)
+                              code=code, date=datetime.datetime.now(), transaction_hash='')
     db.session.add(payment)
     db.session.commit()
     requests.post('https://bot.eos.korpus.io/promocode', data={'user_id': current_user.id, 'code': code})
