@@ -1295,8 +1295,7 @@ def confirm_pay():
     user_address = user.get_eth_address(current_user_id=current_user.id)
     if user_balance < price:
         return redirect(f'/service/{s_id}')
-    result, is_error = token_utils.make_payment(user_address, int(price * KT_BITS_IN_KT), os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    result, is_error = token_utils.make_payment(user_address, int(price * KT_BITS_IN_KT), user.private_key)
     if is_error:
         print(result)
         return redirect(f'/service/{s_id}')
