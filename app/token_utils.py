@@ -389,7 +389,9 @@ def set_token_price():
         db.session.commit()
 
 def make_payment(address, price, private_key):
-    allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, private_key)
+    admin_private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+
+    allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, admin_private_key)
 
     if is_allowing_failed:
       return 'Не удалось получить разрешение на перевод токенов', True
@@ -399,6 +401,6 @@ def make_payment(address, price, private_key):
     if is_transfer_failed:
       return 'Не удалось перевести токены', True
 
-    set_KTD_seller(address, 0, private_key)
+    set_KTD_seller(address, 0, admin_private_key)
 
     return transaction_hex, False
