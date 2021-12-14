@@ -18,9 +18,9 @@ login = LoginManager(app)
 login.login_view = 'login'
 w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
 
-kti_address = '0xa47286dd2496e4b6d389fbeb2879db8f3bcb5697'
-ktd_address = '0x99d01e76234cd97a6bcc43664e6bc4c49d11524a'
-contract_address = '0x96d0925e383c658d9ab0e90679e866d9cf2c7614'
+kti_address = '0x1b28f639449afd8ae596e972b697266d8c2a5baf'
+ktd_address = '0x43ec2a0432b9f3d56ed1d7febff98c7cb737a88b'
+contract_address = '0x2f6acb26eec74b3b46c46542c9d5b18f2826db97'
 ETH_IN_WEI = 1000000000000000000
 KT_BITS_IN_KT = 1000000000000000000
 
