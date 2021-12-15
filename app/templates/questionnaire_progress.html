@@ -13,7 +13,7 @@
             <span> Всего анкетируемых: <span class="main_text">{{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено личных анкет: <span class="main_text"> {{ questionnaire.already_self }} из {{ questionnaire.max_particip }}</span></span><br>
             <span> Пройдено командных анкет: <span class="main_text">{{ questionnaire.already_team }} из {{ questionnaire.all_team_particip }}</span></span><br>
-            <span> Выбрали коллегию для оценки по оси дела: <span class="main_text">{{ counter }}</span></span><br>
+            <span> Выбрали коллегию для оценки по оси отношений: <span class="main_text">{{ counter }}</span></span><br>
 
         </p>
         <a class='nav__link border' href="{{ url_for('finish_questionnaire') }}">Завершить анкетирование</a>
