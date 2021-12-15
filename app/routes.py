@@ -146,8 +146,8 @@ def questionnaire_self():
 
     form = QuestionnairePersonal()
     questions = Questions.query.filter_by(type=1)  # type=1 - вопросы 1-го типа, т. е. личные
+    membership = Membership.query.filter_by(user_id=current_user.id).first()
     if form.validate_on_submit():
-        membership = Membership.query.filter_by(user_id=current_user.id).first()
         if membership:
             q = Questionnaire(user_id=current_user.id,
                               team_id=membership.team_id,
@@ -178,13 +178,16 @@ def questionnaire_self():
 
     return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
                            q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
-                           access=get_access(current_user))
+                           access=get_access(current_user), membership=membership)
 
 
 @app.route('/questionnaire_team', methods=['GET', 'POST'])
 @login_required
 def questionnaire_team():
     log('Просмотр страницы с командной анкетой')
+    membership = Membership.query.filter_by(user_id=current_user.id).first()
+    if not membership:
+        return redirect('/participate')
     cur_quest = QuestionnaireTable.current_questionnaire_id()
     user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
     if user_quest:
@@ -321,18 +324,19 @@ def get_questionnaire_progress():
                 questionnaire['participaters'].append(user.id)
                 questionnaire['participaters_self_ids'].append(user.id)
                 questionnaire['max_particip'] += 1
-                questionnaire['all_team_particip'] += 1
-                questionnaire['participaters_team_ids'].append(user.id)
+                if User.is_in_team(user.id):
+                    questionnaire['all_team_particip'] += 1
+                    questionnaire['participaters_team_ids'].append(user.id)
 
-            if Questionnaire.query.filter_by(user_id=user.id, type=1):
-                for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
-                    if qst.questionnaire_id == cur_questionnaire:
+            if Questionnaire.query.filter_by(user_id=user.id, type=1, assessment=1, questionnaire_id=cur_questionnaire).first():
+                # for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
+                #     if qst.questionnaire_id == cur_questionnaire:
                         questionnaire['already_self'] += 1
                         questionnaire['participated_self'].append(user.id)
 
-            if Questionnaire.query.filter_by(user_id=user.id, type=2):
-                for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
-                    if qst.questionnaire_id == cur_questionnaire:
+            if Questionnaire.query.filter_by(user_id=user.id, type=2, assessment=1, questionnaire_id=cur_questionnaire).first():
+                # for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
+                #     if qst.questionnaire_id == cur_questionnaire:
                         questionnaire['already_team'] += 1
                         questionnaire['participated_team'].append(user.id)
 
@@ -344,11 +348,11 @@ def get_questionnaire_progress():
     not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
                                       for user in questionnaire['participaters_self_ids']
                                       if user not in questionnaire['participated_self']]
-    not_participated_self_statuses = [Statuses.query.filter_by(
-        id=UserStatuses.query.filter_by(
-            user_id=user).first().status_id).first().status
-                                      for user in questionnaire['participaters_self_ids']
-                                      if user not in questionnaire['participated_self']]
+    # not_participated_self_statuses = [Statuses.query.filter_by(
+    #     id=UserStatuses.query.filter_by(
+    #         user_id=user).first().status_id).first().status
+    #                                   for user in questionnaire['participaters_self_ids']
+    #                                   if user not in questionnaire['participated_self']]
     # not_participated_self_teams = [Teams.query.filter_by(
     #     id=Membership.query.filter_by(user_id=user).first().team_id
     # ).first().name
@@ -362,6 +366,8 @@ def get_questionnaire_progress():
             teams_id = [t for t in teams_id if t]
             if len(teams_id) > 0:
                 not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
+            else:
+                not_participated_self_teams.append('-')
     not_participated_self_info = []
 
     for i in range(len(not_participated_self_ids)):
@@ -384,6 +390,8 @@ def get_questionnaire_progress():
             teams_id = [t for t in teams_id if t]
             if len(teams_id) > 0:
                 not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
+            else:
+                not_participated_team_teams.append('-')
     # not_participated_team_teams = [Teams.query.filter(
     #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
     # ).first().name

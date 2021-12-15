@@ -71,16 +71,25 @@ class User(UserMixin, db.Model):
         statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 3:
-                teams = Membership.query.filter_by(user_id=current_user_id).all()
-                for t in teams:
-                    team = Teams.query.filter_by(id=t.team_id).first()
-                    try:
-                        if team.type and team.type == 1:
-                            return True
-                    except AttributeError:
-                        continue
+                return True
+                # teams = Membership.query.filter_by(user_id=current_user_id).all()
+                # for t in teams:
+                #     team = Teams.query.filter_by(id=t.team_id).first()
+                #     try:
+                #         if team.type and team.type == 1:
+                #             return True
+                #     except AttributeError:
+                #         continue
                 #return True
         return False
+
+    @staticmethod
+    def is_in_team(user_id):
+        teams = Membership.query.filter_by(user_id=user_id).all()
+        if len(teams):
+            return True
+        else:
+            return False
 
     @staticmethod
     def check_chieftain(current_user_id):

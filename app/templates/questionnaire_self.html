@@ -7,22 +7,24 @@
         <form action="" method="post" class="form">
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}
-
+            {% if membership %}
             <p>
                 {{ form.qst_personal_growth.label(class_="question_type") }}<br>
                 <label><p class="question">{{ q1 }}</p></label>
-                {{ form.qst_personal_growth(class_="text_field", rows='15',cols='75') }}
+                {{ form.qst_personal_growth(class_="text_field2", rows='15',cols='75') }}
                 {% for error in form.errors %}
                     <span style="color: red;">
                         {{ error }}
                     </span>
                 {% endfor %}
             </p>
-
+            {% else %}
+                <input name="qst_personal_growth" value="-" type="hidden">
+            {% endif %}
             <p>
                 {{ form.qst_controllability.label(class_="question_type") }}<br>
                 <label><p class="question">{{ q2 }}</p></label>
-                {{ form.qst_controllability(class_="text_field", rows='15',cols='75')}}
+                {{ form.qst_controllability(class_="text_field2", rows='15',cols='75')}}
                 {% for error in form.errors %}
                     <span style="color: red;">
                         {{ error }}
@@ -33,7 +35,7 @@
             <p>
                 {{ form.qst_selfcontrol.label(class_="question_type") }}<br>
                 <label><p class="question">{{ q3 }}</p></label>
-                {{ form.qst_selfcontrol(class_="text_field", rows='15',cols='75') }}
+                {{ form.qst_selfcontrol(class_="text_field2", rows='15',cols='75') }}
                 {% for error in form.errors %}
                     <span style="color: red;">
                         {{ error }}
@@ -44,7 +46,7 @@
             <p>
                 {{ form.qst_strategy.label(class_="question_type") }}<br>
                 <label><p class="question">{{ q4 }}</p></label>
-                {{ form.qst_strategy(class_="text_field", rows='15',cols='75') }}
+                {{ form.qst_strategy(class_="text_field2", rows='15',cols='75') }}
                 {% for error in form.errors %}
                     <span style="color: red;">
                         {{ error }}

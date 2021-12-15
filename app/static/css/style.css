@@ -249,6 +249,17 @@ h6 {
   font-family: 'Share Tech Mono', monospace;
 }
 
+.text_field2 {
+  border: 1px solid #000000;
+  background: #ffffff !important;
+  outline: none;
+  height: 100px;
+  /*width: 200px;*/
+  color: #000000;
+  font-size: 14px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
 /* Constructor */
 
 .constructor {
