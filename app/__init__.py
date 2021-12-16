@@ -21,6 +21,7 @@ w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a
 kti_address = '0x1b28f639449afd8ae596e972b697266d8c2a5baf'
 ktd_address = '0x43ec2a0432b9f3d56ed1d7febff98c7cb737a88b'
 contract_address = '0x2f6acb26eec74b3b46c46542c9d5b18f2826db97'
+admin_wallet_address = '0x409B1cb790b6923A55e7722676593bcAEC2cDd3f'
 ETH_IN_WEI = 1000000000000000000
 KT_BITS_IN_KT = 1000000000000000000
 
