@@ -141,8 +141,14 @@ def questionnaire_self():
     if user_quest:
         user_quest = user_quest[-1]
         if user_quest.questionnaire_id == cur_quest:
-            return render_template('questionnaire_error.html',
-                                   access=get_access(current_user))
+            if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 9:
+                return render_template('questionnaire_error.html', access=get_access(current_user))
+            else:
+                membership = Membership.query.filter_by(user_id=current_user.id).first()
+                if not membership:
+                    return render_template('questionnaire_error.html', access=get_access(current_user))
+                else:
+                    return redirect('/questionnaire_team')
 
     form = QuestionnairePersonal()
     questions = Questions.query.filter_by(type=1)  # type=1 - вопросы 1-го типа, т. е. личные
@@ -196,7 +202,8 @@ def questionnaire_team():
         teams_id = [t for t in teams_id if t]
         if len(teams_id) == 1:
             user_quest = user_quest[-1]
-            if user_quest.questionnaire_id == cur_quest:
+            if user_quest.questionnaire_id == cur_quest and \
+                    len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 5:
                 return render_template('questionnaire_error.html',
                                        access=get_access(current_user))
     teammates = []
