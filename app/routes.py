@@ -1694,7 +1694,7 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = 10
+        current_month = 12
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
@@ -2223,6 +2223,19 @@ def assessment_results():
                                access=get_access(current_user))
 
 
+@app.route('/weekly_results', methods=['GET'])
+@login_required
+def weekly_results():
+    votings = WeeklyVoting.query.group_by(WeeklyVoting.date).all()
+    for v in votings:
+        day = f'0{v.date.day}' if v.date.day < 10 else v.date.day
+        month = f'0{v.date.month}' if v.date.month < 10 else v.date.month
+        v.date_str = f'{day}.{month}.{v.date.year}'
+        v.date = f'{v.date.year}-{v.date.month}-{v.date.day}'
+    return render_template('weekly_results.html', title='Результаты еженедельной оценки',
+                           access=get_access(current_user), votings=votings)
+
+
 @app.route('/get_results_of_voting', methods=['GET'])
 @login_required
 def get_results_of_voting():
@@ -2243,6 +2256,60 @@ def get_results_of_voting():
         return jsonify({'criterions': criterions, 'user_info': user_info})
     else:
         return jsonify({'criterions': None, 'user_info': None})
+
+
+@app.route('/get_results_of_weekly_voting', methods=['GET'])
+@login_required
+def get_results_of_weekly_voting():
+    date = request.args.get('voting_date')
+    date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    teams = [t for t in Teams.query.all() if t.type in [1,4]]
+    summary_results = []
+    for t in teams:
+        team_members = [(member.user_id, User.query.filter_by(id=member.user_id).first().name,
+                     User.query.filter_by(id=member.user_id).first().surname)
+                    for member in Membership.query.filter_by(team_id=t.id) if User.check_cadet(member.user_id)]
+        voting_results = []
+        voting_dict = {}
+        for user in team_members:
+            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+        dates_str = []
+
+        date_info = {'date': f'{date.day}.{date.month}.{date.year}'}
+        dates_str.append(f'{date.day}.{date.month}.{date.year}')
+        marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
+            filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
+            group_by(WeeklyVoting.criterion_id).all()
+        mark_res = []
+        for mark in marks:
+            mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
+        date_info['marks'] = mark_res
+        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
+                                                                          WeeklyVotingMembers.team_id == t.id).all()
+        teammates = [t[0] for t in teammates]
+        for user in voting_dict:
+            if user in teammates and mark_res[0]['mark'] == 1:
+                voting_dict[user]['marks1'].append(1)
+            else:
+                voting_dict[user]['marks1'].append(0)
+            if user in teammates and mark_res[1]['mark'] == 1:
+                voting_dict[user]['marks2'].append(1)
+            else:
+                voting_dict[user]['marks2'].append(0)
+            if user in teammates and mark_res[2]['mark'] == 1:
+                voting_dict[user]['marks3'].append(1)
+            else:
+                voting_dict[user]['marks3'].append(0)
+        teammates_info = []
+        for member in team_members:
+            if member[0] in teammates and len(teammates) > 0:
+                teammates_info.append(member)
+            elif len(teammates) == 0:
+                teammates_info.append(member)
+        date_info['teammates'] = teammates_info
+        voting_results.append(date_info)
+        summary_results.append({'team': t.name, 'marks': voting_dict})
+    return jsonify({'results': summary_results})
 
 
 @app.route('/log_page', methods=['GET'])

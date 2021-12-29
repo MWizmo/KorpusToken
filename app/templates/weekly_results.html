@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/weekly_voting_result.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="res_container" ng-app="app" ng-controller="ctrl" ng-cloak>
+    <button onclick="history.back();" class="nav__link">Назад</button><br><br>
+    <h2>Выберите дату, за которую хотите просмотреть оценки</h2>
+    <select ng-model="selected" ng-change="choose_voting();">
+        <option value="0"></option>
+        {% for v in votings %}
+            <option value="{{v.date}}">{{v.date_str}}</option>
+        {% endfor %}
+    </select><br><br>
+    <div ng-show="show_results">
+        {% raw %}
+        <h3>Дата: {{selected}}</h3>
+        <h2 ng-show="!results">Результаты еще не подведены</h2>
+
+        <div ng-show="results" ng-cloak>
+            <div ng-repeat="team in info">
+                <h2>{{team['team']}}</h2>
+                <table  class="result_table" cellspacing="0" style="margin-bottom:2vh; width:60%;">
+                    <thead>
+                        <tr>
+                            <td style="width:25%;">Имя</td>
+                            <td style="width:25%;">Движение</td>
+                            <td style="width:25%;">Завершенность</td>
+                            <td style="width:25%;">Подтверждение средой</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat = "user in team['marks']">
+                            <td> {{user['name']}} </td>
+                            <td> {{user['marks1'][0]}} </td>
+                            <td> {{user['marks2'][0]}} </td>
+                            <td> {{user['marks3'][0]}} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        {% endraw %}
+    </div>
+
+</div>
+{% endblock %}
