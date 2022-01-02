@@ -16,11 +16,11 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
-w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+w3 = Web3(Web3.HTTPProvider("https://polygon-mumbai.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
 
-kti_address = '0x1b28f639449afd8ae596e972b697266d8c2a5baf'
-ktd_address = '0x43ec2a0432b9f3d56ed1d7febff98c7cb737a88b'
-contract_address = '0x2f6acb26eec74b3b46c46542c9d5b18f2826db97'
+kti_address = '0x91f0ca3505c2b1d449b2cee338723bf5ea5a09da'
+ktd_address = '0xc408983fc1765c41acc42adc18d543929b11b217'
+contract_address = '0x14c843383d841a0c93f075c5a78115d2b897aba1'
 ETH_IN_WEI = 1000000000000000000
 KT_BITS_IN_KT = 1000000000000000000
 
