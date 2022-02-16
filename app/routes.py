@@ -1393,7 +1393,7 @@ def add_budget_item():
             bud_date = datetime.datetime.now().date()
         else:
             month = VotingTable.query.get(voting_id).month_from
-            month, year = month.split('_')
+            month, year = month.split(' ')
             year = int(year[:4])
             month = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
                             'октябрь', 'ноябрь', 'декабрь'].index(month) + 1
