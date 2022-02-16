@@ -1383,11 +1383,22 @@ def add_budget_item():
     form = AddBudgetItemForm()
     existing_budget_record = BudgetRecord.query.filter_by(date=datetime.datetime.now().date(),
                                                           item=form.item.data).first()
-
+    votings = VotingTable.query.filter_by(status='Fixed').all()
     if form.validate_on_submit():
         summa = round(float(form.cost.data.replace(' ', '')), 2)
         who_added = f'{User.get_full_name(current_user.id)}'
-        record = BudgetRecord(date=datetime.datetime.now().date(), item=form.item.data, summa=summa,
+        voting_id = int(form.voting.data)
+
+        if voting_id == 0:
+            bud_date = datetime.datetime.now().date()
+        else:
+            month = VotingTable.query.get(voting_id).month_from
+            month, year = month.split('_')
+            year = int(year[:4])
+            month = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
+                            'октябрь', 'ноябрь', 'декабрь'].index(month) + 1
+            bud_date = datetime.datetime(year=year, month=month, day=20, hour=12, minute=0, second=0, microsecond=0)
+        record = BudgetRecord(date=bud_date, item=form.item.data, summa=summa,
                               who_added=who_added)
         if existing_budget_record:
             existing_budget_record.summa = summa
@@ -1398,7 +1409,7 @@ def add_budget_item():
         db.session.add(record)
         db.session.commit()
         return redirect('/current_budget')
-    return render_template('add_budget_item.html', title='Добавить статью', form=form)
+    return render_template('add_budget_item.html', title='Добавить статью', form=form, votings=votings)
 
 
 @app.route('/write_to_blockchain')

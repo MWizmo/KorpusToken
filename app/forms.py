@@ -143,6 +143,7 @@ class TransferKtdForm(FlaskForm):
 class AddBudgetItemForm(FlaskForm):
     item = StringField(validators=[DataRequired()])
     cost = StringField(validators=[DataRequired()])
+    voting = StringField(validators=[DataRequired()])
 
 class ManageKTIForm(FlaskForm):
     address = StringField(validators=[DataRequired()])

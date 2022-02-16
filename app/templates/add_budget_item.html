@@ -2,10 +2,19 @@
 
 {% block content %}
 <div class="container">
-    <div class="signup">
+    <div class="signup" style="width:80%;">
         <h2> Добавить статью в бюджет </h2>
         <form action="" method="post">
             {{form.hidden_tag()}}
+            <p>
+                <span class="main_text">Оценка</span> <br>
+                <select name="voting" required>
+                    <option selected value="0">Не указывать</option>
+                    {% for v in votings %}
+                        <option value="{{v.id}}">{{v.month_from}} - {{v.month_to}}</option>
+                    {% endfor %}
+                </select>
+            </p>
             <p>
                 <span class="main_text">Статья расхода</span> <br>
                 {{form.item()}}
