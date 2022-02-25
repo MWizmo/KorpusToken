@@ -74,14 +74,23 @@
                 </div>
             </nav>
 <div class="container" style="margin:0; padding:0;width:100%;padding-top:10vh;">
-<button class="nav__link finish_vote_btn" style="width:10%; margin-top:2vh;margin-left:5%;" onclick="history.back();">Назад</button>
+<button class="nav__link finish_vote_btn" style="width:10%; margin-top:2vh;margin-left:5%;" onclick="window.location.href='/budget';">Назад</button>
     <!--ul class="nav nav-tabs actions-nav">
         <li class="active">
             <a href="javascript:void(0)">List (1)</a>
         </li>
     </ul-->
+    {% if flag %}
     <div style="width:100%; text-align:center; margin-top:50px;">
-        <p>Статьи расходов на грядущий месяц.<br>Грядущий месяц - <b>{{month}}</b></p>
+        <p>В настоящее время нет активной оценки</p>
+    </div>
+    {% else %}
+    <div style="width:100%; text-align:center; margin-top:50px;">
+        {% if not_saved %}
+        <p>Статьи расходов на текущую оценку</p>
+        {% else %}
+        <p>Статьи расходов на текущую оценку (зафиксировано)</p>
+        {% endif %}
     </div>
     <div class="table-responsive" style="margin-top:5vh; width: 80%; margin-left: 10%;">
         <table class="table table-striped table-bordered table-hover model-list" style="width:100%;">
@@ -106,7 +115,7 @@
             {% for row in data %}
             <tr>
                 <td class="list-buttons-column">
-                    <form class="icon" method="POST" action="/delete_budget_row">
+                    <form class="icon" method="POST" action="/delete_budget_row/{{budget_id}}">
                       <input id="id" name="id" required type="hidden" value="{{row.id}}">
                       <button onclick="return faHelpers.safeConfirm('Вы уверены, что хотите удалить запись?');" title="Удалить запись">
                         <span class="fa fa-trash glyphicon glyphicon-trash"></span>
@@ -121,10 +130,13 @@
             {% endfor %}
         </table>
     </div>
+    {% if not_saved %}
     <div class="black_buttons_block">
-        <a class="black_button" href="/add_budget_item">Добавить статью</a>
+        <a class="black_button" href="/add_budget_item/{{budget_id}}">Добавить статью</a>
         <a class="black_button" href="/write_to_blockchain">Зафиксировать и записать в блокчейн</a>
     </div>
+    {% endif %}
+    {% endif %}
 </div>
 <script src="/static/admin/vendor/jquery.min.js?v=3.3.1" type="text/javascript"></script>
 <script src="/static/admin/bootstrap/bootstrap3/js/bootstrap.min.js?v=3.3.5" type="text/javascript"></script>

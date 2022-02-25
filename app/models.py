@@ -571,13 +571,20 @@ class Transaction(db.Model):
     status = db.Column(db.String(32))
 
 
+class Budget(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    voting_id = db.Column(db.Integer)
+    who_saved = db.Column(db.String(128))
+    is_saved = db.Column(db.Boolean, default=False, nullable=False)
+
+
 class BudgetRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     item = db.Column(db.String(128))
     summa = db.Column(db.Float)
     who_added = db.Column(db.String(128))
-    is_saved = db.Column(db.Boolean, default=False, nullable=False)
+    budget_id = db.Column(db.Integer)
 
 class Profit(db.Model):
     id = db.Column(db.Integer, primary_key=True)

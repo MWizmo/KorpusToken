@@ -7,15 +7,6 @@
         <form action="" method="post">
             {{form.hidden_tag()}}
             <p>
-                <span class="main_text">Оценка</span> <br>
-                <select name="voting" required>
-                    <option selected value="0">Не указывать</option>
-                    {% for v in votings %}
-                        <option value="{{v.id}}">{{v.month_from}} - {{v.month_to}}</option>
-                    {% endfor %}
-                </select>
-            </p>
-            <p>
                 <span class="main_text">Статья расхода</span> <br>
                 {{form.item()}}
             </p>
@@ -25,7 +16,7 @@
             </p>
             <div class="black_buttons_block" style="margin-left:0;">
         <button class="black_button"  type="submit">Подтвердить</button>
-        <button class="black_button" type="button" onclick="window.location.href='/current_budget';">Отмена</button>
+        <button class="black_button" type="button" onclick="window.location.href='/current_budget/{{budget_id}}';">Отмена</button>
     </div>
         </form>
     </div>

@@ -80,36 +80,34 @@
             <a href="javascript:void(0)">List (1)</a>
         </li>
     </ul-->
+    {% if data %}
     <div class="table-responsive" style="margin-top:5vh; width: 80%; margin-left: 10%;">
         <table class="table table-striped table-bordered table-hover model-list" style="width:100%;">
             <thead>
             <tr>
                 <th class="col-md-1">&nbsp;</th>
-                <th class="column-header col-type">
-                    <!--a href="/transactions/?sort=0" title="Sort by Дата">Дата</a-->Дата
-                </th>
-                <th class="column-header col-summa">
-                    <!--a href="/transactions/?sort=1" title="Sort by Сумма">Сумма</a-->Сумма
-                </th>
-                <th class="column-header col-receiver">
-                    <!--a href="/transactions/?sort=2" title="Sort by Кто добавил">Кто добавил</a-->Кто добавил
-                </th>
-                <th class="column-header col-date">
-                    <!--a href="/transactions/?sort=3" title="Sort by Статья">Статья</a-->Статья
-                </th>
+                <th class="column-header col-type">Сроки оценки</th>
+                <th class="column-header col-summa">Общая сумма бюджета</th>
+                <th class="column-header col-receiver">Кто утвердил</th>
+                <th class="column-header col-date"></th>
             </tr>
             </thead>
             {% for row in data %}
             <tr>
                 <td class="list-buttons-column"></td>
-                <td class="col-type">{{row.date}}</td>
-                <td class="col-summa">{{row.summa}}</td>
-                <td class="col-receiver">{{row.who_added}}</td>
-                <td class="col-date">{{row.item}}</td>
+                <td class="col-type">{{row.voting}}</td>
+                <td class="col-summa">{{row.summ}}</td>
+                <td class="col-receiver">{{row.who_saved}}</td>
+                <td class="col-date"><a href="/current_budget/{{row.id}}">Посмотреть</a> </td>
             </tr>
             {% endfor %}
         </table>
     </div>
+    {% else %}
+        <div style="width:100%; text-align:center; margin-top:50px;">
+            <p>Отсутствуют зафиксированные бюджеты</p>
+        </div>
+    {% endif %}
 </div>
 <script src="/static/admin/vendor/jquery.min.js?v=3.3.1" type="text/javascript"></script>
 <script src="/static/admin/bootstrap/bootstrap3/js/bootstrap.min.js?v=3.3.5" type="text/javascript"></script>

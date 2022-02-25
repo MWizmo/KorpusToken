@@ -4,7 +4,7 @@ import threading
 import os
 import csv
 import requests
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts import graphs
@@ -12,7 +12,7 @@ from app.scripts.service import get_access
 from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
-    Profit, KorpusServices, ServicePayments
+    Profit, KorpusServices, ServicePayments, Budget
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -877,7 +877,41 @@ def manage_kti():
 @app.route('/budget')
 @login_required
 def budget():
-    return render_template('budget.html', title='Бюджет')
+    cur_budget = Budget.query.filter_by(is_saved=False).first()
+    if cur_budget:
+        cur_budget_id = cur_budget.id
+    else:
+        cur_voting = VotingTable.query.filter(or_(VotingTable.status == 'Active', VotingTable.status == 'Fixed')).first()
+        if cur_voting:
+            cur_budget = Budget(voting_id=cur_voting.id, who_saved='')
+            db.session.add(cur_budget)
+            db.session.commit()
+            cur_budget_id = cur_budget.id
+        else:
+            cur_budget_id = 0
+    return render_template('budget.html', title='Бюджет', cur_budget_id=cur_budget_id)
+
+
+@app.route('/all_budget_records/')
+def all_budget_records():
+    data = Budget.query.filter_by(is_saved=True).all()
+    for row in data:
+        voting = VotingTable.query.get(row.voting_id)
+        row.voting = f'{voting.month_from} - {voting.month_to}'
+        records = BudgetRecord.query.filter_by(budget_id=row.id).all()
+        row.summ = sum([roww.summa for roww in records])
+    return render_template('all_budget_records.html', data=data)
+
+
+@app.route('/current_budget/<budget_id>')
+def current_budget(budget_id):
+    budget_id = int(budget_id)
+    if budget_id == 0:
+        return render_template('current_budget.html', data=[], flag=True)
+    data = BudgetRecord.query.filter_by(budget_id=budget_id).all()
+    b = Budget.query.get(budget_id)
+    not_saved = Budget.query.get(budget_id).is_saved == False
+    return render_template('current_budget.html', data=data, not_saved=not_saved, budget_id=budget_id)
 
 
 @app.route('/token_exchange_rate_by_default', methods=['POST'])
@@ -1377,57 +1411,59 @@ def confirm_house_rent():
     return redirect('/')
 
 
-@app.route('/add_budget_item', methods=['GET', 'POST'])
+@app.route('/add_budget_item/<budget_id>', methods=['GET', 'POST'])
 @login_required
-def add_budget_item():
+def add_budget_item(budget_id):
     form = AddBudgetItemForm()
+    budget_id = int(budget_id)
     existing_budget_record = BudgetRecord.query.filter_by(date=datetime.datetime.now().date(),
                                                           item=form.item.data).first()
-    votings = VotingTable.query.filter_by(status='Fixed').all()
+    #votings = VotingTable.query.filter_by(status='Fixed').all()
     if form.validate_on_submit():
         summa = round(float(form.cost.data.replace(' ', '')), 2)
         who_added = f'{User.get_full_name(current_user.id)}'
-        voting_id = int(form.voting.data)
-
-        if voting_id == 0:
-            bud_date = datetime.datetime.now().date()
-        else:
-            month = VotingTable.query.get(voting_id).month_from
-            month, year = month.split(' ')
-            year = int(year[:4])
-            month = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
-                            'октябрь', 'ноябрь', 'декабрь'].index(month) + 1
-            bud_date = datetime.datetime(year=year, month=month, day=20, hour=12, minute=0, second=0, microsecond=0)
+        #voting_id = int(form.voting.data)
+        bud_date = datetime.datetime.now().date()
+        # if voting_id == 0:
+        #     bud_date = datetime.datetime.now().date()
+        # else:
+        #     month = VotingTable.query.get(voting_id).month_from
+        #     month, year = month.split(' ')
+        #     year = int(year[:4])
+        #     month = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
+        #                     'октябрь', 'ноябрь', 'декабрь'].index(month) + 1
+        #     bud_date = datetime.datetime(year=year, month=month, day=20, hour=12, minute=0, second=0, microsecond=0)
         record = BudgetRecord(date=bud_date, item=form.item.data, summa=summa,
-                              who_added=who_added)
+                              who_added=who_added, budget_id=budget_id)
         if existing_budget_record:
             existing_budget_record.summa = summa
             existing_budget_record.who_added = who_added
             db.session.commit()
 
-            return redirect('/current_budget')
+            return redirect(f'/current_budget/{budget_id}')
         db.session.add(record)
         db.session.commit()
-        return redirect('/current_budget')
-    return render_template('add_budget_item.html', title='Добавить статью', form=form, votings=votings)
+        return redirect(f'/current_budget/{budget_id}')
+    return render_template('add_budget_item.html', title='Добавить статью', form=form, budget_id=budget_id)
 
 
-@app.route('/write_to_blockchain')
+@app.route('/write_to_blockchain/<budget_id>')
 @login_required
-def write_to_blockchain():
-    return render_template('write_to_blockchain.html', title='Записать в блокчейн')
+def write_to_blockchain(budget_id):
+    return render_template('write_to_blockchain.html', title='Записать в блокчейн', budget_id=budget_id)
 
 
-@app.route('/save_to_blockchain')
+@app.route('/save_to_blockchain/<budget_id>')
 @login_required
-def save_to_blockchain():
+def save_to_blockchain(budget_id):
+    budget_id = int(budget_id)
     if not current_user.is_admin:
         return redirect(url_for('home'))
 
     account = w3.eth.account.privateKeyToAccount(
         os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
-    budget_records = BudgetRecord.query.filter_by(is_saved=False).all()
+    budget_records = BudgetRecord.query.filter_by(budget_id=budget_id).all()
 
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
@@ -1464,10 +1500,11 @@ def save_to_blockchain():
             txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
             transaction_hash = txn_hash.hex()
 
-            budget_record.is_saved = True
+            #budget_record.is_saved = True
         except Exception as err:
             print(err)
-
+    Budget.query.get(budget_id).is_saved = True
+    Budget.query.get(budget_id).who_saved = f'{User.get_full_name(current_user.id)}'
     db.session.commit()
 
     return redirect(url_for('budget'))
@@ -1503,13 +1540,13 @@ def write_voting_progress():
     return redirect('/questionnaire_progress')
 
 
-@app.route('/delete_budget_row', methods=['POST'])
+@app.route('/delete_budget_row/<budget_id>', methods=['POST'])
 @login_required
-def delete_budget_row():
+def delete_budget_row(budget_id):
     row_id = int(request.form.get('id'))
     BudgetRecord.query.filter_by(id=row_id).delete()
     db.session.commit()
-    return redirect('/current_budget')
+    return redirect(f'/current_budget/budget_id')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
