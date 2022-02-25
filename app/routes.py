@@ -551,6 +551,9 @@ def delete_user():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
     uid = request.args.get('uid')
+    user = User.query.filter_by(id=current_user.id).first()
+    user_balance = User.get_ktd_balance(current_user.id)
+    transaction_hash, is_error = token_utils.take_TKD(user_balance, user.private_key)
     User.query.filter_by(id=uid).delete()
     Membership.query.filter_by(user_id=uid).delete()
     UserStatuses.query.filter_by(user_id=uid).delete()
