@@ -87,9 +87,9 @@
     {% else %}
     <div style="width:100%; text-align:center; margin-top:50px;">
         {% if not_saved %}
-        <p>Статьи расходов на текущую оценку</p>
+        <p>Статьи расходов на текущую оценку ({{voting.month_from}} - {{voting.month_to}})</p>
         {% else %}
-        <p>Статьи расходов на текущую оценку (зафиксировано)</p>
+        <p>Статьи расходов на текущую оценку ({{voting.month_from}} - {{voting.month_to}})<br>(зафиксировано)</p>
         {% endif %}
     </div>
     <div class="table-responsive" style="margin-top:5vh; width: 80%; margin-left: 10%;">

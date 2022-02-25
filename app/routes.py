@@ -912,9 +912,9 @@ def current_budget(budget_id):
     if budget_id == 0:
         return render_template('current_budget.html', data=[], flag=True)
     data = BudgetRecord.query.filter_by(budget_id=budget_id).all()
-    b = Budget.query.get(budget_id)
+    voting = VotingTable.query.get(Budget.query.get(budget_id).voting_id)
     not_saved = Budget.query.get(budget_id).is_saved == False
-    return render_template('current_budget.html', data=data, not_saved=not_saved, budget_id=budget_id)
+    return render_template('current_budget.html', data=data, not_saved=not_saved, budget_id=budget_id, voting=voting)
 
 
 @app.route('/token_exchange_rate_by_default', methods=['POST'])
