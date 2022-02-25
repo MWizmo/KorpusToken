@@ -1,4 +1,4 @@
-from app import w3, contract_address, ktd_address, kti_address, admin_wallet_address, db
+from app import w3, contract_address, ktd_address, kti_address, db# admin_wallet_address, db
 from app.models import TokenExchangeRate
 from web3.auto import Web3
 import time
