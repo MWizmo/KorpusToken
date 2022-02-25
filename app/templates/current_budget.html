@@ -114,13 +114,13 @@
             </thead>
             {% for row in data %}
             <tr>
-                <td class="list-buttons-column">
+                <td class="list-buttons-column">{% if not_saved %}
                     <form class="icon" method="POST" action="/delete_budget_row/{{budget_id}}">
                       <input id="id" name="id" required type="hidden" value="{{row.id}}">
                       <button onclick="return faHelpers.safeConfirm('Вы уверены, что хотите удалить запись?');" title="Удалить запись">
                         <span class="fa fa-trash glyphicon glyphicon-trash"></span>
                       </button>
-                    </form>
+                    </form>{% endif %}
                 </td>
                 <td class="col-date">{{row.item}}</td>
                 <td class="col-summa">{{row.summa}}</td>
