@@ -1549,7 +1549,7 @@ def delete_budget_row(budget_id):
     row_id = int(request.form.get('id'))
     BudgetRecord.query.filter_by(id=row_id).delete()
     db.session.commit()
-    return redirect(f'/current_budget/budget_id')
+    return redirect(f'/current_budget/{budget_id}')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
