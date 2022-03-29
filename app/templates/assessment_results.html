@@ -8,7 +8,9 @@
 
 {% block content %}
 <div class="res_container" ng-app="app" ng-controller="ctrl" ng-cloak>
-    <button onclick="history.back();" class="nav__link">Назад</button><br><br>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">результаты оценки</a>
+    </div>
     <h2>Выберите оценку</h2>
     <select ng-model="selected" ng-change="choose_voting();">
         <option value="0"></option>

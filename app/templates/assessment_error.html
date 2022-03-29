@@ -3,8 +3,10 @@
 {% block content %}
     <div class="intro">
         <div class="container">
+            <div class="nav_href" style="margin-left: 10%; margin-bottom:0;">
+			<a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a class="cur_href" href="">оценивание</a>
+		</div>
             <h2 class="error">Лимит оценки по этой оси исчерпан.</h2>
-            <button class='nav__link border' onclick="history.back();" style="width:10%; margin-left:45%;margin-top:50px;">Назад</button>
         </div>
     </div>
 {% endblock %}

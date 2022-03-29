@@ -7,6 +7,9 @@
 
 {% block content %}
 <div class="container" ng-app="app" ng-controller="ctrl" style="margin-left:10%; width:80%;">
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/participate">участвовать в оценке</a> - <a class="cur_href" href="">выбрать коллегию</a>
+    </div>
     <h2>Выберите от 1 до 5 курсантов, которые будут оценивать ось отношений</h2>
     <div class="top_cadet_div" >
         {% for cadet in cadets %}

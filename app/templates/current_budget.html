@@ -74,7 +74,16 @@
                 </div>
             </nav>
 <div class="container" style="margin:0; padding:0;width:100%;padding-top:10vh;">
-<button class="nav__link finish_vote_btn" style="width:10%; margin-top:2vh;margin-left:5%;" onclick="window.location.href='/budget';">Назад</button>
+    {% if not_saved %}
+        <div class="nav_href" style=" margin-top:2vh;margin-left:10%;">
+            <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a href="/budget">бюджет</a> - <a class="cur_href" href="">текущий бюджет</a>
+        </div>
+        {% else %}
+        <div class="nav_href" style=" margin-top:2vh;margin-left:10%;">
+            <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a href="/budget">бюджет</a> - <a href="/all_budget_records">все записи</a> - <a class="cur_href" href="">просмотр записи</a>
+        </div>
+        {% endif %}
+
     <!--ul class="nav nav-tabs actions-nav">
         <li class="active">
             <a href="javascript:void(0)">List (1)</a>

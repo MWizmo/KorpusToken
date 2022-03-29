@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="nav_href" style="margin-left: 10%; margin-top:50px; margin-bottom: -70px;">
+    <a href="/">главная</a> - <a class="cur_href" href="">сообщество</a>
+</div>
 <div class="small_card_container">
     <div class="small_card_flex">
         {% if current_user.is_admin %}

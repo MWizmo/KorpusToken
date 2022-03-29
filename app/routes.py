@@ -572,25 +572,6 @@ def delete_user():
     return redirect('users_list')
 
 
-@app.route('/teams_list', methods=['POST', 'GET'])
-@login_required
-def teams_list():
-    # if not User.check_admin(current_user.id):
-    #     log('Попытка просмотра страницы с текущими командами (ГВ)')
-    #     return render_template('gryazniy_vzlomshik.html',
-    #                            access=get_access(current_user))
-
-    log('Просмотр страницы с текущими командами')
-    form = TeamAdding()
-    if form.validate_on_submit():
-        team = Teams(name=form.title.data, type=int(form.type.data))
-        db.session.add(team)
-        db.session.commit()
-        log('Добавление команды с названием "{}"'.format(form.title.data))
-    return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
-                           access=get_access(current_user))
-
-
 @app.route('/delete_team', methods=['GET'])
 @login_required
 def delete_team():

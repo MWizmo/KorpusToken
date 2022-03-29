@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block content %}
-<button class="nav__link finish_vote_btn" style="width:10%; margin-top:2vh;margin-left:5%;" onclick="history.back();">
-    Назад
-</button>
+<div class="nav_href" style="margin-top:2vh;margin-left:10%;">
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a href="/emission">эмиссия токенов</a> - <a class="cur_href" href="">изменить курс токенов</a>
+    </div>
 <div class="small_card_container" style="min-height:80vh;">
     <div class="small_card_flex" style="flex-direction: column">
         <p class="eth_text">Текущий зафиксированный курс токенов вклада и инвестиции</p>

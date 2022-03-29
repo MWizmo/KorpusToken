@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container">
-    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button>
+    <div class="nav_href" style="margin-left:10%;">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a class="cur_href" href="">пользователи</a>
+    </div>
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
         <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>
@@ -11,7 +13,7 @@
             {% for user in users %}
             <tr>
                 <td>{{loop.index0+1}}</td>
-                <td><a class="nav__link" href="/user_profile?user_id={{user[3]}}" target="_blank">{{user[0]}} {{user[1]}}</a></td>
+                <td><a class="nav__link" href="/user_profile?user_id={{user[3]}}">{{user[0]}} {{user[1]}}</a></td>
                 <td>{{user[2]}}</td>
                 <td>
                     {% if user[4] %}

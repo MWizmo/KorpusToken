@@ -1,4 +1,7 @@
 {% extends "base.html" %} {% block content %}
+<div class="nav_href" style="margin-left: 10%; margin-top:50px; margin-bottom: -60px;">
+    <a href="/">главная</a> - <a class="cur_href" href="">блокчейн</a>
+</div>
 <div class="small_card_container" style="margin-top: 1vh; min-height: 90vh">
     <div class="small_card_flex" style="width: 60%; margin-left: 20%">
         {% if current_user.is_admin %}
@@ -237,7 +240,7 @@
                 <img class="small_card_img" src="/static/images/change_eth.png"/>
                 <p class="small_card_text">Обменять на eth</p>
             </a>
-            {% endif %} {% if current_user.is_accountant %}
+            {% endif %} {% if current_user.is_accountant%}
             <a
                     href="/emission"
                     class="small_card small_card_special2"

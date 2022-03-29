@@ -2,6 +2,9 @@
 
 {% block content %}
 <div class="container" style="margin-left:10%;">
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a href="/users_list">пользователи</a> - <a class="cur_href" href="">информация о пользователе</a>
+    </div>
     {% if user %}
         <h2>{{user.name}} {{user.surname}}</h2>
         <p><b>Дата рождения</b>: {{date}}</p>

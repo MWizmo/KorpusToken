@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container" style="margin-left:10%;width:80%;">
-    <button class="nav__link finish_vote_btn" style="width:10%;margin-left:0;margin-bottom:2vh;" onclick="document.location.href='/community';">Назад</button>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a class="cur_href" href="">услуги</a>
+    </div>
     <h3>Выберите интересуюшую вас услугу из списка</h3><br>
     {% if current_user.is_dealer %}
     <button class="nav__link finish_vote_btn" style="margin-left:0;" onclick="document.location.href='/add_service';">+ добавить услугу</button>
@@ -29,7 +31,7 @@
                                     {% if current_user.is_dealer %}
                                     <button class="nav__link finish_vote_btn" style="padding:10px 50px;border-radius:7px;color:black;background:white;" onclick="document.location.href='/change_service/{{s.id}}';">Изменить</button>
                                     {% endif %}
-                                    <button class="nav__link finish_vote_btn" style="padding:10px 50px;border-radius:7px;" onclick="window.open('/service/{{s.id}}');">Подробнее</button>
+                                    <button class="nav__link finish_vote_btn" style="padding:10px 50px;border-radius:7px;" onclick="document.location.href='/service/{{s.id}}';">Подробнее</button>
 
                                 </div>
                             </td>

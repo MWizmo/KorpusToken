@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container" style="margin-left:10%;width:80%;">
-    <button class="nav__link finish_vote_btn" style="width:10%;" onclick="history.back();">Назад</button>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a class="cur_href" href="">выбор команды</a>
+    </div>
     <div class="intro" style="padding-top: 15%; padding-left: 0%  ">
         <h2>Ось {{axis}}</h2>
         <h3>Выберите команду для оценки</h3>

@@ -8,7 +8,9 @@
 
 {% block content %}
 <div class="container">
-    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button>
+    <div class="nav_href" style="margin-left: 10%;">
+        <a href="/">главная</a> - <a class="cur_href" href="">профиль</a>
+    </div>
     <div class="signup">
         <h2> Профиль </h2>
         <form action="" method="post">
