@@ -45,7 +45,7 @@
                     </p>
                 </div>
             </div>
-
+            {% if not current_user.is_partner %}
             <div class="info_card" style="display: block; padding: 0">
                 <div class="info_card_text_block">
                     <p class="info_card_text">
@@ -68,6 +68,7 @@
                     </p>
                 </div>
             </div>
+            {% endif %}
         </div>
         {% else %}
         <div class="info_card_block">
@@ -81,7 +82,7 @@
                     <p class="info_card_text green">1 КТ = {{ ktd_price }}р</p>
                 </div>
             </div>
-
+            {% if not current_user.is_partner %}
             <div
                     class="info_card"
                     style="display: block; padding: 0; margin-top: 3vh"
@@ -107,11 +108,12 @@
                     </p>
                 </div>
             </div>
+            {% endif %}
         </div>
         {% endif %}
-
+        {% if current_user.is_admin %}
         <div class="small_card_rows">
-            {% if current_user.is_admin %}
+
             <a
                     href="/transactions"
                     class="small_card small_card_special2"
@@ -193,9 +195,12 @@
                     Доступ к токенам инвестиций
                 </p>
             </a>
-
+        </div>
             {% else %}
-
+            <div style="width: 50%; display:flex;justify-content:center; align-items:center;margin-left: 10%;">
+                <p style="font-size:3vh;">В данный момент идёт доработка этого раздела, мы сообщим вам, когда раздел будет обновлён</p>
+            </div>
+            <!--
             <a
                     href="/transactions"
                     class="small_card small_card_special"
@@ -239,9 +244,10 @@
             >
                 <img class="small_card_img" src="/static/images/change_eth.png"/>
                 <p class="small_card_text">Обменять на eth</p>
-            </a>
-            {% endif %} {% if current_user.is_accountant%}
-            <a
+            </a>-->
+            {% endif %}
+            {% if current_user.is_accountant%}
+            <!--a
                     href="/emission"
                     class="small_card small_card_special2"
                     style="margin-top: 3vh"
@@ -253,9 +259,10 @@
                 <p class="small_card_text" style="text-align: center">
                     Эмиссия токенов
                 </p>
-            </a>
+            </a>-->
             {% endif %}
-        </div>
+
+
     </div>
 </div>
 

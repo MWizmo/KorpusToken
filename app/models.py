@@ -38,6 +38,18 @@ class User(UserMixin, db.Model):
           return True
       return False
 
+    @staticmethod
+    def check_partner(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 10:
+                return True
+        return False
+
+    @property
+    def is_partner(self):
+        return not User.check_partner(self.id)
+
     @property
     def is_accountant(self):
       return User.check_accountant(self.id)

@@ -32,11 +32,13 @@
                 <span>Admin</span>
             </a-->
             {% endif %}
+            {% if not current_user.is_partner %}
             <a href="/assessment_page" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(1);" id="block1" onmouseleave="reduce_block(1);">
                 <img class="header_profile_img"
                      src="{{ url_for('static', filename='images/assessment.png') }}">
                 <span>Оценка вклада</span>
             </a>
+            {% endif %}
             <a href="/blockchain" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(2);" id="block2" onmouseleave="reduce_block(2);">
                 <img class="header_profile_img"
                      src="{{ url_for('static', filename='images/blockchain.png') }}">

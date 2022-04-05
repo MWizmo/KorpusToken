@@ -64,18 +64,19 @@ def home():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(login=form.login.data).first()
-        if user is None or not user.check_password(form.password.data):
-            return render_template('login.html', tittle='Авторизация', form=form, err=True)
-        login_user(user, remember=form.remember_me.data)
+    if request.method == 'GET':
+        return render_template('login.html', title='Авторизация')
+    else:
+        values = request.values
+        user = User.query.filter_by(login=values['login']).first()
+        if user is None or not user.check_password(values['password']):
+            return render_template('login.html', tittle='Авторизация', err=True)
+        login_user(user, remember='remember' in values)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         log('Вход в систему')
         return redirect(next_page)
-    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/restore_password', methods=['GET', 'POST'])
@@ -93,43 +94,45 @@ def restore_password():
     return render_template('restore_password.html', title='Восстановление пароля', form=form)
 
 
+@app.route('/partner')
+def partner():
+    return render_template('signup.html', title='Регистрация', script='signup.js', for_partner=True)
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-
-    form = SignupForm()
-    if form.validate_on_submit():
-        tg = form.tg_nickname.data
+    if request.method == 'GET':
+        return render_template('signup.html', title='Регистрация', script='signup.js')
+    else:
+        values = request.values
+        tg = values['tlg']
         if tg[0] == '@':
             tg = tg[1:]
         ethAccount = w3.eth.account.create()
         user = User(
-            email=form.email.data,
-            login=form.login.data,
+            email='',
+            login=values['login'],
             tg_nickname=tg,
-            courses=form.courses.data,
-            birthday=form.birthday.data,
+            courses='',
+            birthday='',
             education='Unknown',  # form.education.data,
-            work_exp=form.work_exp.data,
-            sex=form.sex.data,
-            name=form.name.data,
-            surname=form.surname.data,
+            work_exp='',
+            sex='',
+            name=values['first_name'],
+            surname=values['surname'],
             private_key=ethAccount.privateKey.hex())
-        user.set_password(form.password.data)
+        user.set_password(values['password'])
         db.session.add(user)
         db.session.commit()
-        if form.participate.data:
-            user_team = Membership(user_id=User.query.filter_by(email=form.email.data).first().id,
-                                   team_id=form.team.data,
-                                   role_id=0)
-            db.session.add(user_team)
-        statuses = UserStatuses(user_id=User.query.filter_by(email=form.email.data).first().id, status_id=3)
+        if values['is_partner'] == '0':
+            statuses = UserStatuses(user_id=user.id, status_id=3)
+        else:
+            statuses = UserStatuses(user_id=user.id, status_id=10)
         db.session.add(statuses)
         db.session.commit()
-        return redirect(url_for('login'))
-    print(form.errors)
-    return render_template('signup.html', title='Регистрация', form=form, script='signup.js')
+        return render_template('after_register.html', title='Регистрация')
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])

@@ -8,17 +8,50 @@
 
 {% block content %}
 <div class="container">
-    <div class="nav_href" style="margin-left: 10%;">
-        <a href="/">главная</a> - <a class="cur_href" href="">профиль</a>
-    </div>
     <div class="signup">
-        <h2> Профиль </h2>
+        <h2> Регистрация </h2>
         <form action="" method="post">
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}
+            <!--p>
+                <span class="main_text">{{ form.email.label }}</span> <br>
+                {{ form.email(size=32) }}
+                {% for error in form.email.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p-->
+            <p>
+                <span class="main_text">{{ form.login.label }}</span> <br>
+                {{ form.login(size=32) }}
+                {% for error in form.login.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+           <p>
+                <span class="main_text">{{ form.password.label }} </span><br>
+                {{ form.password(size=32) }}
+                {% for error in form.password.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
+            <p>
+                <span class="main_text">{{ form.password2.label }}</span> <br>
+                {{ form.password2(size=32) }}
+                {% for error in form.password2.errors %}
+                    <span style="color: red;">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+            </p>
             <p>
                 <span class="main_text">{{ form.name.label }}</span> <br>
-                <input id="name" name="name" size="32" value="{{current_user.name}}">
+                {{ form.name(size=32) }}
                 {% for error in form.name.errors %}
                     <span style="color: red;">
                         {{ error }}
@@ -27,7 +60,7 @@
             </p>
             <p>
                 <span class="main_text">{{ form.surname.label }} </span><br>
-                <input id="surname" name="surname" size="32" value="{{current_user.surname}}">
+                {{ form.surname(size=32) }}
                 {% for error in form.surname.errors %}
                     <span style="color: red;">
                         {{ error }}
@@ -36,7 +69,7 @@
             </p>
             <p>
                 <span class="main_text">{{ form.tg_nickname.label }} </span><br>
-                <input id="tg_nickname" name="tg_nickname" size="32" value="{{current_user.tg_nickname}}">
+                {{ form.tg_nickname(size=32) }}
                 {% for error in form.tg_nickname.errors %}
                     <span style="color: red;">
                         {{ error }}
@@ -45,48 +78,48 @@
             </p>
             <!--p>
                 <span class="main_text">{{ form.courses.label }} </span><br>
-                <input id="cources" name="cources" size="64" value="{{current_user.cources}}">
+                {{ form.courses(size=64) }}
                 {% for error in form.courses.errors %}
                     <span style="color: red;">
                         {{ error }}
                     </span>
                 {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.participate.label }}</span>
-                {{ form.participate(class_="submit", id_='participate') }} <br>
-            </p>
-            <p>
+            </p-->
+            <!--p>
                 <span class="main_text">{{ form.birthday.label }} </span><br>
-                <input id="date" name="birthday" size="64" value="{{current_user.birthday}}">
+                {{ form.birthday(id="date") }}
                 {% for error in form.birthday.errors %}
                 <span style="color: red;"> {{error}} </span>
                 {% endfor %}
-            </p>
+            </p-->
             <p>
                 <span class="main_text">{{ form.sex.label }}</span> <br>
                 {{ form.sex(class_="submit_sex") }}
             </p>
+            <!--p>
                 <span class="main_text">{{ form.education.label }} </span><br>
-                <input id="education" name="education" size="64" value="{{current_user.education}}">
-            <p>
+                {{ form.education }}
+            </p-->
+            <!--p>
                 <span class="main_text">{{ form.work_exp.label }}</span> <br>
                 {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
-            </p>
-            <p>
+            </p-->
+            <!--p>
                 <span class="main_text">{{ form.vk_url.label }}</span> <br>
-                <input id="vk_url" name="vk_url" size="64" value="{{current_user.vk_url}}">
+                {{ form.vk_url }}
             </p>
             <p>
                 <span class="main_text">{{ form.fb_url.label }} </span><br>
-                <input id="fb_url" name="fb_url" size="64" value="{{current_user.fb_url}}">
+                {{ form.fb_url }}<br>
+                <label>если нет, оставить -</label>
             </p>
             <p>
                 <span class="main_text">{{ form.inst_url.label }}</span> <br>
-                <input id="inst_url" name="inst_url" size="64" value="{{current_user.inst_url}}">
+                {{ form.inst_url }}<br>
+                <label>если нет, оставить -</label>
             </p-->
             <p>
-                <input name="submit" type="submit" class="_submit"  value="Сохранить">
+                {{ form.submit(class_="submit") }}
             </p>
         </form>
     </div>
