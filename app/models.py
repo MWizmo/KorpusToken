@@ -300,6 +300,7 @@ class User(UserMixin, db.Model):
     inst_url = db.Column(db.String(256))
     token = db.Column(db.String(64))
     private_key = db.Column(db.String(256))
+    level = db.Column(db.Integer)
 
 
 class Teams(db.Model):

@@ -7,13 +7,14 @@
     </div>
     <table cellspacing="0" cellpadding="0" class="team_table">
         <thead>
-        <tr><td>№ п/п</td><td>Пользователь</td><td>Команда</td><td>Авторизован в боте</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>
+        <tr><td>№ п/п</td><td>Пользователь</td><td>Уровень</td><td>Команда</td><td>Авторизован в боте</td>{% if current_user.is_admin %}<td>Действия</td>{% endif %}</tr>
         </thead>
         <tbody>
             {% for user in users %}
             <tr>
                 <td>{{loop.index0+1}}</td>
                 <td><a class="nav__link" href="/user_profile?user_id={{user[3]}}">{{user[0]}} {{user[1]}}</a></td>
+                <td>{{user[5]}}</td>
                 <td>{{user[2]}}</td>
                 <td>
                     {% if user[4] %}

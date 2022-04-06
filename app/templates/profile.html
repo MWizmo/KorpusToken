@@ -13,6 +13,7 @@
     </div>
     <div class="signup">
         <h2> Профиль </h2>
+        <h3>Ваш текущий уровень - {{current_user.level}}</h3>
         <form action="" method="post">
             {{ form.hidden_tag() }}
             {{ form.csrf_token() }}

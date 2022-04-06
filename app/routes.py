@@ -538,9 +538,9 @@ def users_list():
         teams = Membership.query.filter_by(user_id=user.id).all()
         if teams:
             user_teams = [team.name for t in teams for team in Teams.query.filter_by(id=t.team_id).all()]
-            info.append((user.name, user.surname, ', '.join(user_teams), user.id, user.tg_id))
+            info.append((user.name, user.surname, ', '.join(user_teams), user.id, user.tg_id, user.level))
         else:
-            info.append((user.name, user.surname, 'Нет', user.id, user.tg_id))
+            info.append((user.name, user.surname, 'Нет', user.id, user.tg_id, user.level))
 
     return render_template('users_list.html', title='Список пользователей', users=info,
                            access=get_access(current_user))
