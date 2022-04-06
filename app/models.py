@@ -48,7 +48,7 @@ class User(UserMixin, db.Model):
 
     @property
     def is_partner(self):
-        return not User.check_partner(self.id)
+        return User.check_partner(self.id)
 
     @property
     def is_accountant(self):
