@@ -1,0 +1,1354 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="resume-container">
+  <div class="resume-content">
+    <h1 class="resume-title" style="text-transform: none">Ваше резюме</h1>
+
+    <section class="resume-section">
+      <h3 class="resume-section-title" style="text-transform: none">
+        Контактные данные
+      </h3>
+
+      <div class="resume-form-control">
+        <label for="name-input">Имя</label>
+        <input
+          type="text"
+          name="name"
+          id="name-input"
+          class="resume-input"
+          value="{{ user.name }}"
+        />
+      </div>
+
+      <div class="resume-form-control">
+        <label for="surname-input">Фамилия</label>
+        <input
+          type="text"
+          name="surname"
+          id="surname-input"
+          class="resume-input"
+          value="{{ user.surname }}"
+        />
+      </div>
+
+      <div class="resume-form-control">
+        <label for="phone-input">Номер телефона</label>
+        <input
+          type="text"
+          name="phone"
+          id="phone-input"
+          class="resume-input"
+          value="{{ user.phone or '' }}"
+        />
+      </div>
+
+      <div class="resume-form-control">
+        <label for="country-input">Страна проживания</label>
+        <input
+          type="text"
+          name="country"
+          id="country-input"
+          class="resume-input"
+          value="{{ user.country or '' }}"
+        />
+      </div>
+
+      <div class="resume-form-control">
+        <label for="city-input">Город проживания</label>
+        <input
+          type="text"
+          name="city"
+          id="city-input"
+          class="resume-input"
+          value="{{ user.city or '' }}"
+        />
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h3 class="resume-section-title" style="text-transform: none">
+        Основная информация
+      </h3>
+
+      <div class="resume-form-control">
+        <span>Дата рождения</span>
+        <div class="resume-date-input">
+          <input
+            type="number"
+            name="birthday"
+            id="birthday-input"
+            class="resume-birthday-input"
+            min="1"
+            max="31"
+            placeholder="День"
+            value="{{ user.birthdate.strftime('%d') if user.birthdate else '' }}"
+          />
+          <select
+            name="birthmonth"
+            id="birthmonth-input"
+            class="resume-birthmonth-input"
+          >
+            {% if not user.birthdate %}
+            <option value="" disabled selected class="resume-default-option">
+              Месяц
+            </option>
+            {% endif %}
+            <option
+              value="0"
+              {% if user.birthdate and user.birthdate.month - 1 == 0 %}selected{% endif %}
+            >
+              Январь
+            </option>
+            <option
+              value="1"
+              {% if user.birthdate and user.birthdate.month - 1 == 1 %}selected{% endif %}
+            >
+              Февраль
+            </option>
+            <option
+              value="2"
+              {% if user.birthdate and user.birthdate.month - 1 == 2 %}selected{% endif %}
+            >
+              Март
+            </option>
+            <option
+              value="3"
+              {% if user.birthdate and user.birthdate.month - 1 == 3 %}selected{% endif %}
+            >
+              Апрель
+            </option>
+            <option
+              value="4"
+              {% if user.birthdate and user.birthdate.month - 1 == 4 %}selected{% endif %}
+            >
+              Май
+            </option>
+            <option
+              value="5"
+              {% if user.birthdate and user.birthdate.month - 1 == 5 %}selected{% endif %}
+            >
+              Июнь
+            </option>
+            <option
+              value="6"
+              {% if user.birthdate and user.birthdate.month - 1 == 6 %}selected{% endif %}
+            >
+              Июль
+            </option>
+            <option
+              value="7"
+              {% if user.birthdate and user.birthdate.month - 1 == 7 %}selected{% endif %}
+            >
+              Август
+            </option>
+            <option
+              value="8"
+              {% if user.birthdate and user.birthdate.month - 1 == 8 %}selected{% endif %}
+            >
+              Сентябрь
+            </option>
+            <option
+              value="9"
+              {% if user.birthdate and user.birthdate.month - 1 == 9 %}selected{% endif %}
+            >
+              Октябрь
+            </option>
+            <option
+              value="10"
+              {% if user.birthdate and user.birthdate.month - 1 == 10 %}selected{% endif %}
+            >
+              Ноябрь
+            </option>
+            <option
+              value="11"
+              {% if user.birthdate and user.birthdate.month - 1 == 11 %}selected{% endif %}
+            >
+              Декабрь
+            </option>
+          </select>
+          <input
+            type="number"
+            name="birthyear"
+            id="birthyear-input"
+            class="resume-birthyear-input"
+            min="1900"
+            max="9999"
+            placeholder="Год"
+            value="{{ user.birthdate.strftime('%Y') if user.birthdate else '' }}"
+          />
+        </div>
+      </div>
+
+      <div class="resume-form-control">
+        <span>Пол</span>
+        <div class="resume-radio-group">
+          <div>
+            <label for="sex-male-input">Мужской</label>
+            <input
+              type="radio"
+              name="sex"
+              id="sex-male-input"
+              class="resume-radio-input"
+              {% if user.sex == 'male' or not user.sex %}checked{% endif %}
+            />
+          </div>
+          <div>
+            <label for="sex-female-input">Женский</label>
+            <input
+              type="radio"
+              name="sex"
+              id="sex-female-input"
+              class="resume-radio-input"
+              {% if user.sex == 'female' %}checked{% endif %}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="resume-form-control">
+        <label for="citizenshipInput">Гражданство</label>
+        <select
+          name="citizenship"
+          id="citizenship-input"
+          class="resume-citizenship-input"
+        >
+          {% for citizenship in citizenships %}
+          <option value="{{ citizenship.name }}" {% if user.citizenship == citizenship.name %}selected{% endif %}>{{ citizenship.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <label for="descriptionInput">Навыки</label>
+        <div class="resume-skills-container" id="resume-skills-container">
+          {% for skill in skills %}
+          <div class="resume-card">
+            <div>
+              <div class="resume-card-title">{{ skill.title }}</div>
+              <div>
+                {% for keyword in skill.keywords %}
+                <span
+                  >{{ keyword.value }}{% if loop.index0 != ((skill.keywords
+                  |length) - 1) %}, {% endif %}</span
+                >
+                {% endfor %}
+              </div>
+            </div>
+            <div>
+              <svg
+                id="remove-skill_{{ skill.id }}"
+                class="cross-icon remove-skill-button"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>
+            </div>
+          </div>
+          {% endfor %}
+          <button class="resume-black-button" id="add-skill-button">
+            Добавить навык
+          </button>
+        </div>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <label for="descriptionInput">Опыт работы</label>
+        <div id="resume-work-exps-container">
+          {% for job in work_experience %}
+          <div class="resume-card">
+            <div>
+              <div class="resume-card-title">
+                {{ job.start_at.strftime('%m.%Y') }} - {{
+                job.end_at.strftime('%m.%Y') if job.is_ended else 'По настоящее
+                время' }}
+              </div>
+              <div>{{ job.position }}</div>
+              <div>{{ job.place }}</div>
+            </div>
+            <div>
+              <svg
+                id="remove-work-exp_{{ job.id }}"
+                class="cross-icon remove-work-exp-button"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>
+            </div>
+          </div>
+          {% endfor %}
+          <button class="resume-black-button" id="add-work-exp-button">
+            Добавить опыт работы
+          </button>
+        </div>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <label for="descriptionInput">Владение языками</label>
+        <div id="resume-languages-container">
+          {% for user_language in user_languages %}
+          <div class="resume-language-container">
+            <div class="resume-language-content-container">
+              <select
+                name="languageName[]"
+                class="resume-language-name-input"
+                id="edit-language-name_{{ user_language.id }}"
+              >
+                <option value="-1" selected>{{ user_language.name }}</option>
+                {% for language in all_languages %} {% if language !=
+                user_language.name %}
+                <option value="{{ language }}">{{ language }}</option>
+                {% endif %} {% endfor %}
+              </select>
+              <select
+                name="languageLevel[]"
+                class="resume-language-level-input"
+                id="edit-language-level_{{ user_language.id }}"
+              >
+                <option value="-1" selected>{{ user_language.level }}</option>
+                {% for level in language_levels %} {% if level !=
+                user_language.level %}
+                <option value="{{ level }}">{{ level }}</option>
+                {% endif %} {% endfor %}
+              </select>
+            </div>
+            <div>
+              <svg
+                class="cross-icon remove-language-button"
+                id="remove-language_{{ user_language.id }}"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="add-language-button-container">
+            <svg
+              class="plus-icon"
+              id="add-language-button"
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <line
+                x1="0.412109"
+                y1="10.3994"
+                x2="20.4121"
+                y2="10.3994"
+                stroke="#C4C4C4"
+                stroke-width="3"
+              />
+              <line
+                x1="10.2266"
+                y1="20.3848"
+                x2="10.2266"
+                y2="0.384767"
+                stroke="#C4C4C4"
+                stroke-width="3"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <label for="description-input">О себе</label>
+        <textarea
+          name="description"
+          id="description-input"
+          class="resume-textarea"
+          placeholder="Расскажите о своих качествах, знаниях, увлечениях, которые, как вам кажется, полезно о вас знать"
+        >{{ user.description or '' }}</textarea>
+      </div>
+    </section>
+
+    <div class="resume-button-container">
+      <button class="resume-black-button" id="resume-save-button" type="submit">
+        Сохранить
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  class="resume-modal-layout resume-disabled-modal-layout"
+  id="add-skill-modal-layout"
+>
+  <div class="resume-modal resume-disabled-modal" id="add-skill-modal">
+    <h4 class="resume-modal-title" style="text-transform: none">
+      Добавление навыка
+    </h4>
+    <div>
+      <label for="skillNameInput">Название навыка</label>
+      <input
+        type="text"
+        class="resume-modal-input"
+        id="skill-name-input"
+        placeholder="Продажи/Web-Дизайн/C++"
+      />
+    </div>
+    <div class="resume-modal-description">
+      Укажите ключевые слова, которые помогут понять уровень, направление,
+      специализацию в рамках указанного навыка.
+    </div>
+    <div class="resume-add-input-group">
+      <input
+        type="text"
+        class="resume-modal-input"
+        id="skill-keyword-input"
+        placeholder="Flask"
+      />
+      <svg
+        class="plus-icon"
+        width="22"
+        height="22"
+        viewBox="0 0 22 22"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        id="add-skill-keyword-button"
+      >
+        <line
+          x1="0.412109"
+          y1="10.3994"
+          x2="20.4121"
+          y2="10.3994"
+          stroke="#C4C4C4"
+          stroke-width="3"
+        />
+        <line
+          x1="10.2266"
+          y1="20.3848"
+          x2="10.2266"
+          y2="0.384767"
+          stroke="#C4C4C4"
+          stroke-width="3"
+        />
+      </svg>
+    </div>
+    <div
+      class="resume-skill-specializations-container"
+      id="skill-keywords-container"
+    ></div>
+    <div class="resume-modal-button-container">
+      <button class="resume-black-button" id="save-skill-button">
+        Сохранить
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  class="resume-modal-layout resume-disabled-modal-layout"
+  id="add-work-exp-modal-layout"
+>
+  <div class="resume-modal resume-disabled-modal" id="add-work-exp-modal">
+    <h4 class="resume-modal-title" style="text-transform: none">Опыт работы</h4>
+    <div>
+      <span class="resume-bold-text">Начало работы</span>
+      <div class="resume-modal-form-group">
+        <select class="resume-modal-month-input" id="work-start-month-input">
+          <option value="" disabled selected class="resume-default-option">
+            Месяц
+          </option>
+          <option value="0">Январь</option>
+          <option value="1">Февраль</option>
+          <option value="2">Март</option>
+          <option value="3">Апрель</option>
+          <option value="4">Май</option>
+          <option value="5">Июнь</option>
+          <option value="6">Июль</option>
+          <option value="7">Август</option>
+          <option value="8">Сентябрь</option>
+          <option value="9">Октябрь</option>
+          <option value="10">Ноябрь</option>
+          <option value="11">Декабрь</option>
+        </select>
+        <input
+          type="number"
+          id="work-start-year-input"
+          class="resume-modal-year-input"
+          min="1900"
+          max="9999"
+          placeholder="Год"
+        />
+      </div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Окончание</span>
+      <div class="resume-modal-radio-group" id="is-work-not-ended-group">
+        <input
+          type="checkbox"
+          id="is-work-not-ended-input"
+          class="resume-radio-input"
+        />
+        <label for="is-work-not-ended-input" class="resume-modal-radio-label"
+          >По настоящее время</label
+        >
+      </div>
+      <div class="resume-modal-form-group" id="work-end-group">
+        <select class="resume-modal-month-input" id="work-end-month-input">
+          <option value="" disabled selected class="resume-default-option">
+            Месяц
+          </option>
+          <option value="0">Январь</option>
+          <option value="1">Февраль</option>
+          <option value="2">Март</option>
+          <option value="3">Апрель</option>
+          <option value="4">Май</option>
+          <option value="5">Июнь</option>
+          <option value="6">Июль</option>
+          <option value="7">Август</option>
+          <option value="8">Сентябрь</option>
+          <option value="9">Октябрь</option>
+          <option value="10">Ноябрь</option>
+          <option value="11">Декабрь</option>
+        </select>
+        <input
+          type="number"
+          id="work-end-year-input"
+          class="resume-modal-year-input"
+          min="1900"
+          max="9999"
+          placeholder="Год"
+        />
+      </div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Место работы</span>
+      <div style="margin: 1rem 0">
+        <input
+          type="text"
+          class="resume-modal-input"
+          id="place-input"
+          placeholder='ООО "Компания мечты"'
+        />
+      </div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Должность</span>
+      <div style="margin: 1rem 0">
+        <input
+          type="text"
+          class="resume-modal-input"
+          id="position-input"
+          placeholder="Программист"
+        />
+      </div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Обязанности на рабочем месте</span>
+      <div class="resume-textarea-form-control">
+        <textarea
+          id="responsibilities-input"
+          class="resume-textarea"
+          placeholder="Делал то-сё, пятое-десятое"
+        ></textarea>
+      </div>
+    </div>
+    <div class="resume-modal-button-container">
+      <button class="resume-black-button" id="save-work-exp-button">
+        Сохранить
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  const getCrossIcon = () => {
+    return `<svg
+                id="remove-skill-keyword-button"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>`;
+  };
+
+  const getRemoveSkillButton = (id) => {
+    return `<svg
+                id="remove-skill_${id}"
+                class="cross-icon remove-skill-button"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>`;
+  };
+
+  const getRemoveWorkExpButton = (id) => {
+    return `<svg
+                id="remove-work-exp_${id}"
+                class="cross-icon remove-work-exp-button"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>`;
+  };
+
+  const getRemoveLanguageButton = (id) => {
+    return `<svg
+                class="cross-icon remove-language-button"
+                id="remove-language_${id}"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line
+                  x1="2.06066"
+                  y1="2.08192"
+                  x2="16.2028"
+                  y2="16.2241"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+                <line
+                  x1="1.93934"
+                  y1="16.0819"
+                  x2="16.0815"
+                  y2="1.93978"
+                  stroke="#C4C4C4"
+                  stroke-width="3"
+                />
+              </svg>`;
+  };
+
+  const getAddLanguageButton = () => {
+    return `<svg
+              class="plus-icon"
+              id="add-language-button"
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <line
+                x1="0.412109"
+                y1="10.3994"
+                x2="20.4121"
+                y2="10.3994"
+                stroke="#C4C4C4"
+                stroke-width="3"
+              />
+              <line
+                x1="10.2266"
+                y1="20.3848"
+                x2="10.2266"
+                y2="0.384767"
+                stroke="#C4C4C4"
+                stroke-width="3"
+              />
+            </svg>`;
+  };
+
+  const removeChildren = (node) => {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  };
+</script>
+
+<script>
+  'use strict';
+
+  const skillsContainer = document.querySelector('#resume-skills-container');
+
+  const addSkillButton = document.querySelector('#add-skill-button');
+  const addSkillModalLayout = document.querySelector('#add-skill-modal-layout');
+  const addSkillModal = document.querySelector('#add-skill-modal');
+
+  const toggleSkillModal = () => {
+    addSkillModalLayout.classList.toggle('resume-disabled-modal-layout');
+    addSkillModal.classList.toggle('resume-disabled-modal');
+  };
+
+  addSkillModalLayout.addEventListener('click', (event) => {
+    if (event.target.id === 'add-skill-modal-layout') {
+      toggleSkillModal();
+    }
+  });
+  addSkillButton.addEventListener('click', toggleSkillModal);
+
+  let skillKeywords = [];
+
+  const skillKeywordInput = document.querySelector('#skill-keyword-input');
+  const skillKeywordsContainer = document.querySelector(
+    '#skill-keywords-container'
+  );
+  const addSkillKeywordButton = document.querySelector(
+    '#add-skill-keyword-button'
+  );
+
+  addSkillKeywordButton.addEventListener('click', () => {
+    const keywordName = skillKeywordInput.value;
+
+    if (!keywordName || skillKeywords.includes(keywordName)) {
+      return;
+    }
+
+    skillKeywords.push(keywordName);
+
+    removeChildren(skillKeywordsContainer);
+
+    const renderKeyword = (keyword) => {
+      const keywordCard = document.createElement('div');
+      keywordCard.classList.add('resume-skill-specilation-card');
+      keywordCard.textContent = keyword;
+
+      const crossIcon = document.createElement('div');
+      crossIcon.classList.add('cross-icon');
+      crossIcon.innerHTML = getCrossIcon();
+      crossIcon.addEventListener('click', (event) => {
+        skillKeywords = skillKeywords.filter(
+          (currentKeyword) => keyword !== currentKeyword
+        );
+
+        removeChildren(skillKeywordsContainer);
+
+        skillKeywords.forEach(renderKeyword);
+      });
+
+      const keywordGroup = document.createElement('div');
+      keywordGroup.classList.add('resume-skill-specialization-group');
+      keywordGroup.appendChild(keywordCard);
+      keywordGroup.appendChild(crossIcon);
+
+      skillKeywordsContainer.appendChild(keywordGroup);
+    };
+
+    skillKeywords.forEach(renderKeyword);
+
+    skillKeywordInput.value = '';
+  });
+
+  const removeSkill = async (id) => {
+    await fetch('/api/remove-skill', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
+
+    await renderSkillsCards();
+  };
+
+  const renderSkillsCards = async () => {
+    const skills = await fetch('/api/skills').then((res) => res.json());
+
+    removeChildren(skillsContainer);
+
+    skills.forEach((skill) => {
+      const cardTitle = document.createElement('div');
+      cardTitle.classList.add('resume-card-title');
+      cardTitle.textContent = skill.title;
+
+      const keywordsContainer = document.createElement('div');
+      keywordsContainer.textContent = skill.keywords.reduce(
+        (text, keyword, index) => {
+          return (
+            text +
+            keyword.value +
+            (index !== skill.keywords.length - 1 ? ', ' : '')
+          );
+        },
+        ''
+      );
+
+      const cardContent = document.createElement('div');
+      cardContent.appendChild(cardTitle);
+      cardContent.appendChild(keywordsContainer);
+
+      const removeButtonContainer = document.createElement('div');
+      removeButtonContainer.innerHTML = getRemoveSkillButton(skill.id);
+      removeButtonContainer.addEventListener('click', () =>
+        removeSkill(skill.id)
+      );
+
+      const card = document.createElement('div');
+      card.classList.add('resume-card');
+      card.appendChild(cardContent);
+      card.appendChild(removeButtonContainer);
+
+      skillsContainer.appendChild(card);
+    });
+
+    const addSkillButton = document.createElement('button');
+    addSkillButton.classList.add('resume-black-button');
+    addSkillButton.id = 'add-skill-button';
+    addSkillButton.textContent = 'Добавить навык';
+    addSkillButton.addEventListener('click', toggleSkillModal);
+
+    skillsContainer.appendChild(addSkillButton);
+  };
+
+  const skillNameInput = document.querySelector('#skill-name-input');
+  const saveSkillButton = document.querySelector('#save-skill-button');
+
+  saveSkillButton.addEventListener('click', async () => {
+    if (!skillNameInput.value) {
+      return;
+    }
+
+    await fetch('/api/add-skill', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: skillNameInput.value,
+        skill_keywords: skillKeywords,
+      }),
+    });
+
+    await renderSkillsCards();
+
+    toggleSkillModal();
+
+    skillNameInput.value = '';
+    skillKeywordInput.value = '';
+    skillKeywords = [];
+    removeChildren(skillKeywordsContainer);
+  });
+
+  const removeSkillButtons = document.querySelectorAll('.remove-skill-button');
+
+  removeSkillButtons.forEach((button) =>
+    button.addEventListener('click', () => removeSkill(button.id.split('_')[1]))
+  );
+</script>
+
+<script>
+  'use strict';
+
+  const workExpsContainer = document.querySelector(
+    '#resume-work-exps-container'
+  );
+  const addWorkExpModalLayout = document.querySelector(
+    '#add-work-exp-modal-layout'
+  );
+  const addWorkExpButton = document.querySelector('#add-work-exp-button');
+  const addWorkExpModal = document.querySelector('#add-work-exp-modal');
+
+  const toggleWorkExpModal = () => {
+    addWorkExpModalLayout.classList.toggle('resume-disabled-modal-layout');
+    addWorkExpModal.classList.toggle('resume-disabled-modal');
+  };
+
+  addWorkExpModalLayout.addEventListener('click', (event) => {
+    if (event.target.id === 'add-work-exp-modal-layout') {
+      toggleWorkExpModal();
+    }
+  });
+  addWorkExpButton.addEventListener('click', toggleWorkExpModal);
+
+  const workStartMonthInput = document.querySelector('#work-start-month-input');
+  const workStartYearInput = document.querySelector('#work-start-year-input');
+
+  const isWorkNotEndedInput = document.querySelector(
+    '#is-work-not-ended-input'
+  );
+  const isWorkNotEndedGroup = document.querySelector(
+    '#is-work-not-ended-group'
+  );
+  const workEndGroup = document.querySelector('#work-end-group');
+
+  isWorkNotEndedInput.addEventListener('change', (event) => {
+    workEndGroup.classList.toggle('resume-hidden-group');
+    isWorkNotEndedGroup.classList.toggle('resume-mb-1');
+  });
+
+  const workEndMonthInput = document.querySelector('#work-end-month-input');
+  const workEndYearInput = document.querySelector('#work-end-year-input');
+  const placeInput = document.querySelector('#place-input');
+  const positionInput = document.querySelector('#position-input');
+  const responsibilitiesInput = document.querySelector(
+    '#responsibilities-input'
+  );
+
+  const removeWorkExp = async (id) => {
+    await fetch('/api/remove-work-exp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
+
+    await renderWorkExpCards();
+  };
+
+  const renderWorkExpCards = async () => {
+    const workExps = await fetch('/api/work-exps').then((res) => res.json());
+
+    removeChildren(workExpsContainer);
+
+    workExps.forEach((workExp) => {
+      const cardTitle = document.createElement('div');
+      cardTitle.classList.add('resume-card-title');
+      cardTitle.textContent = `${new Date(workExp.start_at).toLocaleDateString(
+        'ru',
+        { month: '2-digit', year: 'numeric' }
+      )} - ${
+        workExp.end_at
+          ? new Date(workExp.end_at).toLocaleDateString('ru', {
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : 'По настоящее время'
+      }`;
+
+      const positionBlock = document.createElement('div');
+      positionBlock.textContent = workExp.position;
+
+      const placeBlock = document.createElement('div');
+      placeBlock.textContent = workExp.place;
+
+      const cardContent = document.createElement('div');
+      cardContent.appendChild(cardTitle);
+      cardContent.appendChild(positionBlock);
+      cardContent.appendChild(placeBlock);
+
+      const removeButtonContainer = document.createElement('div');
+      removeButtonContainer.innerHTML = getRemoveWorkExpButton(workExp.id);
+      removeButtonContainer.addEventListener('click', () =>
+        removeWorkExp(workExp.id)
+      );
+
+      const cardContainer = document.createElement('div');
+      cardContainer.classList.add('resume-card');
+      cardContainer.appendChild(cardContent);
+      cardContainer.appendChild(removeButtonContainer);
+
+      workExpsContainer.appendChild(cardContainer);
+    });
+
+    const addWorkExpButton = document.createElement('button');
+    addWorkExpButton.classList.add('resume-black-button');
+    addWorkExpButton.id = 'add-work-exp-button';
+    addWorkExpButton.textContent = 'Добавить опыт работы';
+    addWorkExpButton.addEventListener('click', toggleWorkExpModal);
+
+    workExpsContainer.appendChild(addWorkExpButton);
+  };
+
+  const saveWorkExpButton = document.querySelector('#save-work-exp-button');
+
+  saveWorkExpButton.addEventListener('click', async () => {
+    await fetch('/api/add-work-exp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        start_at: new Date(workStartYearInput.value, workStartMonthInput.value, 2).toISOString(),
+        end_at: !isWorkNotEndedInput.checked
+          ? new Date(workEndYearInput.value, workEndMonthInput.value, 2).toISOString()
+          : undefined,
+        is_ended: !isWorkNotEndedInput.checked,
+        place: placeInput.value,
+        position: positionInput.value,
+        responsibilities: responsibilitiesInput.value,
+      }),
+    });
+
+    await renderWorkExpCards();
+
+    toggleWorkExpModal();
+
+    workStartMonthInput.value = '';
+    workStartYearInput.value = '';
+    isWorkNotEndedInput.checked = false;
+    placeInput.value = '';
+    positionInput.value = '';
+    responsibilitiesInput.value = '';
+    workEndGroup.classList.remove('resume-hidden-group');
+    isWorkNotEndedGroup.classList.remove('resume-mb-1');
+  });
+
+  const removeWorkExpButtons = document.querySelectorAll(
+    '.remove-work-exp-button'
+  );
+
+  removeWorkExpButtons.forEach((button) =>
+    button.addEventListener('click', () =>
+      removeWorkExp(button.id.split('_')[1])
+    )
+  );
+</script>
+
+<script>
+  'use strict';
+
+  const languagesContainer = document.querySelector(
+    '#resume-languages-container'
+  );
+  const addLanguageButton = document.querySelector('#add-language-button');
+
+  const editLanguageName = async (id, name) => {
+    if (!name) {
+      return;
+    }
+
+    await fetch('/api/change-language-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+        name,
+      }),
+    });
+
+    await renderLanguageCards();
+  };
+
+  const editLanguageLevel = async (id, level) => {
+    if (!level) {
+      return;
+    }
+
+    await fetch('/api/change-language-level', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+        level,
+      }),
+    });
+
+    await renderLanguageCards();
+  };
+
+  const removeLanguage = async (id) => {
+    await fetch('/api/remove-language', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
+
+    await renderLanguageCards();
+  };
+
+  const addLanguage = async () => {
+    await fetch('/api/add-language', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Английский',
+        level: 'A1 - начальный',
+      }),
+    });
+
+    await renderLanguageCards();
+  };
+
+  const renderLanguageCards = async () => {
+    const languages = await fetch('/api/languages').then((res) => res.json());
+
+    const allLanguages = await fetch('/api/json/languages').then((res) =>
+      res.json()
+    );
+    const allLanguageLevels = await fetch('/api/json/language-levels').then(
+      (res) => res.json()
+    );
+
+    removeChildren(languagesContainer);
+
+    languages.forEach((language) => {
+      const languageNameSelect = document.createElement('select');
+      languageNameSelect.name = 'languageName[]';
+      languageNameSelect.classList.add('resume-language-name-input');
+      languageNameSelect.id = `edit-language-name_${language.id}`;
+
+      const defaultNameOption = document.createElement('option');
+      defaultNameOption.value = '-1';
+      defaultNameOption.selected = true;
+      defaultNameOption.textContent = language.name;
+
+      const nameOptions = allLanguages
+        .map((language) => {
+          const option = document.createElement('option');
+          option.value = language;
+          option.textContent = language;
+
+          return option;
+        })
+        .filter((optionLanguage) => optionLanguage !== language.name);
+
+      languageNameSelect.appendChild(defaultNameOption);
+      nameOptions.forEach((option) => languageNameSelect.appendChild(option));
+
+      languageNameSelect.addEventListener('change', async (event) =>
+        editLanguageName(language.id, event.target.value)
+      );
+
+      const languageLevelSelect = document.createElement('select');
+      languageLevelSelect.name = 'languageLevel[]';
+      languageLevelSelect.classList.add('resume-language-level-input');
+      languageLevelSelect.id = `edit-language-level_${language.id}`;
+
+      const defaultLevelOption = document.createElement('option');
+      defaultLevelOption.value = '-1';
+      defaultLevelOption.checked = true;
+      defaultLevelOption.textContent = language.level;
+
+      const levelOptions = allLanguageLevels
+        .map((level) => {
+          const option = document.createElement('option');
+          option.value = level;
+          option.textContent = level;
+
+          return option;
+        })
+        .filter((optionLevel) => optionLevel !== language.level);
+
+      languageLevelSelect.appendChild(defaultLevelOption);
+      levelOptions.forEach((option) => languageLevelSelect.appendChild(option));
+
+      languageLevelSelect.addEventListener('change', async (event) =>
+        editLanguageLevel(language.id, event.target.value)
+      );
+
+      const cardContent = document.createElement('div');
+      cardContent.classList.add('resume-language-content-container');
+      cardContent.appendChild(languageNameSelect);
+      cardContent.appendChild(languageLevelSelect);
+
+      const removeLanguageButtonContainer = document.createElement('div');
+      removeLanguageButtonContainer.innerHTML = getRemoveLanguageButton(
+        language.id
+      );
+      removeLanguageButtonContainer.addEventListener('click', () =>
+        removeLanguage(language.id)
+      );
+
+      const cardContainer = document.createElement('div');
+      cardContainer.classList.add('resume-language-container');
+      cardContainer.appendChild(cardContent);
+      cardContainer.appendChild(removeLanguageButtonContainer);
+
+      languagesContainer.appendChild(cardContainer);
+    });
+
+    const addLanguageButtonContainer = document.createElement('div');
+    addLanguageButtonContainer.classList.add('add-language-button-container');
+    addLanguageButtonContainer.innerHTML = getAddLanguageButton();
+    addLanguageButtonContainer.addEventListener('click', addLanguage);
+
+    languagesContainer.appendChild(addLanguageButtonContainer);
+  };
+
+  addLanguageButton.addEventListener('click', addLanguage);
+
+  const removeLanguageButtons = document.querySelectorAll(
+    '.remove-language-button'
+  );
+
+  removeLanguageButtons.forEach((button) =>
+    button.addEventListener('click', (event) =>
+      removeLanguage(event.currentTarget.id.split('_')[1])
+    )
+  );
+
+  const editLanguageNameInputs = document.querySelectorAll(
+    '.resume-language-name-input'
+  );
+
+  editLanguageNameInputs.forEach((input) =>
+    input.addEventListener('change', async () =>
+      editLanguageName(event.target.id.split('_')[1], event.target.value)
+    )
+  );
+
+  const editLanguageLevelInputs = document.querySelectorAll(
+    '.resume-language-level-input'
+  );
+
+  editLanguageLevelInputs.forEach((input) =>
+    input.addEventListener('change', async (event) =>
+      editLanguageLevel(event.target.id.split('_')[1], event.target.value)
+    )
+  );
+</script>
+
+<script>
+  const nameInput = document.querySelector('#name-input');
+  const surnameInput = document.querySelector('#surname-input');
+  const phoneInput = document.querySelector('#phone-input');
+  const countryInput = document.querySelector('#country-input');
+  const cityInput = document.querySelector('#city-input');
+
+  const birthdayInput = document.querySelector('#birthday-input');
+  const birthmonthInput = document.querySelector('#birthmonth-input');
+  const birthyearInput = document.querySelector('#birthyear-input');
+
+  const sexMaleInput = document.querySelector('#sex-male-input');
+
+  const citizenshipInput = document.querySelector('#citizenship-input');
+  const descriptionInput = document.querySelector('#description-input');
+
+  const saveButton = document.querySelector('#resume-save-button');
+
+  saveButton.addEventListener('click', async () => {
+    try {
+      await fetch('/api/change-resume', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: nameInput.value,
+          surname: surnameInput.value,
+          phone: phoneInput.value,
+          country: countryInput.value,
+          city: cityInput.value,
+          birthdate: new Date(
+            birthyearInput.value,
+            birthmonthInput.value,
+            +birthdayInput.value + 1
+          ).toISOString(),
+          sex: sexMaleInput.checked ? 'male' : 'female',
+          citizenship: citizenshipInput.value,
+          description: descriptionInput.value,
+        }),
+      });
+
+      location.href = '/';
+    } catch (error) {
+      console.log(error);
+    }
+  });
+</script>
+
+{% endblock %}

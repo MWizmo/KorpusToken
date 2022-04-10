@@ -1008,8 +1008,8 @@ img {
   opacity: 0.7;
 }
 
-.service_page_button:disabled{
-    cursor: default;
+.service_page_button:disabled {
+  cursor: default;
   opacity: 0.7;
 }
 
@@ -1029,7 +1029,7 @@ img {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 35rem;
+  width: 55rem;
   background-color: white;
   text-align: center;
   padding: 5px 0;
@@ -1045,52 +1045,908 @@ img {
   visibility: visible;
 }
 
-.services_table{
-
-    width:100%;
-    height:65vh;
-    max-height:65vh;
-    margin-top:2vh;
+.services_table {
+  width: 100%;
+  height: 65vh;
+  max-height: 65vh;
+  margin-top: 2vh;
 }
 
-.scroll_block{
-    overflow:auto;
-    height:65vh;
-    max-height:65vh;
-    scrollbar-color: black white;
+.scroll_block {
+  overflow: auto;
+  height: 65vh;
+  max-height: 65vh;
+  scrollbar-color: black white;
 }
 
 .scroll_block::-webkit-scrollbar-track {
-  background: white;        /* цвет дорожки */
+  background: white; /* цвет дорожки */
 }
 .scroll_block::-webkit-scrollbar-thumb {
-  background-color: black;    /* цвет плашки */
+  background-color: black; /* цвет плашки */
 }
 
-.services_td{
-    border:1px solid black;
-    display:flex;
-    flex-direction: row;
-    justify-content:space-between;
-    padding:5px 10px;
-    align-items:center;
+.services_td {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 5px 10px;
+  align-items: center;
 }
 
-.services_name_block{
-    width:40%;
+.services_name_block {
+  width: 40%;
 }
 
-.services_price_block{
-    width:20%;
+.services_price_block {
+  width: 20%;
 }
 
-.services_button_block{
-    width:40%;
-    display:flex;
-    justify-content: flex-end;
+.services_button_block {
+  width: 40%;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.scroll_table{
-    width:100%;
-    border-collapse:collapse;
+.scroll_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resume-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-content {
+  padding-top: 5rem;
+  padding-bottom: 3.5rem;
+}
+
+.resume-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.resume-section {
+  margin: 3.5rem 0;
+}
+
+.resume-section-title {
+  font-size: 1.7rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+}
+
+.resume-form-control {
+  margin: 1.5rem 0;
+  width: 55rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.resume-input {
+  border: 1px solid black;
+  border-radius: 0.4rem;
+  height: 1.5rem;
+  width: 15rem;
+  padding-left: 0.3rem;
+}
+
+.resume-radio-group {
+  display: flex;
+  justify-content: space-between;
+  width: 15rem;
+}
+
+.resume-textarea {
+  border: 1px solid black;
+  border-radius: 0.4rem;
+  width: 25rem;
+  min-height: 10rem;
+  resize: vertical;
+  padding: 0.7rem;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-textarea::placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-textarea:-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-textarea::-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-textarea-form-control {
+  margin: 1.5rem 0;
+  width: 55rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.resume-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
+.resume-black-button {
+  background-color: black;
+  font-family: 'Decima Mono Cyr';
+  font-weight: 300;
+  border-radius: 0.5rem;
+  border: 0;
+  color: white;
+  width: 15rem;
+  height: 1.7rem;
+}
+
+.resume-black-button:hover {
+  cursor: pointer;
+}
+
+.resume-date-input {
+  display: flex;
+}
+
+.resume-birthday-input {
+  width: 4rem;
+  border: 1px solid black;
+  border-radius: 0.4rem 0 0 0.4rem;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  color: #c4c4c4;
+}
+
+.resume-birthday-input::placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-birthday-input:-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-birthday-input::-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-birthmonth-input {
+  width: 6rem;
+  height: 1.85rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0.1rem 0.2rem;
+  text-align: center;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 0;
+  border-right: 0;
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+}
+
+.resume-birthyear-input {
+  width: 4rem;
+  border: 1px solid black;
+  border-radius: 0 0.4rem 0.4rem 0;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  color: #c4c4c4;
+}
+
+.resume-radio-input:checked {
+  filter: brightness(0);
+}
+
+.resume-birthyear-input::placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-birthyear-input:-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-birthyear-input::-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-citizenship-input {
+  width: 15rem;
+  height: 1.6rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0.1rem 0.2rem;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 0.4rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg width='29' height='15' viewBox='0 0 29 15' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cline y1='1' x2='29' y2='1' stroke='%23C4C4C4' stroke-width='2'/%3E%3Cline y1='8' x2='29' y2='8' stroke='%23C4C4C4' stroke-width='2'/%3E%3Cline y1='14' x2='29' y2='14' stroke='%23C4C4C4' stroke-width='2'/%3E%3C/svg%3E%0A");
+  background-size: 1.2rem;
+  background-repeat: no-repeat;
+  background-position-x: 95%;
+  background-position-y: 7px;
+}
+
+.resume-card {
+  border: 1px solid black;
+  border-radius: 0.4rem;
+  width: 14rem;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Decima Mono Cyr';
+  font-size: 0.7rem;
+}
+
+.resume-card-title {
+  margin-bottom: 0.3rem;
+}
+
+.cross-icon {
+  cursor: pointer;
+  height: 0.9rem;
+}
+
+.plus-icon {
+  cursor: pointer;
+  height: 0.9rem;
+}
+
+.resume-language-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  width: 20rem;
+}
+
+.resume-language-content-container {
+  display: flex;
+}
+
+.add-language-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  margin-top: 1rem;
+}
+
+.resume-language-name-input {
+  width: 7rem;
+  border: 1px solid black;
+  border-radius: 0.4rem 0 0 0.4rem;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.resume-language-level-input {
+  width: 11rem;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 0;
+  border-radius: 0 0.4rem 0.4rem 0;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.resume-modal-layout {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.7);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 998;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.resume-modal {
+  padding: 1rem 1.5rem;
+  width: 55rem;
+  background-color: white;
+  font-family: 'Decima Mono Cyr';
+  z-index: 999;
+}
+
+.resume-modal-title {
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+}
+
+.resume-modal-input {
+  width: 15rem;
+  height: 1.5rem;
+  border: 1px solid black;
+  padding: 0.2rem 0.5rem;
+}
+
+.resume-modal-input::placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-input:-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-input::-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-description {
+  margin: 1.5rem 0;
+}
+
+.resume-add-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.resume-add-input-group > .plus-icon {
+  position: relative;
+  right: 1.5rem;
+}
+
+.resume-skill-specializations-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2rem 0 1rem 0;
+}
+
+.resume-skill-specialization-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+
+.resume-skill-specialization-group > .cross-icon {
+  position: relative;
+  right: 1.5rem;
+}
+
+.resume-skill-specilation-card {
+  border: 1px solid black;
+  padding: 0.3rem 2.5rem 0.3rem 1.5rem;
+  border-radius: 0.4rem;
+  font-family: 'Decima Mono Cyr';
+  font-weight: 300;
+  font-size: 0.8rem;
+}
+
+.resume-modal-button-container {
+  display: flex;
+  width: 100%;
+  justify-content: end;
+}
+
+.resume-disabled-modal {
+  display: none;
+  opacity: 0;
+}
+
+.resume-disabled-modal-layout {
+  display: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.resume-bold-text {
+  font-weight: 700;
+}
+
+.resume-modal-form-group {
+  margin: 1rem 0;
+  display: flex;
+}
+
+.resume-modal-month-input {
+  width: 5rem;
+  height: 1.65rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0.1rem 0.2rem;
+  text-align: center;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 0;
+  border-radius: 0.4rem 0 0 0.4rem;
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+}
+
+.resume-modal-year-input {
+  width: 3.5rem;
+  border: 1px solid black;
+  border-radius: 0 0.4rem 0.4rem 0;
+  height: 1.32rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  color: #c4c4c4;
+}
+
+.resume-modal-year-input::placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-year-input:-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-year-input::-ms-input-placeholder {
+  color: #c4c4c4;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resume-modal-radio-group {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+input[type='radio'] {
+  margin: 0;
+}
+
+.resume-modal-radio-label {
+  margin-left: 0.5rem;
+}
+
+.resume-hidden-group {
+  display: none;
+}
+
+.resume-mb-1 {
+  margin-bottom: 1rem;
+}
+
+.resume-mini-title {
+  margin-top: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+@media screen and (max-width: 980px) {
+  .resume-content {
+    width: 100%;
+    padding: 4rem 2rem;
+  }
+
+  .resume-form-control {
+    width: 100%;
+    font-size: 2.5rem;
+  }
+
+  .resume-textarea-form-control {
+    width: 100%;
+    font-size: 2.5rem;
+  }
+
+  .resume-title {
+    font-size: 3.5rem;
+  }
+
+  .resume-section-title {
+    font-size: 2.5rem;
+  }
+
+  .resume-input {
+    width: 25rem;
+    height: 3rem;
+    font-size: 2rem;
+    border-radius: 0.5rem;
+    padding: 0 1rem;
+  }
+
+  .resume-birthday-input {
+    width: 7rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-birthmonth-input {
+    width: 9rem;
+    height: 3.32rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-birthyear-input {
+    width: 10rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-radio-group {
+    width: 27rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-citizenship-input {
+    width: 27rem;
+    height: 3rem;
+    font-size: 2rem;
+    background-size: 2rem;
+    background-repeat: no-repeat;
+    background-position-x: 95%;
+    background-position-y: 15px;
+  }
+
+  .resume-card {
+    width: 26rem;
+    font-size: 1.5rem;
+  }
+
+  .cross-icon {
+    width: 2rem;
+  }
+
+  .resume-black-button {
+    width: 27rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-textarea {
+    width: 40rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-language-container {
+    width: 27rem;
+  }
+
+  .resume-language-name-input {
+    width: 10rem;
+    height: 3rem;
+    font-size: 1.2rem;
+  }
+
+  .resume-language-level-input {
+    width: 17rem;
+    height: 3rem;
+    font-size: 1.2rem;
+  }
+
+  .cross-icon.remove-language-button {
+    height: 1.2rem;
+    position: relative;
+    bottom: 0.7rem;
+  }
+
+  .plus-icon {
+    height: 2rem;
+  }
+
+  .resume-modal {
+    font-size: 2rem;
+  }
+
+  .resume-modal-title {
+    font-size: 2.5rem;
+  }
+
+  .resume-modal-input {
+    width: 25rem;
+    height: 2.8rem;
+    font-size: 1.7rem;
+  }
+
+  .resume-skill-specilation-card {
+    width: 13rem;
+    height: 3rem;
+    font-size: 1.7rem;
+  }
+
+  .resume-skill-specialization-group > .cross-icon {
+    position: relative;
+    bottom: 1.2rem;
+    right: 2rem;
+  }
+
+  .resume-modal-month-input {
+    width: 10rem;
+    height: 3rem;
+    font-size: 1.7rem;
+  }
+
+  .resume-modal-year-input {
+    width: 10rem;
+    height: 2.65rem;
+    font-size: 1.7rem;
+  }
+}
+
+.resumes-search {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.resumes-search-input {
+  padding: 0 0.5rem;
+  width: 52rem;
+  height: 2.2rem;
+  font-size: 1.1rem;
+  border: 1px solid black;
+  font-family: 'Decima Mono Cyr';
+}
+
+.resumes-search-button {
+  border-left: 0;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  background: white;
+  height: 2.33rem;
+  cursor: pointer;
+}
+
+.resumes-search-button:hover {
+  background: white;
+}
+
+.resumes-root {
+  margin-top: 3rem;
+  display: flex;
+}
+
+.resumes-cards {
+  width: 53.5rem;
+}
+
+.resumes-list-card {
+  width: 53.5rem;
+  border-top: 1px solid #c4c4c4;
+  border-right: 1px solid #c4c4c4;
+  border-left: 1px solid #c4c4c4;
+  padding: 0.8rem;
+  cursor: pointer;
+}
+
+.resume-list-card-title {
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.resume-list-card-age {
+  font-weight: 400;
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+.resume-list-card-section-title {
+  color: #c4c4c4;
+  font-weight: 400;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+.resume-list-card-section-content {
+  font-weight: 400;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+.resumes-pagination-block {
+  margin-top: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.resumes-page-button {
+  padding: 0.3rem 0.7rem;
+  margin: 0.2rem;
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.resumes-dots {
+  font-weight: 700;
+  padding-top: 1rem;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
+}
+
+.resumes-filters {
+  margin-left: 3.5rem;
+}
+
+.resumes-filter-title {
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.resumes-filter {
+  margin-bottom: 1rem;
+}
+
+.resumes-age-filter-control {
+  display: flex;
+}
+
+.resume-age-filter-group {
+  display: flex;
+  position: relative;
+}
+
+.resume-age-filter-label {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.1rem;
+  color: #c4c4c4;
+  font-weight: 300;
+  font-family: 0.9rem;
+}
+
+.resume-age-filter-input {
+  padding-left: 2rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  height: 1.2rem;
+  border-top: 1px solid black;
+  border-left: 0;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+#age-low-border {
+  border-left: 1px solid black;
+  border-radius: 0.3rem 0 0 0.3rem;
+}
+
+#age-high-border {
+  border-radius: 0 0.3rem 0.3rem 0;
+}
+
+.resumes-city-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0.1rem 0.2rem;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 0.4rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg width='29' height='15' viewBox='0 0 29 15' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cline y1='1' x2='29' y2='1' stroke='%23C4C4C4' stroke-width='2'/%3E%3Cline y1='8' x2='29' y2='8' stroke='%23C4C4C4' stroke-width='2'/%3E%3Cline y1='14' x2='29' y2='14' stroke='%23C4C4C4' stroke-width='2'/%3E%3C/svg%3E%0A");
+  background-size: 1.2rem;
+  background-repeat: no-repeat;
+  background-position-x: 95%;
+  background-position-y: 7px;
+}
+
+.resumes-result-text {
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-family: 'Decima Mono Cyr';
+  margin-top: 1rem;
+}
+
+.resume-span {
+  width: 27%;
+}
+
+.resume-textarea-span {
+  width: 1%;
+}
+
+.resume-hidden-field {
+  display: none;
+}
+
+.resume-language-view {
+  display: flex;
+  margin: 0.5rem 0;
+}
+
+.resume-language-name-view {
+  font-size: 0.9rem;
+  width: 7rem;
+  border: 1px solid black;
+  border-radius: 0.4rem 0 0 0.4rem;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resume-language-level-view {
+  font-size: 0.9rem;
+  width: 11rem;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 0;
+  border-radius: 0 0.4rem 0.4rem 0;
+  height: 1.5rem;
+  padding: 0.1rem 0.2rem;
+  font-family: 'Decima Mono Cyr';
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media screen and (max-width: 980px) {
+  .resume-language-name-view {
+    width: 10rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+
+  .resume-language-level-view {
+    width: 17rem;
+    height: 3rem;
+    font-size: 1.3rem;
+  }
 }
