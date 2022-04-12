@@ -38,18 +38,6 @@ class User(UserMixin, db.Model):
           return True
       return False
 
-    @staticmethod
-    def check_partner(current_user_id):
-        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
-        for status in statuses:
-            if status.status_id == 10:
-                return True
-        return False
-
-    @property
-    def is_partner(self):
-        return User.check_partner(self.id)
-
     @property
     def is_accountant(self):
       return User.check_accountant(self.id)
@@ -236,18 +224,26 @@ class User(UserMixin, db.Model):
             return 'Unknown (id {})'.format(user_id)
 
     def __init__(self, email, login, tg_nickname,
-                 courses, birthday, education,
+                 courses, birthday, education, private_key,
                  work_exp, sex, name, surname,
-                 private_key, token=None):
+                 phone=None, country=None, city=None,
+                 description=None, work_experience_in_ms=0,
+                 birthdate=None, token=None):
         self.name = name
         self.surname = surname
         self.email = email
         self.login = login
+        self.phone = phone
+        self.country = country
+        self.city = city
         self.tg_nickname = tg_nickname
         self.courses = courses
         self.birthday = birthday
+        self.birthdate = birthdate
+        self.description = description
         self.education = education
         self.work_exp = work_exp
+        self.work_experience_in_ms = work_experience_in_ms
         self.sex = sex
         self.private_key = private_key
         self.token = token
@@ -266,6 +262,9 @@ class User(UserMixin, db.Model):
             'id': self.id,
             'name': self.name,
             'surname': self.surname,
+            'phone': self.phone,
+            'country': self.country,
+            'city': self.city,
             'tg_nickname': self.tg_nickname,
             'tg_id': self.tg_id,
             'photo': self.photo,
@@ -273,8 +272,11 @@ class User(UserMixin, db.Model):
             'login': self.login,
             'email': self.email,
             'birthday': self.birthday,
+            'birthdate': self.birthdate,
+            'description': self.description,
             'education': self.education,
             'work_exp': self.work_exp,
+            'work_experience_in_ms': self.work_experience_in_ms,
             'membership': True if Membership.query.filter_by(user_id=self.id).first() else False
         }
         return data
@@ -282,6 +284,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     surname = db.Column(db.String(64))
+    phone = db.Column(db.String(32))
+    country = db.Column(db.String(64))
+    city = db.Column(db.String(64))
+    citizenship = db.Column(db.String(64))
     email = db.Column(db.String(128), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     login = db.Column(db.String(64), unique=True)
@@ -289,6 +295,8 @@ class User(UserMixin, db.Model):
     tg_id = db.Column(db.String(64), unique=True)
     courses = db.Column(db.String(256))
     birthday = db.Column(db.String(32))
+    birthdate = db.Column(db.Date)
+    description = db.Column(db.Text)
     education = db.Column(db.String(128))
     work_exp = db.Column(db.String(256))
     sex = db.Column(db.String(16))
@@ -300,7 +308,9 @@ class User(UserMixin, db.Model):
     inst_url = db.Column(db.String(256))
     token = db.Column(db.String(64))
     private_key = db.Column(db.String(256))
-    level = db.Column(db.Integer)
+    work_experience_in_ms = db.Column(db.BigInteger)
+    jobs = db.relationship("WorkExperience", cascade="all,delete")
+    skills = db.relationship("Skill", cascade="all,delete")
 
 
 class Teams(db.Model):
@@ -633,3 +643,34 @@ class ServicePayments(db.Model):
     transaction_hash = db.Column(db.String(256))
     active = db.Column(db.Boolean)
     date = db.Column(db.Date)
+
+class Skill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'))
+    user = db.relationship("User", cascade='all,delete')
+    keywords = db.relationship("SkillKeyword", cascade="all,delete")
+
+class SkillKeyword(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    value = db.Column(db.String(32))
+    skill_id = db.Column(db.Integer, db.ForeignKey('skill.id', ondelete='cascade'))
+    skill = db.relationship("Skill", cascade='all,delete')
+
+class WorkExperience(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    start_at = db.Column(db.Date)
+    end_at = db.Column(db.Date)
+    is_ended = db.Column(db.Boolean, default=False)
+    place = db.Column(db.String(128))
+    position = db.Column(db.String(128))
+    responsibilities = db.Column(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'))
+    user = db.relationship("User", cascade='all,delete')
+    
+class Language(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    level = db.Column(db.String(32))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'))
+    user = db.relationship("User", cascade='all,delete')

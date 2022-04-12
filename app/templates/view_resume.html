@@ -1,0 +1,318 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="resume-container">
+  <div class="resume-content">
+    <h1 class="resume-title" style="text-transform: none">
+      {{ user.name }} {{ user.surname }}
+    </h1>
+
+    <section class="resume-section">
+      <h3 class="resume-section-title" style="text-transform: none">
+        Контактные данные
+      </h3>
+
+      <div class="resume-form-control">
+        <span>Номер телефона</span>
+        <span class="resume-span">{{ user.phone or '-' }}</span>
+      </div>
+
+      <div class="resume-form-control">
+        <span>Страна проживания</span>
+        <span class="resume-span">{{ user.country or '-' }}</span>
+      </div>
+
+      <div class="resume-form-control">
+        <span>Город проживания</span>
+        <span class="resume-span">{{ user.city or '-' }}</span>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h3 class="resume-section-title" style="text-transform: none">
+        Основная информация
+      </h3>
+
+      <div class="resume-form-control">
+        <span>Дата рождения</span>
+        <span class="resume-span"
+          >{{ user.birthdate.strftime('%d') if user.birthdate else '-' }}.{{
+          user.birthdate.strftime('%m') if user.birthdate else '-' }}.{{
+          user.birthdate.strftime('%Y') if user.birthdate else '' }}</span
+        >
+      </div>
+
+      <div class="resume-form-control">
+        <span>Пол</span>
+        <span class="resume-span"
+          >{{ 'Мужской' if user.sex == 'male' else 'Женский' if user.sex else
+          '-' }}</span
+        >
+      </div>
+
+      <div class="resume-form-control">
+        <span>Гражданство</span>
+        <span class="resume-span"
+          >{{ user.citizenship if user.citizenship else '-' }}</span
+        >
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <span>Навыки</span>
+        <div class="resume-skills-container" id="resume-skills-container">
+          {% for skill in skills %}
+          <div class="resume-card resume-skill-card" style="cursor: pointer">
+            <div>
+              <div class="resume-card-title">{{ skill.title }}</div>
+              <div class="resume-hidden-field">{{ skill.id }}</div>
+              <div>
+                {% for keyword in skill.keywords %}
+                <span
+                  >{{ keyword.value }}{% if loop.index0 != ((skill.keywords
+                  |length) - 1) %}, {% endif %}</span
+                >
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <span>Опыт работы</span>
+        <div id="resume-work-exps-container">
+          {% for job in work_experience %}
+          <div class="resume-card resume-work-exp-card" style="cursor: pointer">
+            <div>
+              <div class="resume-hidden-field">{{ job.id }}</div>
+              <div class="resume-card-title">
+                {{ job.start_at.strftime('%m.%Y') }} - {{
+                job.end_at.strftime('%m.%Y') if job.is_ended else 'По настоящее
+                время' }}
+              </div>
+              <div>{{ job.position }}</div>
+              <div>{{ job.place }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <span>Владение языками</span>
+        {% if user_languages|length == 0 %}
+        <span class="resume-span">-</span>
+        {% else %}
+        <div>
+          {% for user_language in user_languages %}
+          <div class="resume-language-view">
+            <div class="resume-language-content-container">
+              <div class="resume-language-name-view">
+                {{ user_language.name }}
+              </div>
+              <div class="resume-language-level-view">
+                {{ user_language.level }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="resume-textarea-form-control">
+        <span>О себе</span>
+        <div
+          name="description"
+          class="resume-textarea"
+          style="overflow-x: auto"
+        >
+          {{ user.description or '' }}
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div
+  class="resume-modal-layout resume-disabled-modal-layout"
+  id="skill-modal-layout"
+>
+  <div class="resume-modal resume-disabled-modal" id="skill-modal">
+    <h4
+      class="resume-modal-title"
+      id="resume-skill-title"
+      style="text-transform: none"
+    ></h4>
+    <div class="resume-modal-description">
+      Уточняющие слова, которые характеризуют уровень, направление,
+      специализацию в рамках указанного навыка.
+    </div>
+    <div
+      class="resume-skill-specializations-container"
+      id="skill-keywords-container"
+    ></div>
+  </div>
+</div>
+<div
+  class="resume-modal-layout resume-disabled-modal-layout"
+  id="work-exp-modal-layout"
+>
+  <div class="resume-modal resume-disabled-modal" id="work-exp-modal">
+    <h4
+      class="resume-modal-title"
+      style="text-transform: none"
+      id="resume-work-exp-title"
+    ></h4>
+    <div>
+      <span class="resume-bold-text">Период работы</span>
+      <div class="resume-modal-form-group" id="resume-work-exp-interval"></div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Должность</span>
+      <div style="margin: 1rem 0" id="resume-work-exp-position"></div>
+    </div>
+    <div>
+      <span class="resume-bold-text">Обязанности на рабочем месте</span>
+      <div class="resume-textarea-form-control">
+        <div
+          id="resume-work-exp-responsibilities"
+          class="resume-textarea"
+          style="overflow-x: auto"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  const removeChildren = (node) => {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  };
+</script>
+
+<script>
+  'use strict';
+
+  const resumeSkillCards = document.querySelectorAll('.resume-skill-card');
+
+  const skillModalLayout = document.querySelector('#skill-modal-layout');
+  const skillModal = document.querySelector('#skill-modal');
+
+  const resumeSkillTitle = document.querySelector('#resume-skill-title');
+
+  const toggleSkillModal = () => {
+    skillModalLayout.classList.toggle('resume-disabled-modal-layout');
+    skillModal.classList.toggle('resume-disabled-modal');
+  };
+
+  skillModalLayout.addEventListener('click', (event) => {
+    if (event.target.id === 'skill-modal-layout') {
+      toggleSkillModal();
+
+      resumeSkillTitle.textContent = '';
+    }
+  });
+
+  const skillKeywordsContainer = document.querySelector(
+    '#skill-keywords-container'
+  );
+
+  resumeSkillCards.forEach((card) =>
+    card.addEventListener('click', async () => {
+      toggleSkillModal();
+
+      const title = card.querySelector('.resume-card-title');
+
+      resumeSkillTitle.textContent = title.textContent;
+
+      const idContainer = card.querySelector('.resume-hidden-field');
+
+      const skillKeywords = await fetch(
+        `/api/skill/${idContainer.textContent}/keywords`
+      ).then((res) => res.json());
+
+      removeChildren(skillKeywordsContainer);
+
+      skillKeywords.forEach((keyword) => {
+        const keywordCard = document.createElement('div');
+        keywordCard.classList.add('resume-skill-specilation-card');
+        keywordCard.style = 'margin-right: 1rem';
+        keywordCard.textContent = keyword.value;
+
+        const keywordGroup = document.createElement('div');
+        keywordGroup.classList.add('resume-skill-specialization-group');
+        keywordGroup.appendChild(keywordCard);
+
+        skillKeywordsContainer.appendChild(keywordGroup);
+      });
+    })
+  );
+</script>
+
+<script>
+  'use strict';
+
+  const resumeWorkExpCards = document.querySelectorAll('.resume-work-exp-card');
+
+  const workExpModalLayout = document.querySelector('#work-exp-modal-layout');
+  const workExpModal = document.querySelector('#work-exp-modal');
+
+  const resumeWorkExpTitle = document.querySelector('#resume-work-exp-title');
+  const resumeWorkExpInterval = document.querySelector(
+    '#resume-work-exp-interval'
+  );
+  const resumeWorkExpPosition = document.querySelector(
+    '#resume-work-exp-position'
+  );
+  const resumeWorkExpResponsibilities = document.querySelector(
+    '#resume-work-exp-responsibilities'
+  );
+
+  const toggleWorkExpModal = () => {
+    workExpModalLayout.classList.toggle('resume-disabled-modal-layout');
+    workExpModal.classList.toggle('resume-disabled-modal');
+  };
+
+  workExpModalLayout.addEventListener('click', (event) => {
+    if (event.target.id === 'work-exp-modal-layout') {
+      toggleWorkExpModal();
+
+      resumeWorkExpTitle.textContent = '';
+      resumeWorkExpInterval.textContent = '';
+      resumeWorkExpPosition.textContent = '';
+      resumeWorkExpResponsibilities.textContent = '';
+    }
+  });
+
+  resumeWorkExpCards.forEach((card) =>
+    card.addEventListener('click', async () => {
+      toggleWorkExpModal();
+
+      const idContainer = card.querySelector('.resume-hidden-field');
+
+      const workExp = await fetch(
+        `/api/work-exps/${idContainer.textContent}`
+      ).then((res) => res.json());
+
+      const formatDate = (date) =>
+        new Date(date).toLocaleDateString('ru', {
+          month: '2-digit',
+          year: 'numeric',
+        });
+
+      resumeWorkExpTitle.textContent = `Опыт работы в ${workExp.place}`;
+      resumeWorkExpInterval.textContent = `С ${formatDate(
+        workExp.start_at
+      )} по ${workExp.end_at ? formatDate(workExp.end_at) : 'настоящее время'}`;
+      resumeWorkExpPosition.textContent = workExp.position;
+      resumeWorkExpResponsibilities.textContent = workExp.responsibilities;
+    })
+  );
+</script>
+
+{% endblock %}

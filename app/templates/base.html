@@ -1,72 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu_style.css') }}">
-    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
-          rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='images/favicon.jpg') }}"
+      type="image/jpg"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/menu_style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='fonts/decima/stylesheet.css') }}"
+      rel="stylesheet"
+      type="text/css"
+    />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    {% block scripts %} {% endblock %}
-    {% if title %}
-    <title> {{ title }} </title>
+    {% block scripts %} {% endblock %} {% if title %}
+    <title>{{ title }}</title>
     {% else %}
-    <title> KorpusToken </title>
+    <title>KorpusToken</title>
     {% endif %}
-</head>
-<body>
-<nav class="home-nav">
-    <div class="header-container">
+  </head>
+  <body>
+    <nav class="home-nav">
+      <div class="header-container">
         <a href="/" class="logo_href">
-            <div class="home_header_logo_block">
-                <img class="logo_img" src="{{ url_for('static', filename='images/logo_white.png') }}">
-            </div>
+          <div class="home_header_logo_block">
+            <img
+              class="logo_img"
+              src="{{ url_for('static', filename='images/logo_white.png') }}"
+            />
+          </div>
         </a>
         {% if current_user.is_authenticated %}
         <div class="profile_nav_div">
-            {% if current_user.is_admin %}
-            <!--a href="" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(0);" id="block0" onmouseleave="reduce_block(0);">
+          {% if current_user.is_admin %}
+          <!--a href="" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(0);" id="block0" onmouseleave="reduce_block(0);">
                 <img class="header_profile_img"
                      src="{{ url_for('static', filename='images/admin.png') }}">
                 <span>Admin</span>
             </a-->
-            {% endif %}
-            {% if not current_user.is_partner %}
-            <a href="/assessment_page" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(1);" id="block1" onmouseleave="reduce_block(1);">
-                <img class="header_profile_img"
-                     src="{{ url_for('static', filename='images/assessment.png') }}">
-                <span>Оценка вклада</span>
-            </a>
-            {% endif %}
-            <a href="/blockchain" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(2);" id="block2" onmouseleave="reduce_block(2);">
-                <img class="header_profile_img"
-                     src="{{ url_for('static', filename='images/blockchain.png') }}">
-                <span>Блокчейн</span>
-            </a>
-            <a href="/profile" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(3);" id="block3" onmouseleave="reduce_block(3);">
-                <img class="header_profile_img"
-                     src="{{ url_for('static', filename='images/profile.png') }}">
-                <span>Профиль</span>
-            </a>
-            <a href="/community" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(5);" id="block5" onmouseleave="reduce_block(5);">
-                <img class="header_profile_img"
-                     src="{{ url_for('static', filename='images/community.png') }}">
-                <span>Сообщество</span>
-            </a>
-            <a href="/logout" class="header_profile_block header_before_load_margin" onmouseover="enlarge_block(4);" id="block4" onmouseleave="reduce_block(4);">
-                <img class="header_profile_img"
-                     src="{{ url_for('static', filename='images/icons8-open-door-50.png') }}">
-                <span>Выход</span>
-            </a>
+          {% endif %}
+          <a
+            href="/assessment_page"
+            class="header_profile_block header_before_load_margin"
+            onmouseover="enlarge_block(1);"
+            id="block1"
+            onmouseleave="reduce_block(1);"
+          >
+            <img
+              class="header_profile_img"
+              src="{{ url_for('static', filename='images/assessment.png') }}"
+            />
+            <span>Оценка вклада</span>
+          </a>
+          <a
+            href="/blockchain"
+            class="header_profile_block header_before_load_margin"
+            onmouseover="enlarge_block(2);"
+            id="block2"
+            onmouseleave="reduce_block(2);"
+          >
+            <img
+              class="header_profile_img"
+              src="{{ url_for('static', filename='images/blockchain.png') }}"
+            />
+            <span>Блокчейн</span>
+          </a>
+          <a
+            href="/profile"
+            class="header_profile_block header_before_load_margin"
+            onmouseover="enlarge_block(3);"
+            id="block3"
+            onmouseleave="reduce_block(3);"
+          >
+            <img
+              class="header_profile_img"
+              src="{{ url_for('static', filename='images/profile.png') }}"
+            />
+            <span>Профиль</span>
+          </a>
+          <a
+            href="/community"
+            class="header_profile_block header_before_load_margin"
+            onmouseover="enlarge_block(5);"
+            id="block5"
+            onmouseleave="reduce_block(5);"
+          >
+            <img
+              class="header_profile_img"
+              src="{{ url_for('static', filename='images/community.png') }}"
+            />
+            <span>Сообщество</span>
+          </a>
+          <a
+            href="/logout"
+            class="header_profile_block header_before_load_margin"
+            onmouseover="enlarge_block(4);"
+            id="block4"
+            onmouseleave="reduce_block(4);"
+          >
+            <img
+              class="header_profile_img"
+              src="{{ url_for('static', filename='images/icons8-open-door-50.png') }}"
+            />
+            <span>Выход</span>
+          </a>
         </div>
         {% endif %}
-    </div>
-</nav>
-<div style="padding-top: 10vh;">
-    {% block content %} {% endblock %}
-</div>
-<script src="{{url_for('static', filename='js/move.min.js')}}"></script>
-<script src="{{url_for('static', filename='js/header.js')}}"></script>
-</body>
+      </div>
+    </nav>
+    <div style="padding-top: 10vh">{% block content %} {% endblock %}</div>
+    <script src="{{url_for('static', filename='js/move.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/header.js')}}"></script>
+  </body>
 </html>

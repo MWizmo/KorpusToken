@@ -4,22 +4,25 @@ import threading
 import os
 import csv
 import requests
-from sqlalchemy import func, or_
-from app import app, db, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
+from sqlalchemy import func, or_, and_
+from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts import graphs
 from app.scripts.service import get_access
-from app.models import User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
+from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
-    Profit, KorpusServices, ServicePayments, Budget
+    Profit, KorpusServices, ServicePayments, Budget, Skill, WorkExperience, Language
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
 from flask_login import current_user, login_user, logout_user, login_required
 from app import token_utils
 import math
-
+import json
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
+import html
 
 def log(action, user_id=None):
     if user_id is None:
@@ -2530,3 +2533,419 @@ def delete_profit_record():
     db.session.commit()
     # may be another actions
     return redirect('/profit_records')
+
+@app.route('/resume', methods=['GET', 'POST'])
+@login_required
+def resume():
+    with open('app/static/json/citizenship.json') as f:
+        citizenship_json = f.read()
+        
+    with open('app/static/json/languages.json') as f:
+        languages_json = f.read()
+        
+    skills = Skill.query.filter_by(user_id=current_user.id).outerjoin(Skill.keywords).all()
+    work_experience = WorkExperience.query.filter_by(user_id=current_user.id).all()
+    user_languages = Language.query.filter_by(user_id=current_user.id).all()
+    language_levels = ['A1 - начальный', 'A2 - ниже среднего', 'B1 - средний', 'B2 - выше среднего', 'C1 - продвинутый', 'C2 - профессиональный']
+    
+    return render_template('resume.html', user=current_user, citizenships=json.loads(citizenship_json),
+                                          skills=skills, work_experience=work_experience,
+                                          all_languages=json.loads(languages_json), language_levels=language_levels,
+                                          user_languages=user_languages, title='Резюме')
+
+@app.route('/api/skills', methods=['GET'])
+@login_required
+def get_skills():
+    skills = Skill.query.filter_by(user_id=current_user.id).outerjoin(Skill.keywords).all()
+    
+    return json.dumps([{
+        'id': skill.id,
+        'title': skill.title,
+        'keywords': [{
+            'id': keyword.id,
+            'value': keyword.value
+            } for keyword in skill.keywords]
+    } for skill in skills]), 200
+
+@app.route('/api/skill/<id>/keywords')
+@login_required
+def get_skill_keywords(id):
+    skill_keywords = SkillKeyword.query.filter_by(skill_id=id).all()
+    
+    return json.dumps([{
+        'id': keyword.id,
+        'value': keyword.value
+    } for keyword in skill_keywords])
+
+@app.route('/api/add-skill', methods=['POST'])
+@login_required
+def add_skill():
+    data = request.json
+    
+    skill = Skill(title=data['title'], user_id=current_user.id)
+    
+    db.session.add(skill)
+    db.session.commit()
+    db.session.refresh(skill)
+    
+    for keyword in data['skill_keywords']:
+        skill_keyword = SkillKeyword(value=keyword, skill_id=skill.id)
+        db.session.add(skill_keyword)
+        
+    db.session.commit()
+    
+    return '', 201
+
+@app.route('/api/remove-skill', methods=['POST'])
+@login_required
+def remove_skill():
+    data = request.json
+    
+    Skill.query.filter_by(id=data['id'], user_id=current_user.id).delete()
+    
+    db.session.commit()
+    
+    return '', 200
+
+@app.route('/api/work-exps', methods=['GET'])
+@login_required
+def get_work_exps():
+    work_exps = WorkExperience.query.filter_by(user_id=current_user.id).all()
+    
+    return json.dumps([{
+        'id': work_exp.id,
+        'position': work_exp.position,
+        'place': work_exp.place,
+        'start_at': work_exp.start_at.isoformat(),
+        'end_at': work_exp.end_at.isoformat() if work_exp.end_at else None
+    } for work_exp in work_exps]), 200
+
+@app.route('/api/work-exps/<id>')
+@login_required
+def get_work_exp(id):
+    work_exp = WorkExperience.query.filter_by(id=id).first()
+    
+    return json.dumps({
+        'id': work_exp.id,
+        'position': work_exp.position,
+        'place': work_exp.place,
+        'start_at': work_exp.start_at.isoformat(),
+        'end_at': work_exp.end_at.isoformat() if work_exp.end_at else None,
+        'responsibilities': work_exp.responsibilities
+    })
+
+@app.route('/api/add-work-exp', methods=['POST'])
+@login_required
+def add_work_exp():
+    data = request.json
+    
+    work_exp = WorkExperience(start_at=parser.parse(data['start_at']), end_at=data.get('end_at') and parser.parse(data['end_at']),
+                              is_ended=data['is_ended'], place=data['place'], position=data['position'],
+                              responsibilities=data['responsibilities'], user_id=current_user.id)
+    
+    db.session.add(work_exp)
+    db.session.commit()
+    
+    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
+    
+    experience_in_ms = 0
+    for job in work_exps:
+        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
+    
+        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
+        
+        if not job.end_at:
+            break
+    
+    user = User.query.filter_by(id=current_user.id).first()
+    
+    user.work_experience_in_ms = experience_in_ms
+    
+    db.session.commit()
+    
+    return '', 201
+    
+@app.route('/api/remove-work-exp', methods=['POST'])
+@login_required
+def remove_work_exp():
+    data = request.json
+    
+    WorkExperience.query.filter_by(id=data['id'], user_id=current_user.id).delete()
+    
+    db.session.commit()
+    
+    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
+    
+    experience_in_ms = 0
+    for job in work_exps:
+        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
+    
+        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
+        
+        if not job.end_at:
+            break
+    user = User.query.filter_by(id=current_user.id).first()
+    
+    user.work_experience_in_ms = experience_in_ms
+    
+    db.session.commit()
+    
+    return '', 200
+
+@app.route('/api/json/languages', methods=['GET'])
+@login_required
+def get_json_languages():
+    with open('app/static/json/languages.json') as f:
+        languages_json = f.read()
+    
+    return languages_json, 200
+
+@app.route('/api/json/language-levels', methods=['GET'])
+@login_required
+def get_json_language_levels():
+    return json.dumps(['A1 - начальный', 'A2 - ниже среднего', 'B1 - средний', 'B2 - выше среднего', 'C1 - продвинутый', 'C2 - профессиональный']), 200
+
+@app.route('/api/languages', methods=['GET'])
+@login_required
+def get_languages():
+    languages = Language.query.filter_by(user_id=current_user.id).all()
+    
+    return json.dumps([{
+        'id': language.id,
+        'name': language.name,
+        'level': language.level
+    } for language in languages]), 200
+
+@app.route('/api/add-language', methods=['POST'])
+@login_required
+def add_language():
+    data = request.json
+    
+    language = Language(name=data['name'], level=data['level'], user_id=current_user.id)
+    
+    db.session.add(language)
+    db.session.commit()
+    
+    return '', 201
+
+@app.route('/api/remove-language', methods=['POST'])
+@login_required
+def remove_language():
+    data = request.json
+    
+    Language.query.filter_by(id=data['id'], user_id=current_user.id).delete()
+    
+    db.session.commit()
+    
+    return '', 200
+    
+@app.route('/api/change-language-name', methods=['POST'])
+@login_required
+def change_language_name():
+    data = request.json
+    
+    language = Language.query.filter_by(id=data['id'], user_id=current_user.id).first()
+    
+    if not language:
+        return 'Not Found', 404
+    
+    language.name = data['name']
+    
+    db.session.commit()
+    
+    return '', 200
+
+@app.route('/api/change-language-level', methods=['POST'])
+@login_required
+def change_language_level():
+    data = request.json
+    
+    language = Language.query.filter_by(id=data['id'], user_id=current_user.id).first()
+    
+    if not language:
+        return 'Not Found', 404
+    
+    language.level = data['level']
+    
+    db.session.commit()
+    
+    return '', 200
+
+@app.route('/api/change-resume', methods=['PATCH'])
+@login_required
+def change_resume():
+    data = request.json
+    
+    if not (data.get('name') or len(data['name'])):
+        return 'Invalid name', 400
+
+    if not (data.get('surname') or len(data['surname'])):
+        return 'Invalid surname', 400
+    
+    if data.get('sex') and (not len(data['sex']) or not data['sex'] in ['male', 'female']):
+        return 'Invalid sex', 400
+    
+    user = User.query.filter_by(id=current_user.id).first()
+    
+    user.name = html.escape(data['name'])
+    user.surname = html.escape(data['surname'])
+    user.phone = html.escape(data['phone'])
+    user.country = html.escape(data['country'])
+    user.city = html.escape(data['city'])
+    user.birthdate = parser.parse(data['birthdate']).strftime('%Y-%m-%d')
+    user.sex = data['sex']
+    user.citizenship = html.escape(data['citizenship'])
+    user.description = html.escape(data['description'])
+    
+    db.session.commit()
+    
+    return '', 200
+
+@app.route('/resumes')
+@login_required
+def resumes():
+    cities = [user.city for user in User.query.with_entities(User.city).all()]
+    
+    return render_template('resumes.html', cities=cities, title='Резюме участников')
+
+@app.route('/api/resumes')
+@login_required
+def get_resumes():
+    take = request.args.get('take') or 7
+    skip = request.args.get('skip') or 0
+    
+    select_males = request.args.get('selectMales') or 'true'
+    select_females = request.args.get('selectFemales') or 'true'
+    sex = []
+    
+    if select_males == 'true':
+        sex.append('male')
+    if select_females == 'true':
+        sex.append('female')
+    
+    if (not request.args.get('selectMales')) and (not request.args.get('selectFemales')):
+        sex = ['male', 'female']
+    
+    min_age = int(request.args.get('minAge') or 0)
+    max_age = int(request.args.get('maxAge') or 1000)
+    
+    city = request.args.get('city') or ''
+    
+    SECOND = 1000
+    MINUTE = 60 * SECOND
+    HOUR = 60 * MINUTE
+    DAY = 24 * HOUR
+    YEAR = 365 * DAY
+    
+    work_exp_filters = []
+    
+    if (request.args.get('selectWithoutWorkExp') or 'true') == 'false':
+        work_exp_filters.append(User.work_experience_in_ms != 0)
+    
+    if (request.args.get('selectWithOneToThreeYears') or 'true') == 'false':
+        work_exp_filters.append(or_(User.work_experience_in_ms < YEAR, User.work_experience_in_ms > 3 * YEAR))
+    
+    if (request.args.get('selectWithThreeToSixYears') or 'true') == 'false':
+        work_exp_filters.append(or_(User.work_experience_in_ms < 3 * YEAR, User.work_experience_in_ms > 6 * YEAR))
+    
+    if (request.args.get('selectWithSixAndMoreYears') or 'true') == 'false':
+        work_exp_filters.append(User.work_experience_in_ms < 6 * YEAR)
+    
+    search = request.args.get('search') or ''
+    
+    resumes_by_position = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        and_(*work_exp_filters),
+    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    
+    resumes_by_position_count = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        and_(*work_exp_filters)
+    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).count()
+    
+    resumes_by_skill = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        User.id.notin_([resume.id for resume in resumes_by_position]),
+        and_(*work_exp_filters),
+    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    
+    resumes_by_skill_count = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        User.id.notin_([resume.id for resume in resumes_by_position]),
+        and_(*work_exp_filters)
+    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).count()
+    
+    resumes_by_skill_keyword = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
+        and_(*work_exp_filters),
+    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    
+    resumes_by_skill_keyword_count = User.query.filter(
+        User.sex.in_(sex),
+        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
+        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
+        User.city.ilike(f'%{city}%'),
+        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
+        and_(*work_exp_filters)
+    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).count()
+    
+    return json.dumps({
+        'total': resumes_by_position_count + resumes_by_skill_count + resumes_by_skill_keyword_count,
+        'data': [ {
+            'id': resume.id,
+            'name': resume.name,
+            'surname': resume.surname,
+            'birthdate': resume.birthdate.isoformat() if resume.birthdate else None,
+            'work_experience_in_ms': resume.work_experience_in_ms,
+            'match': match,
+            'jobs': [ {
+                'id': job.id,
+                'place': job.place,
+                'position': job.position,
+                'start_at': job.start_at.isoformat(),
+                'end_at': job.end_at.isoformat() if job.end_at else None
+                } for job in resume.jobs ],
+            'skills': [{
+                'id': skill.id,
+                'title': skill.title,
+                'keywords': [{
+                    'id': keyword.id,
+                    'value': keyword.value
+                    } for keyword in skill.keywords]
+                } for skill in resume.skills],
+            } for (resume, match) in [
+                *map(lambda resume: (resume, 'position'), resumes_by_position),
+                *map(lambda resume: (resume, 'skill'), resumes_by_skill),
+                *map(lambda resume: (resume, 'skill_keyword'), resumes_by_skill_keyword)
+            ]
+        ]
+    })
+    
+@app.route('/resume/<id>')
+@login_required
+def view_resume(id):
+    user = User.query.filter_by(id=id).first()
+    
+    skills = Skill.query.filter_by(user_id=user.id).outerjoin(Skill.keywords).all()
+    work_experience = WorkExperience.query.filter_by(user_id=user.id).all()
+    user_languages = Language.query.filter_by(user_id=user.id).all()
+    
+    return render_template('view_resume.html', user=user, skills=skills,
+                           work_experience=work_experience,
+                           user_languages=user_languages, title='Резюме участника')

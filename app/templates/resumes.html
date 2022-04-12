@@ -1,0 +1,569 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="resume-container">
+  <div class="resume-content">
+    <h1 class="resume-title" style="text-transform: none">
+      Резюме участников Корпуса
+    </h1>
+    <h3 class="resume-mini-title" style="text-transform: none">
+      Введите название должности, искомого навыка или места работы.
+    </h3>
+    <div class="resumes-search">
+      <input
+        type="text"
+        class="resumes-search-input"
+        id="search-resumes-input"
+      />
+      <button class="resumes-search-button" id="resumes-search-button">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 26 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M25.4607 21.9235L20.6438 17.4909C24.2995 13.2579 23.9554 7.02829 19.7836 3.15474C17.5902 1.11814 14.7087 0 11.6121 0C8.51557 0 5.59103 1.11814 3.39763 3.15474C1.20422 5.19135 0 7.86689 0 10.782C0 13.6972 1.20422 16.3727 3.39763 18.4093C5.59103 20.406 8.47256 21.5641 11.6121 21.5641C14.2356 21.5641 16.8161 20.7255 18.8375 19.208L23.6114 23.6406C23.8694 23.8802 24.1705 24 24.5145 24C24.8586 24 25.2026 23.8802 25.4177 23.6406C25.9338 23.1614 25.9338 22.4027 25.4607 21.9235ZM20.6438 10.782C20.6438 13.0183 19.6976 15.1348 17.9773 16.6922C16.257 18.2496 14.0206 19.1681 11.6121 19.1681C9.2037 19.1681 6.92428 18.2895 5.24697 16.6922C3.56966 15.0948 2.58048 13.0183 2.58048 10.782C2.58048 8.54576 3.52665 6.42929 5.24697 4.87188C6.96728 3.31448 9.16069 2.39601 11.6121 2.39601C14.0206 2.39601 16.3 3.27454 17.9773 4.87188C19.6546 6.46922 20.6438 8.50582 20.6438 10.782Z"
+            fill="black"
+          />
+        </svg>
+      </button>
+    </div>
+    <div class="resumes-result-text" id="resumes-result-text"></div>
+    <div class="resumes-root">
+      <div class="resumes-cards" id="resumes-cards-container"></div>
+      <div class="resumes-filters">
+        <div class="resumes-filter">
+          <div class="resumes-filter-title">Опыт работы</div>
+          <div class="resumes-filter-control">
+            <input
+              type="checkbox"
+              name="work-exp-filter"
+              id="no-work-exp"
+              class="resume-radio-input"
+              checked
+            />
+            <label for="no-work-exp">Нет опыта</label>
+          </div>
+          <div class="resumes-filter-control">
+            <input
+              type="checkbox"
+              name="work-exp-filter"
+              id="work-exp-one-to-three"
+              class="resume-radio-input"
+              checked
+            />
+            <label for="work-exp-one-to-three">От 1 до 3 лет</label>
+          </div>
+          <div class="resumes-filter-control">
+            <input
+              type="checkbox"
+              name="work-exp-filter"
+              id="work-exp-three-to-six"
+              class="resume-radio-input"
+              checked
+            />
+            <label for="work-exp-three-to-six">От 3 до 6 лет</label>
+          </div>
+          <div class="resumes-filter-control">
+            <input
+              type="checkbox"
+              name="work-exp-filter"
+              id="work-exp-more-then-six"
+              class="resume-radio-input"
+              checked
+            />
+            <label for="work-exp-more-then-six">От 6 лет</label>
+          </div>
+        </div>
+        <div class="resumes-filter">
+          <div class="resumes-filter-title">Пол</div>
+          <div class="resumes-filter-control">
+            <div class="resumes-filter-control">
+              <input
+                type="checkbox"
+                name="sex-filter"
+                id="male-filter"
+                class="resume-radio-input"
+                checked
+              />
+              <label for="male-filter">Мужской</label>
+            </div>
+            <div class="resumes-filter-control">
+              <input
+                type="checkbox"
+                name="sex-filter"
+                id="female-filter"
+                class="resume-radio-input"
+                checked
+              />
+              <label for="female-filter">Женский</label>
+            </div>
+          </div>
+        </div>
+        <div class="resumes-filter">
+          <div class="resumes-filter-title">Возраст в годах</div>
+          <div class="resumes-age-filter-control">
+            <div class="resume-age-filter-group">
+              <div class="resume-age-filter-label">От</div>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                class="resume-age-filter-input"
+                id="age-low-border"
+              />
+            </div>
+            <div class="resume-age-filter-group">
+              <div class="resume-age-filter-label">До</div>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                class="resume-age-filter-input"
+                id="age-high-border"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="resumes-filter">
+          <div class="resumes-filter-title">Город</div>
+          <div class="resumes-filter-control">
+            <div class="resumes-filter-control">
+              <select
+                type="text"
+                id="resumes-city-filter"
+                class="resume-input resumes-city-input"
+                style="width: 11.2rem"
+              >
+                <option value="" selected></option>
+                {% for city in cities %}
+                <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script>
+    'use strict';
+
+    const removeChildren = (node) => {
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
+    };
+
+    const getAgeWord = (age) => {
+      const normalizedAge = Number(age);
+
+      const lastDigit = normalizedAge % 10;
+
+      const digitBeforeLast = Math.floor(normalizedAge / 10) % 10;
+
+      if (digitBeforeLast === 1) {
+        return 'лет';
+      }
+
+      if (lastDigit === 1) {
+        return 'год';
+      }
+
+      if (lastDigit > 1 && lastDigit < 5) {
+        return 'года';
+      }
+
+      return 'лет';
+    };
+
+    const getMonthAgeWord = (age) => {
+      const normalizedAge = Number(age);
+
+      if (1 <= normalizedAge && normalizedAge < 2) {
+        return 'месяц';
+      }
+
+      if (2 <= normalizedAge && normalizedAge < 5) {
+        return 'месяца';
+      }
+
+      return 'месяцев';
+    };
+
+    const MS_IN_YEAR = 31557600000;
+
+    const DEFAULT_FETCH_LIMIT = 7;
+
+    let currentPage = 1;
+    let isFetchedWithSearch = false;
+    const filters = {
+      selectMales: true,
+      selectFemales: true,
+      minAge: '',
+      maxAge: '',
+      city: '',
+      search: '',
+      selectWithoutWorkExp: true,
+      selectWithOneToThreeYears: true,
+      selectWithThreeToSixYears: true,
+      selectWithSixAndMoreYears: true,
+    };
+
+    const getResumes = async (skip, filters, take = DEFAULT_FETCH_LIMIT) => {
+      const urlSearchParams = new URLSearchParams();
+      urlSearchParams.append('skip', skip);
+      urlSearchParams.append('take', take);
+      urlSearchParams.append('selectFemales', filters.selectFemales);
+      urlSearchParams.append('selectMales', filters.selectMales);
+      urlSearchParams.append('minAge', filters.minAge);
+      urlSearchParams.append('maxAge', filters.maxAge);
+      urlSearchParams.append('city', filters.city);
+      urlSearchParams.append(
+        'selectWithoutWorkExp',
+        filters.selectWithoutWorkExp
+      );
+      urlSearchParams.append(
+        'selectWithOneToThreeYears',
+        filters.selectWithOneToThreeYears
+      );
+      urlSearchParams.append(
+        'selectWithThreeToSixYears',
+        filters.selectWithThreeToSixYears
+      );
+      urlSearchParams.append(
+        'selectWithSixAndMoreYears',
+        filters.selectWithSixAndMoreYears
+      );
+      urlSearchParams.append('search', filters.search);
+
+      return await fetch(`/api/resumes?${urlSearchParams.toString()}`).then(
+        (res) => res.json()
+      );
+    };
+
+    const renderResumesCards = ({ total, data: resumes }) => {
+      const resultText = document.querySelector('#resumes-result-text');
+      resultText.textContent = '';
+
+      const resumesCardsContainer = document.querySelector(
+        '#resumes-cards-container'
+      );
+
+      removeChildren(resumesCardsContainer);
+
+      if (isFetchedWithSearch) {
+        resultText.textContent = `По вашему запросу найдено ${total} резюме.`;
+      }
+
+      resumes.forEach((resume, index) => {
+        const resumeTitle = document.createElement('div');
+        resumeTitle.classList.add('resume-list-card-title');
+        resumeTitle.textContent = `${resume.name} ${resume.surname}`;
+
+        const ageBlock = document.createElement('div');
+        ageBlock.classList.add('resume-list-card-age');
+        if (resume.birthdate) {
+          const age = moment
+            .duration(moment(Date.now()).diff(resume.birthdate))
+            .years();
+          ageBlock.textContent = `${age} ${getAgeWord(age)}`;
+        }
+
+        const workExpBlock = document.createElement('div');
+        workExpBlock.classList.add('resume-list-card-work-exp');
+        const workExpBlockTitle = document.createElement('div');
+        workExpBlockTitle.classList.add('resume-list-card-section-title');
+        workExpBlockTitle.textContent = 'Опыт работы';
+        const workExpBlockContent = document.createElement('div');
+        workExpBlockContent.classList.add('resume-list-card-section-content');
+        const jobs = resume.jobs.map((job) => ({
+          ...job,
+          start_at: new Date(job.start_at),
+          end_at: job.end_at ? new Date(job.end_at) : null,
+        }));
+        jobs.sort((a, b) => a.start_at - b.start_at);
+
+        const workDuration = moment.duration(resume.work_experience_in_ms);
+        const years = workDuration.years();
+        const months = workDuration.months();
+
+        workExpBlockContent.textContent =
+          years > 0 || months > 0
+            ? `${years > 0 ? `${years} ${getAgeWord(years)} ` : ''} ${
+                months > 0 ? `${months} ${getMonthAgeWord(months)}` : ''
+              }`
+            : '-';
+        workExpBlock.appendChild(workExpBlockTitle);
+        workExpBlock.appendChild(workExpBlockContent);
+
+        const lastJobBlock = document.createElement('div');
+        lastJobBlock.classList.add('resume-list-card-last-job');
+        const lastJobBlockTitle = document.createElement('div');
+        lastJobBlockTitle.classList.add('resume-list-card-section-title');
+        lastJobBlockTitle.textContent = 'Последнее место работы';
+        const lastJob = jobs.length > 0 && jobs[jobs.length - 1];
+        const lastJobBlockContent = document.createElement('div');
+        lastJobBlockContent.classList.add('resume-list-card-section-content');
+        lastJobBlockContent.textContent = lastJob
+          ? `${lastJob.position} в ${lastJob.place}`
+          : '-';
+        lastJobBlock.appendChild(lastJobBlockTitle);
+        lastJobBlock.appendChild(lastJobBlockContent);
+
+        const matchBlock = document.createElement('div');
+        if (isFetchedWithSearch) {
+          matchBlock.classList.add('resume-list-card-match');
+
+          const matchBlockTitle = document.createElement('div');
+          matchBlockTitle.classList.add('resume-list-card-section-title');
+          matchBlockTitle.textContent = 'Совпадение';
+
+          let matchedText = '';
+
+          if (resume.match === 'position') {
+            const matchedJob = resume.jobs.find((job) =>
+              job.position.toLowerCase().includes(filters.search.toLowerCase())
+            );
+
+            matchedText = matchedJob ? matchedJob.position : '';
+          }
+
+          if (resume.match === 'skill') {
+            const matchedSkill = resume.skills.find((skill) =>
+              skill.title.toLowerCase().includes(filters.search.toLowerCase())
+            );
+
+            matchedText = matchedSkill ? matchedSkill.title : '';
+          }
+
+          if (resume.match === 'skill_keyword') {
+            const matchedSkillKeyword = resume.skills
+              .map((skill) => skill.keywords)
+              .flat()
+              .find((keyword) =>
+                keyword.value
+                  .toLowerCase()
+                  .includes(filters.search.toLowerCase())
+              );
+
+            matchedText = matchedSkillKeyword ? matchedSkillKeyword.value : '';
+          }
+
+          const matchBlockContent = document.createElement('div');
+          matchBlockContent.classList.add('resume-list-card-section-content');
+          matchBlockContent.textContent = `${
+            resume.match === 'position'
+              ? 'Должность'
+              : resume.match === 'skill'
+              ? 'Навык'
+              : 'Уточнение в навыке'
+          }: ${matchedText}`;
+
+          matchBlock.appendChild(matchBlockTitle);
+          matchBlock.appendChild(matchBlockContent);
+        }
+
+        const resumeCard = document.createElement('div');
+        resumeCard.classList.add('resumes-list-card');
+
+        resumeCard.addEventListener('click', () => {
+          location.href = `/resume/${resume.id}`;
+        });
+
+        if (index === resumes.length - 1) {
+          resumeCard.style = 'border-bottom: 1px solid #c4c4c4;';
+        }
+
+        resumeCard.appendChild(resumeTitle);
+        resumeCard.appendChild(ageBlock);
+        resumeCard.appendChild(workExpBlock);
+        resumeCard.appendChild(lastJobBlock);
+        resumeCard.appendChild(matchBlock);
+
+        resumesCardsContainer.appendChild(resumeCard);
+      });
+
+      const pages = Math.ceil(total / DEFAULT_FETCH_LIMIT);
+
+      const paginationBlock = document.createElement('div');
+      paginationBlock.classList.add('resumes-pagination-block');
+
+      const renderDots = () => {
+        const dotsBlock = document.createElement('div');
+        dotsBlock.classList.add('resumes-dots');
+        dotsBlock.textContent = '...';
+
+        paginationBlock.appendChild(dotsBlock);
+      };
+
+      if (pages > 1) {
+        for (let page = 1; page <= pages; page++) {
+          if (
+            Math.abs(currentPage - page) > 2 &&
+            page !== pages &&
+            page !== 1
+          ) {
+            if (pages - 1 === page || page === 2) {
+              renderDots();
+            }
+
+            continue;
+          }
+
+          const pageButton = document.createElement('div');
+          pageButton.classList.add('resumes-page-button');
+          pageButton.textContent = page;
+
+          pageButton.addEventListener('click', () => {
+            currentPage = page;
+
+            getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+              renderResumesCards
+            );
+          });
+
+          paginationBlock.appendChild(pageButton);
+        }
+
+        if (currentPage < pages) {
+          const nextPageButton = document.createElement('button');
+          nextPageButton.classList.add('resume-black-button');
+          nextPageButton.textContent = 'Дальше';
+          nextPageButton.style = 'height: 2rem; margin-left: 1rem;';
+
+          nextPageButton.addEventListener('click', () => {
+            currentPage++;
+
+            getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+              renderResumesCards
+            );
+          });
+
+          paginationBlock.appendChild(nextPageButton);
+        }
+      }
+
+      resumesCardsContainer.appendChild(paginationBlock);
+    };
+  </script>
+
+  <script>
+    'use strict';
+
+    getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+      renderResumesCards
+    );
+
+    const maleFilter = document.querySelector('#male-filter');
+    maleFilter.addEventListener('change', () => {
+      filters.selectMales = maleFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const femaleFilter = document.querySelector('#female-filter');
+    femaleFilter.addEventListener('change', () => {
+      filters.selectFemales = femaleFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const minAgeFilter = document.querySelector('#age-low-border');
+    minAgeFilter.addEventListener('change', () => {
+      filters.minAge = minAgeFilter.value;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const maxAgeFilter = document.querySelector('#age-high-border');
+    maxAgeFilter.addEventListener('change', () => {
+      filters.maxAge = maxAgeFilter.value;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const cityFilter = document.querySelector('#resumes-city-filter');
+    cityFilter.addEventListener('change', () => {
+      filters.city = cityFilter.value;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const noWorkExpFilter = document.querySelector('#no-work-exp');
+    noWorkExpFilter.addEventListener('change', () => {
+      filters.selectWithoutWorkExp = noWorkExpFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const workExpOneToThreeFilter = document.querySelector(
+      '#work-exp-one-to-three'
+    );
+    workExpOneToThreeFilter.addEventListener('change', () => {
+      filters.selectWithOneToThreeYears = workExpOneToThreeFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const workExpThreeToSixFilter = document.querySelector(
+      '#work-exp-three-to-six'
+    );
+    workExpThreeToSixFilter.addEventListener('change', () => {
+      filters.selectWithThreeToSixYears = workExpThreeToSixFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+
+    const workExpMoreThenSixFilter = document.querySelector(
+      '#work-exp-more-then-six'
+    );
+    workExpMoreThenSixFilter.addEventListener('change', () => {
+      filters.selectWithSixAndMoreYears = workExpMoreThenSixFilter.checked;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+  </script>
+
+  <script>
+    'use strict';
+
+    const searchResumesInput = document.querySelector('#search-resumes-input');
+    const searchResumesButton = document.querySelector(
+      '#resumes-search-button'
+    );
+
+    searchResumesButton.addEventListener('click', () => {
+      isFetchedWithSearch = !!searchResumesInput.value;
+
+      filters.search = searchResumesInput.value;
+
+      getResumes((currentPage - 1) * DEFAULT_FETCH_LIMIT, filters).then(
+        renderResumesCards
+      );
+    });
+  </script>
+
+  {% endblock %}
+</div>

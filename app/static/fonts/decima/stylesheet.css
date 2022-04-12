@@ -1,0 +1,72 @@
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyr-BoldItalic.eot');
+    src: local('Decima Mono Cyr Bold Italic'), local('DecimaMonoCyr-BoldItalic'),
+        url('DecimaMonoCyr-BoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyr-BoldItalic.woff2') format('woff2'),
+        url('DecimaMonoCyr-BoldItalic.woff') format('woff'),
+        url('DecimaMonoCyr-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyr.eot');
+    src: local('Decima Mono Cyr'), local('DecimaMonoCyr'),
+        url('DecimaMonoCyr.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyr.woff2') format('woff2'),
+        url('DecimaMonoCyr.woff') format('woff'),
+        url('DecimaMonoCyr.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyrLt-Italic.eot');
+    src: local('Decima Mono Cyr Light  Italic'), local('DecimaMonoCyrLt-Italic'),
+        url('DecimaMonoCyrLt-Italic.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyrLt-Italic.woff2') format('woff2'),
+        url('DecimaMonoCyrLt-Italic.woff') format('woff'),
+        url('DecimaMonoCyrLt-Italic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyrLt.eot');
+    src: local('Decima Mono Cyr Light'), local('DecimaMonoCyrLt'),
+        url('DecimaMonoCyrLt.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyrLt.woff2') format('woff2'),
+        url('DecimaMonoCyrLt.woff') format('woff'),
+        url('DecimaMonoCyrLt.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyr-Bold.eot');
+    src: local('Decima Mono Cyr Bold'), local('DecimaMonoCyr-Bold'),
+        url('DecimaMonoCyr-Bold.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyr-Bold.woff2') format('woff2'),
+        url('DecimaMonoCyr-Bold.woff') format('woff'),
+        url('DecimaMonoCyr-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Decima Mono Cyr';
+    src: url('DecimaMonoCyr-Italic.eot');
+    src: local('Decima Mono Cyr Italic'), local('DecimaMonoCyr-Italic'),
+        url('DecimaMonoCyr-Italic.eot?#iefix') format('embedded-opentype'),
+        url('DecimaMonoCyr-Italic.woff2') format('woff2'),
+        url('DecimaMonoCyr-Italic.woff') format('woff'),
+        url('DecimaMonoCyr-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
