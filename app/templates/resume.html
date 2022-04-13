@@ -4,8 +4,8 @@
     </div>
 <div class="resume-container">
   <div class="resume-content">
-    <h1 class="resume-title" style="text-transform: none">Ваше резюме</h1>
-
+    <h1 class="resume-title" style="text-transform: none">Мой профиль</h1>
+    <h3 style="text-transform: none">Ваш текущий уровень - {{current_user.level}}</h3>
     <section class="resume-section">
       <h3 class="resume-section-title" style="text-transform: none">
         Контактные данные
@@ -30,6 +30,17 @@
           id="surname-input"
           class="resume-input"
           value="{{ user.surname }}"
+        />
+      </div>
+
+        <div class="resume-form-control">
+        <label for="tg-input">Профиль telegram</label>
+        <input
+          type="text"
+          name="tg"
+          id="tg-input"
+          class="resume-input"
+          value="{{ user.tg_nickname}}"
         />
       </div>
 
@@ -1307,6 +1318,7 @@
 <script>
   const nameInput = document.querySelector('#name-input');
   const surnameInput = document.querySelector('#surname-input');
+  const tgInput = document.querySelector('#tg-input');
   const phoneInput = document.querySelector('#phone-input');
   const countryInput = document.querySelector('#country-input');
   const cityInput = document.querySelector('#city-input');
@@ -1332,6 +1344,7 @@
         body: JSON.stringify({
           name: nameInput.value,
           surname: surnameInput.value,
+            tg: tgInput.value,
           phone: phoneInput.value,
           country: countryInput.value,
           city: cityInput.value,

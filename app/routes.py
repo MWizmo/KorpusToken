@@ -2537,10 +2537,10 @@ def delete_profit_record():
 @app.route('/resume', methods=['GET', 'POST'])
 @login_required
 def resume():
-    with open('app/static/json/citizenship.json') as f:
+    with open('app/static/json/citizenship.json', encoding='utf-8') as f:
         citizenship_json = f.read()
         
-    with open('app/static/json/languages.json') as f:
+    with open('app/static/json/languages.json', encoding='utf-8') as f:
         languages_json = f.read()
         
     skills = Skill.query.filter_by(user_id=current_user.id).outerjoin(Skill.keywords).all()
@@ -2788,6 +2788,7 @@ def change_resume():
     user = User.query.filter_by(id=current_user.id).first()
     
     user.name = html.escape(data['name'])
+    user.tg_nickname = html.escape(data['tg'])
     user.surname = html.escape(data['surname'])
     user.phone = html.escape(data['phone'])
     user.country = html.escape(data['country'])
