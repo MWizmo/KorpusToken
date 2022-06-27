@@ -144,7 +144,7 @@
       id="resume-skill-title"
       style="text-transform: none"
     ></h4>
-    <div class="resume-modal-description">
+    <div class="resume-modal-description" id="keywords-description-container">
       Уточняющие слова, которые характеризуют уровень, направление,
       специализацию в рамках указанного навыка.
     </div>
@@ -218,6 +218,10 @@
     }
   });
 
+  const keywordsDescriptionContainer = document.querySelector(
+    '#keywords-description-container'
+  );
+
   const skillKeywordsContainer = document.querySelector(
     '#skill-keywords-container'
   );
@@ -235,6 +239,11 @@
       const skillKeywords = await fetch(
         `/api/skill/${idContainer.textContent}/keywords`
       ).then((res) => res.json());
+
+      keywordsDescriptionContainer.textContent =
+        skillKeywords.length === 0
+          ? ''
+          : 'Уточняющие слова, которые характеризуют уровень, направление, специализацию в рамках указанного навыка.';
 
       removeChildren(skillKeywordsContainer);
 
