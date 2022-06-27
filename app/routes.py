@@ -2805,7 +2805,7 @@ def change_resume():
 @app.route('/resumes')
 @login_required
 def resumes():
-    cities = [user.city for user in User.query.with_entities(User.city).all()]
+    cities = list(set([user.city for user in User.query.with_entities(User.city).all() if user.city and user.city.strip() != '']))
     
     return render_template('resumes.html', cities=cities, title='Резюме участников')
 
