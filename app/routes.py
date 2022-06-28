@@ -5,6 +5,7 @@ import os
 import csv
 import requests
 from sqlalchemy import func, or_, and_
+from sqlalchemy.sql import text
 from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts import graphs
@@ -2830,7 +2831,8 @@ def get_resumes():
     min_age = int(request.args.get('minAge') or 0)
     max_age = int(request.args.get('maxAge') or 1000)
     
-    city = request.args.get('city') or ''
+    city = (request.args.get('city') or '').lower()
+    search = (request.args.get('search') or '').lower()
     
     SECOND = 1000
     MINUTE = 60 * SECOND
@@ -2838,103 +2840,164 @@ def get_resumes():
     DAY = 24 * HOUR
     YEAR = 365 * DAY
     
-    work_exp_filters = []
+    is_with_no_experience = (request.args.get('selectWithoutWorkExp') or 'true') == 'true'
+    no_experience_condition = """
+        work_experience_in_ms != 0
+    """ if not is_with_no_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithoutWorkExp') or 'true') == 'false':
-        work_exp_filters.append(User.work_experience_in_ms != 0)
+    is_with_one_to_three_experience = (request.args.get('selectWithOneToThreeYears') or 'true') == 'true'
+    one_to_three_experience_condition = f"""
+        (
+            work_experience_in_ms < {YEAR} OR
+            work_experience_in_ms > {3 * YEAR}
+        )
+    """ if not is_with_one_to_three_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithOneToThreeYears') or 'true') == 'false':
-        work_exp_filters.append(or_(User.work_experience_in_ms < YEAR, User.work_experience_in_ms > 3 * YEAR))
+    is_with_three_to_six_experience = (request.args.get('selectWithThreeToSixYears') or 'true') == 'true'
+    three_to_six_experience_condition = f"""
+        (
+            work_experience_in_ms < {3 * YEAR} OR
+            work_experience_in_ms > {6 * YEAR}
+        )
+    """ if not is_with_three_to_six_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithThreeToSixYears') or 'true') == 'false':
-        work_exp_filters.append(or_(User.work_experience_in_ms < 3 * YEAR, User.work_experience_in_ms > 6 * YEAR))
+    is_with_six_and_more_experience = (request.args.get('selectWithSixAndMoreYears') or 'true') == 'true'
+    six_and_more_experience_condition = f"""
+        (
+            work_experience_in_ms < {6 * YEAR}
+        )
+    """ if not is_with_six_and_more_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithSixAndMoreYears') or 'true') == 'false':
-        work_exp_filters.append(User.work_experience_in_ms < 6 * YEAR)
+    search_condition = """
+        (
+            LOWER(job.position) LIKE :search OR
+            LOWER(skill.title) LIKE :search OR
+            LOWER(keyword.value) LIKE :search
+        )
+    """ if len(search) != 0 else "(1 = 1)"
     
-    search = request.args.get('search') or ''
+    query = f"""
+        FROM user
+        LEFT JOIN work_experience job ON job.user_id = user.id
+        LEFT JOIN skill ON skill.user_id = user.id
+        LEFT JOIN skill_keyword keyword ON keyword.skill_id = skill.id
+        WHERE
+            sex IN (:first_sex_option, :second_sex_option) AND
+            birthdate <= :min_age AND
+            birthdate >= :max_age AND
+            LOWER(city) LIKE :city AND
+            {search_condition} AND
+            {no_experience_condition} AND
+            {one_to_three_experience_condition} AND
+            {three_to_six_experience_condition} AND
+            {six_and_more_experience_condition}
+    """
     
-    resumes_by_position = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        and_(*work_exp_filters),
-    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    find_query = text(f"""
+        SELECT
+            DISTINCT(user.id), name, surname, birthdate,
+            work_experience_in_ms
+        {query}
+        ORDER BY name
+        LIMIT :limit
+        OFFSET :offset
+    """)
     
-    resumes_by_position_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        and_(*work_exp_filters)
-    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).count()
+    count_query = text(f"""
+        SELECT COUNT(DISTINCT(user.id))
+        {query}
+    """)
     
-    resumes_by_skill = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in resumes_by_position]),
-        and_(*work_exp_filters),
-    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    query_options = {
+        "first_sex_option": "male" if "male" in sex else "-1",
+        "second_sex_option": "female" if "female" in sex else "-1",
+        "min_age": (datetime.datetime.now() - relativedelta(years=min_age)).strftime('%Y-%m-%d'),
+        "max_age": (datetime.datetime.now() - relativedelta(years=max_age)).strftime('%Y-%m-%d'),
+        "city": f"%{city}%",
+        "search": f"%{search}%",
+        "limit": int(take),
+        "offset": int(skip)
+    }
     
-    resumes_by_skill_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in resumes_by_position]),
-        and_(*work_exp_filters)
-    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).count()
+    find_jobs_query = text("""
+        SELECT id, place, position, start_at, end_at
+        FROM work_experience job
+        WHERE job.user_id = :user_id
+    """)
     
-    resumes_by_skill_keyword = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
-        and_(*work_exp_filters),
-    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    find_skills_query = text("""
+        SELECT id, title
+        FROM skill
+        WHERE skill.user_id = :user_id
+    """)
     
-    resumes_by_skill_keyword_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
-        and_(*work_exp_filters)
-    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).count()
+    find_keywords_query = text("""
+        SELECT id, value
+        FROM skill_keyword keyword
+        WHERE keyword.skill_id = :skill_id
+    """)
     
+    resumes = [dict(resume) for resume in db.engine.execute(find_query, query_options)]
+    count = list(db.engine.execute(count_query, query_options))[0][0]
+    
+    for resume in resumes:
+        resume['match'] = None
+        
+        jobs = [dict(job) for job in db.engine.execute(find_jobs_query, {
+            "user_id": resume['id']
+        })]
+        
+        for job in jobs:
+            if search in job['position'].lower():
+                resume['match'] = 'position'
+        
+        resume['jobs'] = jobs
+        
+        skills = [dict(skill) for skill in db.engine.execute(find_skills_query, {
+            "user_id": resume['id']
+        })]
+        
+        for skill in skills:            
+            keywords = [dict(keyword) for keyword in db.engine.execute(find_keywords_query, {
+                "skill_id": skill['id']
+            })]
+            
+            for keyword in keywords:
+                if search in keyword['value'].lower():
+                    resume['match'] = 'skill_keyword'
+            
+            if search in skill['title'].lower():
+                resume['match'] = 'skill'
+            
+            skill['keywords'] = keywords
+        
+        resume['skills'] = skills
+        
     return json.dumps({
-        'total': resumes_by_position_count + resumes_by_skill_count + resumes_by_skill_keyword_count,
+        'total': count,
         'data': [ {
-            'id': resume.id,
-            'name': resume.name,
-            'surname': resume.surname,
-            'birthdate': resume.birthdate.isoformat() if resume.birthdate else None,
-            'work_experience_in_ms': resume.work_experience_in_ms,
-            'match': match,
+            'id': resume['id'],
+            'name': resume['name'],
+            'surname': resume['surname'],
+            'birthdate': resume['birthdate'].isoformat() if resume['birthdate'] else None,
+            'work_experience_in_ms': resume['work_experience_in_ms'],
+            'match': resume['match'],
             'jobs': [ {
-                'id': job.id,
-                'place': job.place,
-                'position': job.position,
-                'start_at': job.start_at.isoformat(),
-                'end_at': job.end_at.isoformat() if job.end_at else None
-                } for job in resume.jobs ],
+                'id': job['id'],
+                'place': job['place'],
+                'position': job['position'],
+                'start_at': job['start_at'].isoformat(),
+                'end_at': job['end_at'].isoformat() if job['end_at'] else None
+                } for job in resume['jobs'] ],
             'skills': [{
-                'id': skill.id,
-                'title': skill.title,
+                'id': skill['id'],
+                'title': skill['title'],
                 'keywords': [{
-                    'id': keyword.id,
-                    'value': keyword.value
-                    } for keyword in skill.keywords]
-                } for skill in resume.skills],
-            } for (resume, match) in [
-                *map(lambda resume: (resume, 'position'), resumes_by_position),
-                *map(lambda resume: (resume, 'skill'), resumes_by_skill),
-                *map(lambda resume: (resume, 'skill_keyword'), resumes_by_skill_keyword)
-            ]
+                    'id': keyword['id'],
+                    'value': keyword['value']
+                    } for keyword in skill['keywords']]
+                } for skill in resume['skills']],
+            } for resume in resumes
         ]
     })
     
