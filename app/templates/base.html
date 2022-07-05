@@ -122,8 +122,18 @@
         {% endif %}
       </div>
     </nav>
+    <div class="modal_window" id="modal">
+      <div class="modal_card">
+        <img class="modal_img" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+      </div>
+    </div>
     <div style="padding-top: 10vh">{% block content %} {% endblock %}</div>
     <script src="{{url_for('static', filename='js/move.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/header.js')}}"></script>
+    <script>
+      $(document).ready(function(){
+          setTimeout(function(){ $("#modal").css("display", "none");},1500);
+      });
+    </script>
   </body>
 </html>
