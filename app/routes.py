@@ -2647,23 +2647,6 @@ def add_work_exp():
     db.session.add(work_exp)
     db.session.commit()
     
-    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
-    
-    experience_in_ms = 0
-    for job in work_exps:
-        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
-    
-        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
-        
-        if not job.end_at:
-            break
-    
-    user = User.query.filter_by(id=current_user.id).first()
-    
-    user.work_experience_in_ms = experience_in_ms
-    
-    db.session.commit()
-    
     return '', 201
     
 @app.route('/api/remove-work-exp', methods=['POST'])
@@ -2674,23 +2657,7 @@ def remove_work_exp():
     WorkExperience.query.filter_by(id=data['id'], user_id=current_user.id).delete()
     
     db.session.commit()
-    
-    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
-    
-    experience_in_ms = 0
-    for job in work_exps:
-        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
-    
-        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
-        
-        if not job.end_at:
-            break
-    user = User.query.filter_by(id=current_user.id).first()
-    
-    user.work_experience_in_ms = experience_in_ms
-    
-    db.session.commit()
-    
+
     return '', 200
 
 @app.route('/api/json/languages', methods=['GET'])
@@ -2941,6 +2908,10 @@ def get_resumes():
     count = list(db.engine.execute(count_query, query_options))[0][0]
     
     for resume in resumes:
+        user = User.query.filter_by(id=resume['id']).first()
+        update_work_experience(user)
+        resume['work_experience_in_ms'] = user.work_experience_in_ms
+        
         resume['match'] = None
         
         jobs = [dict(job) for job in db.engine.execute(find_jobs_query, {
@@ -3013,3 +2984,46 @@ def view_resume(id):
     return render_template('view_resume.html', user=user, skills=skills,
                            work_experience=work_experience,
                            user_languages=user_languages, title='Резюме участника')
+
+def update_work_experience(user):
+    jobs = [job.__dict__ for job in WorkExperience.query.filter_by(user_id=user.id).all()]
+    jobs = merge_intervals(jobs)
+    
+    experience_in_ms = 0
+    for job in jobs:
+        experience_in_ms += ((job['end_at'] or datetime.date.today()) - job['start_at']).total_seconds() * 1000
+        
+    user.work_experience_in_ms = experience_in_ms
+    
+    db.session.commit()
+
+def merge_intervals(intervals):
+    merged = []
+    
+    for interval in sorted(intervals, key=lambda x: x['start_at'] or datetime.date.max):
+        normalized_interval = { 'start_at': interval['start_at'], 'end_at': interval['end_at'] }
+        
+        if len(merged) == 0:
+            merged.append(normalized_interval)
+            continue
+        
+        last_end_at = merged[-1]['end_at'] or datetime.date.max
+        current_end_at = interval['end_at'] or datetime.date.max
+        
+        is_overlap = interval['start_at'] <= last_end_at and last_end_at <= current_end_at
+        is_contained = merged[-1]['start_at'] <= interval['start_at'] and current_end_at <= last_end_at
+        
+        if is_overlap or is_contained:
+            merged_interval = {
+                'start_at': min(interval['start_at'], merged[-1]['start_at']),
+                'end_at': None
+                    if (merged[-1]['end_at'] == None or interval['end_at'] == None)
+                    else max(current_end_at, last_end_at)
+            }
+            
+            merged.pop()
+            merged.append(merged_interval)
+        else:
+            merged.append(normalized_interval)
+
+    return merged
