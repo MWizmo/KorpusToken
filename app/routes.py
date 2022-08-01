@@ -1105,7 +1105,6 @@ def make_emission():
         exchange_rate = 248000
 
     kti_emission = int(((current_budget / exchange_rate) / kti_price) * KT_BITS_IN_KT)
-    ktd_emission = int((kti_emission * 3 / 7) * KT_BITS_IN_KT)
 
     contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
@@ -1152,7 +1151,7 @@ def emission():
         exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
-    ktd_emission = kti_emission * 3 / 7
+    ktd_emission = kti_emission * 9
 
     voting_id = VotingTable.current_emission_voting_id()
     try:
@@ -1227,7 +1226,7 @@ def make_tokens_distribution():
         exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
-    ktd_emission = kti_emission * 3 / 7
+    ktd_emission = kti_emission * 9
 
     cur_voting = VotingTable.query.filter_by(status='Distribution').first()
     if cur_voting:
