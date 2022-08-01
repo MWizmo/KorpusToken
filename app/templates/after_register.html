@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet">
+    {% if title %}
+    <title> {{ title }} </title>
+    {% else %}
+    <title> KorpusToken </title>
+    {% endif %}
+</head>
+<body>
+<img class="body_back" src="{{url_for('static', filename='images/reg_korpus_back.png')}}">
+<img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+<div class="profile_body">
+    <div class="personal_area_div account_form">
+        <div class="personal_area_form">
+            <div class="title_flex">
+                <h4 class="personal_area_h">Регистрация</h4>
+            </div>
+            <p style="font-size:3vh;">UserName, ваши данные успешно записаны!<br>Для завершения регистрации осталось несколько шагов:</p>
+            <ul style="font-size:3vh;">
+                <li>Перейдите в Telegram</li>
+                <li>В строке поиска введите @korpusnewbot</li>
+                <li>Напишите боту /start</li>
+                <li>Следуйте инструкциям бота</li>
+            </ul>
+
+            <p style="font-size:3vh;">Вы также можете заполнить резюме, тогда другие участники смогут пригласить вас в свою команду.</p>
+            <div class="button_row">
+            <button class="account_button" onclick="document.location.href='/profile';">Заполнить резюме</button>
+        </div>
+        </div>
+        <div class="button_row">
+            <button class="account_button" type="button" onclick="document.location.href='/login';">К авторизации
+            </button>
+            <button class="account_button" onclick="document.location.href='https://t.me/korpusnewbot';">Открыть бота
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

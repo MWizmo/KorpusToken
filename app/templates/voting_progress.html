@@ -3,11 +3,13 @@
 {% block content %}
 
 <div class="container" >
-    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button><br><br>
+    <div class="nav_href" style="margin-left:10%;">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">прогресс голосования</a>
+    </div>
     {% if q %}
     <div style="margin-left:10%;">
         <h2>В настоящее время проходит анкетирование</h2>
-</div>
+    </div>
     <div style="margin-left:10%; display:flex;width:80%; justify-content:space-between;">
         {% if not_participated_self %}
                 <p>

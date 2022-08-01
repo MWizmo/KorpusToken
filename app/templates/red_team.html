@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container">
-    <button onclick="document.location='/teams_crew';" class="nav__link" style="margin-left:10%;">Назад</button>
+    <div class="nav_href" style="margin-left:10%;">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a href="/teams_crew">составы команд</a> - <a class="cur_href" href="">редактировать команду</a>
+    </div>
     <form class="crew_div" method="post" style="margin-left:10%;">
         {{ form.hidden_tag() }}
         <p>

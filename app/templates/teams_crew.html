@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container" style="margin-left:10%;width:80%;">
-    <button onclick="history.back();" class="nav__link">Назад</button>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a class="cur_href" href="">составы команд</a>
+    </div>
     <div class="crew_div">
         {% for team in info %}
         <h3 class="team_title"><span>{{team[0].name}}</span></h3>

@@ -3,7 +3,9 @@
 {% block content %}
 
 <div class="container" style="margin-left:10%;width:80%;">
-    <button class="nav__link finish_vote_btn" style="width:10%;" onclick="history.back();">Назад</button>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">выбор оси</a>
+    </div>
     <div class="qustionnaire">
         {% if access.assessment_opened %}
             {% if not is_first and not is_second and not is_third %}

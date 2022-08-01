@@ -1,4 +1,7 @@
 {% extends "base.html" %} {% block content %}
+<div class="nav_href" style="margin-top:2vh;margin-left:10%;margin-bottom:-5vh; ">
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">перевести токены</a>
+    </div>
 <form class="small_card_container" method="post">
   {% with messages = get_flashed_messages(category_filter=["error"]) %} {% if messages %}
   <p style="text-align: center; width: 100%"><i>{{ messages[0] }}</i></p>

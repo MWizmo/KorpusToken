@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="nav_href" style="margin-left: 10%; margin-top:50px; margin-bottom: -60px;">
+    <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">бюджет</a>
+</div>
 <div class="small_card_container">
     <div class="small_card_flex">
         <a href="/all_budget_records" class="small_card" onmouseover="enlarge_block(11);" id="block11" onmouseleave="reduce_block(11);">
@@ -9,9 +12,6 @@
         <a href="/current_budget/{{cur_budget_id}}" class="small_card" onmouseover="enlarge_block(12);" id="block12" onmouseleave="reduce_block(12);">
             <img class="small_card_img" src="/static/images/budget.png">
             <p class="small_card_text">Текущий бюджет</p>
-        </a>
-        <a href="/blockchain" class="small_card" onmouseover="enlarge_block(13);" id="block13" onmouseleave="reduce_block(13);">
-            <p class="small_card_text">Назад</p>
         </a>
     </div>
 

@@ -1,4 +1,8 @@
-{% extends "base.html" %} {% block content %} {% if has_access_to_sell %}
+{% extends "base.html" %} {% block content %}
+<div class="nav_href" style="margin-top:2vh;margin-left:10%; ">
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">обменять на eth</a>
+    </div>
+{% if has_access_to_sell %}
 <form action="" method="post" novalidate class="form small_card_container">
   <p style="text-align: center; width: 100%">
     <i id="status_message"></i>
@@ -50,13 +54,7 @@
 {% else %}
 <div class="intro">
   <div class="container">
-    <button
-      onclick="history.back();"
-      class="nav__link"
-      style="margin-left: 10%"
-    >
-      Назад</button
-    ><br /><br />
+
     <h1 class="intro_title">У вас нет доступа к обмену токенов вклада.</h1>
   </div>
 </div>

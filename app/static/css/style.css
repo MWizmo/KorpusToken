@@ -1950,3 +1950,24 @@ input[type='radio'] {
     font-size: 1.3rem;
   }
 }
+
+.nav_href {
+  font-size: 14px;
+  text-decoration: none;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.nav_href a {
+  color: black;
+  text-decoration: none;
+}
+
+.cur_href {
+  color: #7000ff !important;
+}
+
+#resume-work-exp-responsibilities {
+  overflow-x: auto;
+  width: 100%;
+}

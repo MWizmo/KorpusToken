@@ -1,129 +1,71 @@
-{% extends "base.html" %}
-
-{% block scripts %}
-<script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
-<script src="{{url_for('static', filename='js/signup.js')}}"></script>
-<script src="{{url_for('static', filename='js/jquery.maskedinput.min.js')}}"></script>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="signup">
-        <h2> Регистрация </h2>
-        <form action="" method="post">
-            {{ form.hidden_tag() }}
-            {{ form.csrf_token() }}
-            <!--p>
-                <span class="main_text">{{ form.email.label }}</span> <br>
-                {{ form.email(size=32) }}
-                {% for error in form.email.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p-->
-            <p>
-                <span class="main_text">{{ form.login.label }}</span> <br>
-                {{ form.login(size=32) }}
-                {% for error in form.login.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-           <p>
-                <span class="main_text">{{ form.password.label }} </span><br>
-                {{ form.password(size=32) }}
-                {% for error in form.password.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.password2.label }}</span> <br>
-                {{ form.password2(size=32) }}
-                {% for error in form.password2.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.name.label }}</span> <br>
-                {{ form.name(size=32) }}
-                {% for error in form.name.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.surname.label }} </span><br>
-                {{ form.surname(size=32) }}
-                {% for error in form.surname.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <p>
-                <span class="main_text">{{ form.tg_nickname.label }} </span><br>
-                {{ form.tg_nickname(size=32) }}
-                {% for error in form.tg_nickname.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p>
-            <!--p>
-                <span class="main_text">{{ form.courses.label }} </span><br>
-                {{ form.courses(size=64) }}
-                {% for error in form.courses.errors %}
-                    <span style="color: red;">
-                        {{ error }}
-                    </span>
-                {% endfor %}
-            </p-->
-            <!--p>
-                <span class="main_text">{{ form.birthday.label }} </span><br>
-                {{ form.birthday(id="date") }}
-                {% for error in form.birthday.errors %}
-                <span style="color: red;"> {{error}} </span>
-                {% endfor %}
-            </p-->
-            <p>
-                <span class="main_text">{{ form.sex.label }}</span> <br>
-                {{ form.sex(class_="submit_sex") }}
-            </p>
-            <!--p>
-                <span class="main_text">{{ form.education.label }} </span><br>
-                {{ form.education }}
-            </p-->
-            <!--p>
-                <span class="main_text">{{ form.work_exp.label }}</span> <br>
-                {{ form.work_exp(class_="text_field", rows='5',cols='75') }}
-            </p-->
-            <!--p>
-                <span class="main_text">{{ form.vk_url.label }}</span> <br>
-                {{ form.vk_url }}
-            </p>
-            <p>
-                <span class="main_text">{{ form.fb_url.label }} </span><br>
-                {{ form.fb_url }}<br>
-                <label>если нет, оставить -</label>
-            </p>
-            <p>
-                <span class="main_text">{{ form.inst_url.label }}</span> <br>
-                {{ form.inst_url }}<br>
-                <label>если нет, оставить -</label>
-            </p-->
-            <p>
-                {{ form.submit(class_="submit") }}
-            </p>
-        </form>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename='js/jquery.js')}}" type="text/javascript"></script>
+    <script src="{{url_for('static', filename='js/signup.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.maskedinput.min.js')}}"></script>
+    {% if title %}
+    <title> {{ title }} </title>
+    {% else %}
+    <title> KorpusToken </title>
+    {% endif %}
+</head>
+<body>
+<img class="body_back" src="{{url_for('static', filename='images/reg_korpus_back.png')}}">
+<img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+<div class="profile_body">
+    <form class="personal_area_div account_form" method="post" action="/signup">
+        <div class="personal_area_form">
+            <div class="title_flex">
+                <h4 class="personal_area_h">Регистрация</h4>
+            </div>
+            <table class="account_table">
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Имя</label></td>
+                    <td class="account_table_td"><input required class="account_input account_table_input" name="first_name" placeholder="Иван"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Фамилия</label></td>
+                    <td class="account_table_td"><input required class="account_input account_table_input" name="surname" placeholder="Иванов"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
+                    <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Tlg ник</label></td>
+                    <td class="account_table_td"><input required class="account_input account_table_input" name="tlg" placeholder="@ivan_ivan"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
+                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Повторить</label></td>
+                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="repeat"></td>
+                </tr>
+            </table>
+        </div>
+        {% if for_partner %}
+        <input name="is_partner" value="1" type="hidden">
+        {% else %}
+        <input name="is_partner" value="0" type="hidden">
+        {% endif %}
+        <div class="button_row">
+            <button class="account_button" type="button" onclick="document.location.href='/login';">К авторизации</button>
+            <button class="account_button" type="submit">Зарегистрироваться</button>
+        </div>
+    </form>
 </div>
+<script src="{{url_for('static', filename='js/move.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/header.js')}}"></script>
 <script>
 $( document ).ready(function() {
     $("#date").mask("9999-99-99");
@@ -133,4 +75,5 @@ $( document ).ready(function() {
         $('#teams').slideToggle(300);
     });
 </script>
-{% endblock %}
+</body>
+</html>

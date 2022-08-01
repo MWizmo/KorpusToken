@@ -1,39 +1,50 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container">
-    <div class="login">
-        <h2> Вход </h2>
-            <form action="" method="post" novalidate class="form">
-                {% with messages = get_flashed_messages(category_filter=["restore"]) %}
-                  {% if messages %}
-                    <p><i>{{ messages[0] }}</i></p>
-                  {% endif %}
-                {% endwith %}
-                {{ form.csrf_token() }}
-                {{ form.hidden_tag() }}
-                <p>
-                    <span class="main_text">{{ form.login.label }}</span> <br>
-                    {{ form.login(size=32) }}
-                    {% for error in form.login.errors %}
-                    <span style="color: red;"> {{error}} </span>
-                    {% endfor %}
-                </p>
-                <p>
-                    <span class="main_text">{{ form.password.label }}</span> <br>
-                    {{ form.password(size=32) }}
-                    {% for error in form.password.errors %}
-                    <span style="color: red;"> {{error}} </span>
-                    {% endfor %}
-                </p>
-                {% if err %}
-                <p> Неправильный логин или пароль </p>
-                <p><a class="nav__link" href="{{ url_for('restore_password') }}">Забыли пароль?</a></p>
-                {% endif %}
-                <p> {{ form.remember_me() }} {{ form.remember_me.label }}</p>
-                <p> {{ form.submit(class_="submit") }} </p>
-            </form>
-            <p>Не зарегистрированы? <a class="nav__link" href="{{ url_for('signup') }}">Зарегистрироваться!</a></p>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet">
+    {% if title %}
+    <title> {{ title }} </title>
+    {% else %}
+    <title> KorpusToken </title>
+    {% endif %}
+</head>
+<body>
+<img class="body_back" src="{{url_for('static', filename='images/login_body_back.png')}}">
+<img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+<div class="profile_body">
+    <form class="personal_area_div account_form" style="margin-top:12vh;" method="post" action="/login">
+        <div class="personal_area_form">
+            <div class="title_flex">
+                <h4 class="personal_area_h">Авторизация</h4>
+            </div>
+            <table class="account_table">
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
+                    <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
+                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
+                </tr>
+                <tr class="account_row">
+                    <td class="account_table_label account_table_td"></td>
+                    <td class="account_table_td" style="text-align:right;"><label style="font-size:2.5vh">Запомнить меня<input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember"></label></td>
+                </tr>
+            </table>
+            {% if err %}
+            <p style="font-size:2.5vh; color: red; text-align:center; width: 100%;">Неправильное имя пользователя или пароль</p>
+            {% endif %}
+        </div>
+        <div class="button_row">
+            <button class="account_button" type="button" onclick="document.location.href='/signup';">Еще не зарегистрирован</button>
+            <button class="account_button" type="submit">Вход</button>
+        </div>
+    </form>
 </div>
-{% endblock %}
+</body>
+</html>

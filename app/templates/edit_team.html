@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container">
-    <button onclick="history.back();" class="nav__link" style="margin-left:10%;">Назад</button>
+    <div class="nav_href" style="margin-left:10%;">
+        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a href="/teams_crew">составы команд</a> - <a class="cur_href" href="">редактировать состав</a>
+    </div>
     <div class="crew_div">
         <h2 class="team_title"  style="margin-left:10%;">{{team_title}}</h2>
         {% if members %}

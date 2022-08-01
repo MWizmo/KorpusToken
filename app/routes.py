@@ -5,6 +5,7 @@ import os
 import csv
 import requests
 from sqlalchemy import func, or_, and_
+from sqlalchemy.sql import text
 from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts import graphs
@@ -67,18 +68,19 @@ def home():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(login=form.login.data).first()
-        if user is None or not user.check_password(form.password.data):
-            return render_template('login.html', tittle='Авторизация', form=form, err=True)
-        login_user(user, remember=form.remember_me.data)
+    if request.method == 'GET':
+        return render_template('login.html', title='Авторизация')
+    else:
+        values = request.values
+        user = User.query.filter_by(login=values['login']).first()
+        if user is None or not user.check_password(values['password']):
+            return render_template('login.html', tittle='Авторизация', err=True)
+        login_user(user, remember='remember' in values)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         log('Вход в систему')
         return redirect(next_page)
-    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/restore_password', methods=['GET', 'POST'])
@@ -96,43 +98,45 @@ def restore_password():
     return render_template('restore_password.html', title='Восстановление пароля', form=form)
 
 
+@app.route('/partner')
+def partner():
+    return render_template('signup.html', title='Регистрация', script='signup.js', for_partner=True)
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-
-    form = SignupForm()
-    if form.validate_on_submit():
-        tg = form.tg_nickname.data
+    if request.method == 'GET':
+        return render_template('signup.html', title='Регистрация', script='signup.js')
+    else:
+        values = request.values
+        tg = values['tlg']
         if tg[0] == '@':
             tg = tg[1:]
         ethAccount = w3.eth.account.create()
         user = User(
-            email=form.email.data,
-            login=form.login.data,
+            email='',
+            login=values['login'],
             tg_nickname=tg,
-            courses=form.courses.data,
-            birthday=form.birthday.data,
+            courses='',
+            birthday='',
             education='Unknown',  # form.education.data,
-            work_exp=form.work_exp.data,
-            sex=form.sex.data,
-            name=form.name.data,
-            surname=form.surname.data,
+            work_exp='',
+            sex='',
+            name=values['first_name'],
+            surname=values['surname'],
             private_key=ethAccount.privateKey.hex())
-        user.set_password(form.password.data)
+        user.set_password(values['password'])
         db.session.add(user)
         db.session.commit()
-        if form.participate.data:
-            user_team = Membership(user_id=User.query.filter_by(email=form.email.data).first().id,
-                                   team_id=form.team.data,
-                                   role_id=0)
-            db.session.add(user_team)
-        statuses = UserStatuses(user_id=User.query.filter_by(email=form.email.data).first().id, status_id=3)
+        if values['is_partner'] == '0':
+            statuses = UserStatuses(user_id=user.id, status_id=3)
+        else:
+            statuses = UserStatuses(user_id=user.id, status_id=10)
         db.session.add(statuses)
         db.session.commit()
-        return redirect(url_for('login'))
-    print(form.errors)
-    return render_template('signup.html', title='Регистрация', form=form, script='signup.js')
+        return render_template('after_register.html', title='Регистрация')
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
@@ -538,9 +542,9 @@ def users_list():
         teams = Membership.query.filter_by(user_id=user.id).all()
         if teams:
             user_teams = [team.name for t in teams for team in Teams.query.filter_by(id=t.team_id).all()]
-            info.append((user.name, user.surname, ', '.join(user_teams), user.id, user.tg_id))
+            info.append((user.name, user.surname, ', '.join(user_teams), user.id, user.tg_id, user.level))
         else:
-            info.append((user.name, user.surname, 'Нет', user.id, user.tg_id))
+            info.append((user.name, user.surname, 'Нет', user.id, user.tg_id, user.level))
 
     return render_template('users_list.html', title='Список пользователей', users=info,
                            access=get_access(current_user))
@@ -573,25 +577,6 @@ def delete_user():
     db.session.commit()
     log('Удаление пользователя с id {}'.format(uid))
     return redirect('users_list')
-
-
-@app.route('/teams_list', methods=['POST', 'GET'])
-@login_required
-def teams_list():
-    # if not User.check_admin(current_user.id):
-    #     log('Попытка просмотра страницы с текущими командами (ГВ)')
-    #     return render_template('gryazniy_vzlomshik.html',
-    #                            access=get_access(current_user))
-
-    log('Просмотр страницы с текущими командами')
-    form = TeamAdding()
-    if form.validate_on_submit():
-        team = Teams(name=form.title.data, type=int(form.type.data))
-        db.session.add(team)
-        db.session.commit()
-        log('Добавление команды с названием "{}"'.format(form.title.data))
-    return render_template('teams_list.html', title='Список текущих команд', form=form, teams=Teams.query.all(),
-                           access=get_access(current_user))
 
 
 @app.route('/delete_team', methods=['GET'])
@@ -2547,10 +2532,10 @@ def delete_profit_record():
 @app.route('/resume', methods=['GET', 'POST'])
 @login_required
 def resume():
-    with open('app/static/json/citizenship.json') as f:
+    with open('app/static/json/citizenship.json', encoding='utf-8') as f:
         citizenship_json = f.read()
         
-    with open('app/static/json/languages.json') as f:
+    with open('app/static/json/languages.json', encoding='utf-8') as f:
         languages_json = f.read()
         
     skills = Skill.query.filter_by(user_id=current_user.id).outerjoin(Skill.keywords).all()
@@ -2656,23 +2641,6 @@ def add_work_exp():
     db.session.add(work_exp)
     db.session.commit()
     
-    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
-    
-    experience_in_ms = 0
-    for job in work_exps:
-        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
-    
-        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
-        
-        if not job.end_at:
-            break
-    
-    user = User.query.filter_by(id=current_user.id).first()
-    
-    user.work_experience_in_ms = experience_in_ms
-    
-    db.session.commit()
-    
     return '', 201
     
 @app.route('/api/remove-work-exp', methods=['POST'])
@@ -2683,23 +2651,7 @@ def remove_work_exp():
     WorkExperience.query.filter_by(id=data['id'], user_id=current_user.id).delete()
     
     db.session.commit()
-    
-    work_exps = sorted(WorkExperience.query.filter_by(user_id=current_user.id).all(), key=lambda x: x.start_at)
-    
-    experience_in_ms = 0
-    for job in work_exps:
-        conflict_job = next(filter(lambda current_job: current_job.id != job.id and current_job.start_at < job.end_at, work_exps), None) if job.end_at else None
-    
-        experience_in_ms += (((conflict_job and conflict_job.start_at) or job.end_at or datetime.date.today()) - job.start_at).total_seconds() * 1000
-        
-        if not job.end_at:
-            break
-    user = User.query.filter_by(id=current_user.id).first()
-    
-    user.work_experience_in_ms = experience_in_ms
-    
-    db.session.commit()
-    
+
     return '', 200
 
 @app.route('/api/json/languages', methods=['GET'])
@@ -2798,6 +2750,7 @@ def change_resume():
     user = User.query.filter_by(id=current_user.id).first()
     
     user.name = html.escape(data['name'])
+    user.tg_nickname = html.escape(data['tg'])
     user.surname = html.escape(data['surname'])
     user.phone = html.escape(data['phone'])
     user.country = html.escape(data['country'])
@@ -2814,7 +2767,7 @@ def change_resume():
 @app.route('/resumes')
 @login_required
 def resumes():
-    cities = [user.city for user in User.query.with_entities(User.city).all()]
+    cities = list(set([user.city for user in User.query.with_entities(User.city).all() if user.city and user.city.strip() != '']))
     
     return render_template('resumes.html', cities=cities, title='Резюме участников')
 
@@ -2839,7 +2792,8 @@ def get_resumes():
     min_age = int(request.args.get('minAge') or 0)
     max_age = int(request.args.get('maxAge') or 1000)
     
-    city = request.args.get('city') or ''
+    city = (request.args.get('city') or '').lower()
+    search = (request.args.get('search') or '').lower()
     
     SECOND = 1000
     MINUTE = 60 * SECOND
@@ -2847,103 +2801,168 @@ def get_resumes():
     DAY = 24 * HOUR
     YEAR = 365 * DAY
     
-    work_exp_filters = []
+    is_with_no_experience = (request.args.get('selectWithoutWorkExp') or 'true') == 'true'
+    no_experience_condition = """
+        work_experience_in_ms != 0
+    """ if not is_with_no_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithoutWorkExp') or 'true') == 'false':
-        work_exp_filters.append(User.work_experience_in_ms != 0)
+    is_with_one_to_three_experience = (request.args.get('selectWithOneToThreeYears') or 'true') == 'true'
+    one_to_three_experience_condition = f"""
+        (
+            work_experience_in_ms < {YEAR} OR
+            work_experience_in_ms > {3 * YEAR}
+        )
+    """ if not is_with_one_to_three_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithOneToThreeYears') or 'true') == 'false':
-        work_exp_filters.append(or_(User.work_experience_in_ms < YEAR, User.work_experience_in_ms > 3 * YEAR))
+    is_with_three_to_six_experience = (request.args.get('selectWithThreeToSixYears') or 'true') == 'true'
+    three_to_six_experience_condition = f"""
+        (
+            work_experience_in_ms < {3 * YEAR} OR
+            work_experience_in_ms > {6 * YEAR}
+        )
+    """ if not is_with_three_to_six_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithThreeToSixYears') or 'true') == 'false':
-        work_exp_filters.append(or_(User.work_experience_in_ms < 3 * YEAR, User.work_experience_in_ms > 6 * YEAR))
+    is_with_six_and_more_experience = (request.args.get('selectWithSixAndMoreYears') or 'true') == 'true'
+    six_and_more_experience_condition = f"""
+        (
+            work_experience_in_ms < {6 * YEAR}
+        )
+    """ if not is_with_six_and_more_experience else "(1 = 1)"
     
-    if (request.args.get('selectWithSixAndMoreYears') or 'true') == 'false':
-        work_exp_filters.append(User.work_experience_in_ms < 6 * YEAR)
+    search_condition = """
+        (
+            LOWER(job.position) LIKE :search OR
+            LOWER(skill.title) LIKE :search OR
+            LOWER(keyword.value) LIKE :search
+        )
+    """ if len(search) != 0 else "(1 = 1)"
     
-    search = request.args.get('search') or ''
+    query = f"""
+        FROM user
+        LEFT JOIN work_experience job ON job.user_id = user.id
+        LEFT JOIN skill ON skill.user_id = user.id
+        LEFT JOIN skill_keyword keyword ON keyword.skill_id = skill.id
+        WHERE
+            sex IN (:first_sex_option, :second_sex_option) AND
+            birthdate <= :min_age AND
+            birthdate >= :max_age AND
+            LOWER(city) LIKE :city AND
+            {search_condition} AND
+            {no_experience_condition} AND
+            {one_to_three_experience_condition} AND
+            {three_to_six_experience_condition} AND
+            {six_and_more_experience_condition}
+    """
     
-    resumes_by_position = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        and_(*work_exp_filters),
-    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    find_query = text(f"""
+        SELECT
+            DISTINCT(user.id), name, surname, birthdate,
+            work_experience_in_ms
+        {query}
+        ORDER BY name
+        LIMIT :limit
+        OFFSET :offset
+    """)
     
-    resumes_by_position_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        and_(*work_exp_filters)
-    ).outerjoin(User.jobs).filter(WorkExperience.position.ilike(f'%{search}%')).count()
+    count_query = text(f"""
+        SELECT COUNT(DISTINCT(user.id))
+        {query}
+    """)
     
-    resumes_by_skill = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in resumes_by_position]),
-        and_(*work_exp_filters),
-    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    query_options = {
+        "first_sex_option": "male" if "male" in sex else "-1",
+        "second_sex_option": "female" if "female" in sex else "-1",
+        "min_age": (datetime.datetime.now() - relativedelta(years=min_age)).strftime('%Y-%m-%d'),
+        "max_age": (datetime.datetime.now() - relativedelta(years=max_age)).strftime('%Y-%m-%d'),
+        "city": f"%{city}%",
+        "search": f"%{search}%",
+        "limit": int(take),
+        "offset": int(skip)
+    }
     
-    resumes_by_skill_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in resumes_by_position]),
-        and_(*work_exp_filters)
-    ).outerjoin(User.skills).filter(Skill.title.ilike(f'%{search}%')).count()
+    find_jobs_query = text("""
+        SELECT id, place, position, start_at, end_at
+        FROM work_experience job
+        WHERE job.user_id = :user_id
+    """)
     
-    resumes_by_skill_keyword = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
-        and_(*work_exp_filters),
-    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).order_by(User.name).limit(take).offset(skip).all()
+    find_skills_query = text("""
+        SELECT id, title
+        FROM skill
+        WHERE skill.user_id = :user_id
+    """)
     
-    resumes_by_skill_keyword_count = User.query.filter(
-        User.sex.in_(sex),
-        User.birthdate <= (datetime.datetime.now() - relativedelta(years=min_age)),
-        User.birthdate >= (datetime.datetime.now() - relativedelta(years=max_age)),
-        User.city.ilike(f'%{city}%'),
-        User.id.notin_([resume.id for resume in [*resumes_by_position, *resumes_by_skill]]),
-        and_(*work_exp_filters)
-    ).outerjoin(User.skills).outerjoin(Skill.keywords).filter(SkillKeyword.value.ilike(f'%{search}%')).count()
+    find_keywords_query = text("""
+        SELECT id, value
+        FROM skill_keyword keyword
+        WHERE keyword.skill_id = :skill_id
+    """)
     
+    resumes = [dict(resume) for resume in db.engine.execute(find_query, query_options)]
+    count = list(db.engine.execute(count_query, query_options))[0][0]
+    
+    for resume in resumes:
+        user = User.query.filter_by(id=resume['id']).first()
+        update_work_experience(user)
+        resume['work_experience_in_ms'] = user.work_experience_in_ms
+        
+        resume['match'] = None
+        
+        jobs = [dict(job) for job in db.engine.execute(find_jobs_query, {
+            "user_id": resume['id']
+        })]
+        
+        for job in jobs:
+            if search in job['position'].lower():
+                resume['match'] = 'position'
+        
+        resume['jobs'] = jobs
+        
+        skills = [dict(skill) for skill in db.engine.execute(find_skills_query, {
+            "user_id": resume['id']
+        })]
+        
+        for skill in skills:            
+            keywords = [dict(keyword) for keyword in db.engine.execute(find_keywords_query, {
+                "skill_id": skill['id']
+            })]
+            
+            for keyword in keywords:
+                if search in keyword['value'].lower():
+                    resume['match'] = 'skill_keyword'
+            
+            if search in skill['title'].lower():
+                resume['match'] = 'skill'
+            
+            skill['keywords'] = keywords
+        
+        resume['skills'] = skills
+        
     return json.dumps({
-        'total': resumes_by_position_count + resumes_by_skill_count + resumes_by_skill_keyword_count,
+        'total': count,
         'data': [ {
-            'id': resume.id,
-            'name': resume.name,
-            'surname': resume.surname,
-            'birthdate': resume.birthdate.isoformat() if resume.birthdate else None,
-            'work_experience_in_ms': resume.work_experience_in_ms,
-            'match': match,
+            'id': resume['id'],
+            'name': resume['name'],
+            'surname': resume['surname'],
+            'birthdate': resume['birthdate'].isoformat() if resume['birthdate'] else None,
+            'work_experience_in_ms': resume['work_experience_in_ms'],
+            'match': resume['match'],
             'jobs': [ {
-                'id': job.id,
-                'place': job.place,
-                'position': job.position,
-                'start_at': job.start_at.isoformat(),
-                'end_at': job.end_at.isoformat() if job.end_at else None
-                } for job in resume.jobs ],
+                'id': job['id'],
+                'place': job['place'],
+                'position': job['position'],
+                'start_at': job['start_at'].isoformat(),
+                'end_at': job['end_at'].isoformat() if job['end_at'] else None
+                } for job in resume['jobs'] ],
             'skills': [{
-                'id': skill.id,
-                'title': skill.title,
+                'id': skill['id'],
+                'title': skill['title'],
                 'keywords': [{
-                    'id': keyword.id,
-                    'value': keyword.value
-                    } for keyword in skill.keywords]
-                } for skill in resume.skills],
-            } for (resume, match) in [
-                *map(lambda resume: (resume, 'position'), resumes_by_position),
-                *map(lambda resume: (resume, 'skill'), resumes_by_skill),
-                *map(lambda resume: (resume, 'skill_keyword'), resumes_by_skill_keyword)
-            ]
+                    'id': keyword['id'],
+                    'value': keyword['value']
+                    } for keyword in skill['keywords']]
+                } for skill in resume['skills']],
+            } for resume in resumes
         ]
     })
     
@@ -2959,3 +2978,46 @@ def view_resume(id):
     return render_template('view_resume.html', user=user, skills=skills,
                            work_experience=work_experience,
                            user_languages=user_languages, title='Резюме участника')
+
+def update_work_experience(user):
+    jobs = [job.__dict__ for job in WorkExperience.query.filter_by(user_id=user.id).all()]
+    jobs = merge_intervals(jobs)
+    
+    experience_in_ms = 0
+    for job in jobs:
+        experience_in_ms += ((job['end_at'] or datetime.date.today()) - job['start_at']).total_seconds() * 1000
+        
+    user.work_experience_in_ms = experience_in_ms
+    
+    db.session.commit()
+
+def merge_intervals(intervals):
+    merged = []
+    
+    for interval in sorted(intervals, key=lambda x: x['start_at'] or datetime.date.max):
+        normalized_interval = { 'start_at': interval['start_at'], 'end_at': interval['end_at'] }
+        
+        if len(merged) == 0:
+            merged.append(normalized_interval)
+            continue
+        
+        last_end_at = merged[-1]['end_at'] or datetime.date.max
+        current_end_at = interval['end_at'] or datetime.date.max
+        
+        is_overlap = interval['start_at'] <= last_end_at and last_end_at <= current_end_at
+        is_contained = merged[-1]['start_at'] <= interval['start_at'] and current_end_at <= last_end_at
+        
+        if is_overlap or is_contained:
+            merged_interval = {
+                'start_at': min(interval['start_at'], merged[-1]['start_at']),
+                'end_at': None
+                    if (merged[-1]['end_at'] == None or interval['end_at'] == None)
+                    else max(current_end_at, last_end_at)
+            }
+            
+            merged.pop()
+            merged.append(merged_interval)
+        else:
+            merged.append(normalized_interval)
+
+    return merged
