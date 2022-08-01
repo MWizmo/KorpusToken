@@ -1236,25 +1236,20 @@ def make_tokens_distribution():
     criterions = [c.name for c in Criterion.query.all()]
     users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id)) for user in User.query.all() if
              User.check_can_be_marked(user.id)]
-    marks_counter = 0
+    
+    PARTIAL_USER_LIMIT = 9
+    total_limit = 0
     for user in users:
-        res = [user[1]]
-        user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
-                                                                         Voting.id == VotingInfo.voting_id).filter(
-            Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
-            VotingInfo.criterion_id).all()
-        for mark in user_res:
-            if float(mark[0]) == 1.0:
-                marks_counter += 1
-    ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
+        total_limit += PARTIAL_USER_LIMIT + db.session.query(func.count(Membership.team_id.distinct()).filter_by(user_id=user[0]))
+
+    ktd_in_mark = ktd_emission / total_limit if total_limit >= 0 else 0
     for user in users:
-        res = [user[1]]
         user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
                                                                          Voting.id == VotingInfo.voting_id).filter(
             Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
-        mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
+        mint_amount = int(ktd_in_mark * marks * KT_BITS_IN_KT)
         token_utils.mint_KTD(mint_amount, user[2], os.environ.get(
             'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
