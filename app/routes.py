@@ -2272,7 +2272,7 @@ def weekly_results():
         v.date_str = f'{day}.{month}.{v.date.year}'
         v.date = f'{v.date.year}-{v.date.month}-{v.date.day}'
     return render_template('weekly_results.html', title='Результаты еженедельной оценки',
-                           access=get_access(current_user), votings=votings)
+                           access=get_access(current_user), votings=votings[::-1])
 
 
 @app.route('/get_results_of_voting', methods=['GET'])
@@ -2322,10 +2322,15 @@ def get_results_of_weekly_voting():
         mark_res = []
         for mark in marks:
             mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] >= 0.5 else 0})
+        if len(marks) == 0:
+            mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
         date_info['marks'] = mark_res
         teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
                                                                           WeeklyVotingMembers.team_id == t.id).all()
-        teammates = [t[0] for t in teammates]
+        if len(teammates) == 0:
+            teammates = [user_id for user_id in voting_dict]
+        else:
+            teammates = [t[0] for t in teammates]
         for user in voting_dict:
             if user in teammates and mark_res[0]['mark'] == 1:
                 voting_dict[user]['marks1'].append(1)
@@ -2358,6 +2363,7 @@ def send_results_of_weekly_voting():
     # date = datetime.datetime.strptime(date, '%Y-%m-%d')
     teams = [t for t in Teams.query.all() if t.type in [1, 4]]
     summary_results = []
+    k = 0
     for t in teams:
         team_members = [(member.user_id, User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
@@ -2376,10 +2382,15 @@ def send_results_of_weekly_voting():
         mark_res = []
         for mark in marks:
             mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] >= 0.5 else 0})
+        if len(marks) == 0:
+            mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
         date_info['marks'] = mark_res
         teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
                                                                           WeeklyVotingMembers.team_id == t.id).all()
-        teammates = [t[0] for t in teammates]
+        if len(teammates) == 0:
+            teammates = [user_id for user_id in voting_dict]
+        else:
+            teammates = [t[0] for t in teammates]
         for user in voting_dict:
             if user in teammates and mark_res[0]['mark'] == 1:
                 voting_dict[user]['marks1'].append(1)
