@@ -2413,7 +2413,7 @@ def send_results_of_weekly_voting():
         date_info['teammates'] = teammates_info
         voting_results.append(date_info)
         summary_results.append({'team': t.name, 'marks': voting_dict, 'team_id': t.id})
-    return jsonify({'results': summary_results, 'date': date})
+    return jsonify({'results': summary_results, 'date': f'{date.day}.{date.month}.{date.year}'})
 
 
 @app.route('/log_page', methods=['GET'])
