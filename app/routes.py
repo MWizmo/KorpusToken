@@ -1751,10 +1751,16 @@ def assessment_users():
             mark_res = []
             for mark in marks:
                 mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
+            if len(marks) == 0:
+                mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
+                            {'criterion': 'Подтверждение средой', 'mark': 0}]
             date_info['marks'] = mark_res
             teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date[0],
                                                                               WeeklyVotingMembers.team_id == team_id).all()
-            teammates = [t[0] for t in teammates]
+            if len(teammates) == 0:
+                teammates = [user_id for user_id in voting_dict]
+            else:
+                teammates = [t[0] for t in teammates]
             for user in voting_dict:
                 if user in teammates and mark_res[0]['mark'] == 1:
                     voting_dict[user]['marks1'].append(1)
