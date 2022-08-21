@@ -1623,7 +1623,7 @@ def assessment():
                                    access=get_access(current_user), axises=[], is_third=False,
                                    is_second=False)
         else:
-            return redirect(url_for('assessment_users', axis_id=3, team_id=0))
+            return redirect(url_for('c', axis_id=3, team_id=0))
 
     return render_template('assessment.html', title='Оценка',
                            access=get_access(current_user))
@@ -1733,7 +1733,7 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = 12
+        current_month = datetime.datetime.now().month
         dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
