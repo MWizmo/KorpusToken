@@ -1592,6 +1592,11 @@ def assessment():
         return render_template('voting_progress.html', title='Оценка', access=get_access(current_user))
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
         + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id) + User.check_teamlead(
+                current_user.id)) == 0:
+        return render_template('voting_self_progress.html', title='Оценка', access=get_access(current_user),
+                               not_voting=True)
+    if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
+        + User.check_tracker(current_user.id) + User.check_chieftain(current_user.id) + User.check_teamlead(
                 current_user.id)) > 1:  # and (Axis.is_available(1)
         #                                                                                         or Axis.is_available(
         #         2) or Axis.is_available(3)):

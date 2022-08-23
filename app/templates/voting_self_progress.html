@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container" >
+    <div class="nav_href" style="margin-left:10%;">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">прогресс голосования</a>
+    </div>
+  {% if not_voting %}
+    <div style="margin-left:10%;">
+        <h2>Вы не участвуете в данном этапе оценки</h2>
+    </div>
+  {% else %}
+  <div></div>
+  {% endif %}
+
+</div>
+{% endblock %}
