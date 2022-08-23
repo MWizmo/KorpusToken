@@ -4,26 +4,58 @@
 
 <div class="container" style="margin-left:10%;width:80%;">
     <div class="nav_href">
-        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">выбор оси</a>
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">участвовать в оценке</a>
     </div>
     <div class="qustionnaire">
         {% if access.assessment_opened %}
-            {% if not is_first and not is_second and not is_third %}
-                <h2 class="error" style="margin-left:-20%;">Ваш лимит голосований исчерпан</h2>
+        {% if not is_first and not is_second and not is_third %}
+            <h2 class="error" style="margin-left:-20%;">Ваш лимит голосований исчерпан</h2>
+        {% else %}
+        <br>
+        <h2>Ваш текущий прогресс оценивания</h2>
+        <br>
+        <p>Вы оцениваете
+            {% if is_first and not is_second and not is_third %} "ось Отношений". {% endif %}
+            {% if is_second and not is_first and not is_third %} "ось Дела". {% endif %}
+            {% if is_third and not is_second and not is_first %} "ось Власти". {% endif %}
+            {% if is_third and not is_second and is_first %} "ось Отношений" и "ось Власти". {% endif %}
+            {% if is_third and is_second and not is_first %} "ось Дела" и "ось Власти". {% endif %}
+            {% if not is_third and is_second and is_first %} "ось Отношений" и "ось Дела". {% endif %}
+            {% if is_third and is_second and is_first %} "ось Отношений", "ось Дела" и "ось Власти". {% endif %}
+        </p>
+        {% if is_first %}
+            <p>По оси Отношений оценено {{voting_num_rel}} из {{teams_for_voting}}</p>
+        {% endif %}
+        {% if is_second %}
+            <p>По оси Дела оценено {{voting_num_bus}} из {{teams_for_voting}}</p>
+        {% endif %}
+        {% if is_third %}
+            <p>По оси Власти оценено {{voting_num_auth}} из 1</p>
+        {% endif %}
+        <br>
+        {% if voting_num_bus == teams_for_voting and voting_num_rel == teams_for_voting and voting_num_auth == 1 %}
+            <h3>Ваш лимит голосований исчерпан</h3>
+        {% else %}
+            {% if voting_num_bus + voting_num_rel + voting_num_auth == 0 %}
+                <a class="black_button" href="/start_vote">Начать</a>
             {% else %}
-                <form class="form" style="padding-top: 15%; padding-left: 0%  ">
-                    <h2>Выберите ось</h2>
-                    {% if access.responsibilities.top_cadet and is_first %}
-                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
-                    {% endif %}
-                    {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.teamlead) and is_second %}
-                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
-                    {% endif %}
-                    {% if access.responsibilities.chieftain and is_third %}
-                        <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[2][0]) }}" style="width: auto%; height: auto%;">{{ axises[2][1] }}</a>
-                    {% endif %}
-                </form>
+                <a class="black_button" href="/start_vote">Продолжить</a>
             {% endif %}
+        {% endif %}
+
+        <!--form class="form" style="padding-top: 15%; padding-left: 0%  ">
+            <h2>Выберите ось</h2>
+            {% if access.responsibilities.top_cadet and is_first %}
+                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[0][0]) }}" style="width: auto%; height: auto%;">{{ axises[0][1] }}</a>
+            {% endif %}
+            {% if (access.responsibilities.expert or access.responsibilities.tracker or access.responsibilities.teamlead) and is_second %}
+                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[1][0]) }}" style="width: auto%; height: auto%;">{{ axises[1][1] }}</a>
+            {% endif %}
+            {% if access.responsibilities.chieftain and is_third %}
+                <a class="nav__link" href="{{ url_for('assessment_team', axis_id=axises[2][0]) }}" style="width: auto%; height: auto%;">{{ axises[2][1] }}</a>
+            {% endif %}
+        </form-->
+        {% endif %}
         {% else %}
         <h2>В настоящее время нет активной оценки</h2>
         {% endif %}

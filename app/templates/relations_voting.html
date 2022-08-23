@@ -10,7 +10,14 @@
 <div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});" style="margin-left:10%;width:80%;">
     <br>
     <div class="nav_href">
-        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a href="/assessment_team?axis_id=1">выбор команды</a> - <a class="cur_href" href="">оценивание по оси отношений</a>
+        <!--a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a href="/assessment_team?axis_id=1">выбор команды</a> - <a class="cur_href" href="">оценивание по оси отношений</a-->
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать в оценке</a> - <a class="cur_href" href="">оценивание по оси отношений</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
+        {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
     </div>
     <br><br>
     <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>

@@ -10,7 +10,13 @@
 <div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});" style="margin-left:10%;width:80%;">
     <br>
     <div class="nav_href">
-        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a class="cur_href" href="">оценивание по оси власти</a>
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать в оценке</a> - <a class="cur_href" href="">оценивание по оси власти</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        {% if is_first %} ось Отношений {{voting_num_rel}}/{{teams_for_voting}}, {% endif %}
+        {% if is_second %}ось Дела {{voting_num_bus}}/{{teams_for_voting}}, {% endif %}
+        <span class="cur_href"> ось Власти {{voting_num_auth}}/1 </span>
     </div>
     <br><br>
     <h2 style="text-align:center;">Оценка по оси власти</h2>

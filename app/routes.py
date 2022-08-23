@@ -1644,18 +1644,67 @@ def assessment_axis():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                         Voting.voting_id == assessment.id).all())
+    voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                                 Voting.voting_id == assessment.id).all())
+    voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                                 Voting.voting_id == assessment.id).all())
     axises = [(axis.id, axis.name) for axis in Axis.query.all()]
-    teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
-             Voting.check_on_assessment(current_user.id, team.id, 1)]
-    is_first = True if len(teams) else False
-    teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
-             Voting.check_on_assessment(current_user.id, team.id, 2)]
-    is_second = True if len(teams) else False
-    is_third = True
-    if not Voting.check_on_assessment(current_user.id, 0, 3):
-        is_third = False
-    return render_template('assessment_axis.html', title='Выбор оси', is_first=is_first,
-                           access=get_access(current_user), axises=axises, is_third=is_third, is_second=is_second)
+    is_first = True if User.check_top_cadet(current_user.id) else False
+    is_second = True if User.check_tracker(current_user.id) or User.check_expert(current_user.id) \
+                        or User.check_teamlead(current_user.id) else False
+    is_third = True if User.check_chieftain(current_user.id) else False
+    # teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+    #          Voting.check_on_assessment(current_user.id, team.id, 1)]
+    # is_first = True if len(teams) else False
+    # teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+    #          Voting.check_on_assessment(current_user.id, team.id, 2)]
+    # is_second = True if len(teams) else False
+    # is_third = True
+    # if not Voting.check_on_assessment(current_user.id, 0, 3):
+    #     is_third = False
+    return render_template('assessment_axis.html', title='Оценка', is_first=is_first,
+                           access=get_access(current_user), axises=axises, is_third=is_third, is_second=is_second,
+                           teams_for_voting=teams_for_voting,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                           voting_num_auth=voting_num_auth)
+
+
+@app.route('/start_vote')
+@login_required
+def start_voting():
+    if not (User.check_tracker(current_user.id) or User.check_top_cadet(current_user.id)
+            or User.check_expert(current_user.id) or User.check_chieftain(current_user.id) or User.check_teamlead(
+                current_user.id)):
+        log('Попытка начать голосование(ГВ)')
+        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
+                               access=get_access(current_user))
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    teams_for_voting = Teams.query.filter_by(type=1).all()
+    teams_for_voting = [t.id for t in teams_for_voting]
+    if User.check_top_cadet(current_user.id):
+        voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                             Voting.voting_id == assessment.id).all()
+        if len(voting_num_rel) < len(teams_for_voting):
+            voted_team = [row.team_id for row in voting_num_rel]
+            left_teams = list(set(teams_for_voting).difference(set(voted_team)))
+            return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0]))
+    if User.check_tracker(current_user.id) or User.check_expert(current_user.id) or User.check_teamlead(current_user.id):
+        voting_num_bus = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                             Voting.voting_id == assessment.id).all()
+        if len(voting_num_bus) < len(teams_for_voting):
+            voted_team = [row.team_id for row in voting_num_bus]
+            left_teams = list(set(teams_for_voting).difference(set(voted_team)))
+            return redirect(url_for('assessment_users', axis_id=2, team_id=left_teams[0]))
+    if User.check_chieftain(current_user.id):
+        voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                              Voting.voting_id == assessment.id).all())
+        if voting_num_auth == 0:
+            return redirect(url_for('assessment_users', axis_id=3, team_id=0))
+    return redirect('assessment_axis')
 
 
 @app.route('/assessment_team', methods=['GET', 'POST'])
@@ -1701,6 +1750,21 @@ def assessment_users():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     # q_ids = []
+
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                             Voting.voting_id == assessment.id).all())
+    voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                             Voting.voting_id == assessment.id).all())
+    voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                              Voting.voting_id == assessment.id).all())
+    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
+    is_first = True if User.check_top_cadet(current_user.id) else False
+    is_second = True if User.check_tracker(current_user.id) or User.check_expert(current_user.id) \
+                        or User.check_teamlead(current_user.id) else False
+    is_third = True if User.check_chieftain(current_user.id) else False
+
     team_id = int(request.args.get('team_id'))
     axis_id = request.args.get('axis_id')
     log('Просмотр страницы с оценкой по оси id {} команды с id {}'.format(axis_id, team_id))
@@ -1729,7 +1793,9 @@ def assessment_users():
                     answers[q.id].append('Нет ответа')
         return render_template('authority_voting.html', title='Ось власти', answers=answers,
                                access=get_access(current_user), questions=questions,
-                               team_members=cadets, criterions=criterions, axis=axis, team_id=team_id)
+                               team_members=cadets, criterions=criterions, axis=axis, team_id=team_id, is_first=is_first,
+                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, voting_num_auth=voting_num_auth)
     elif axis_id == '2':
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -1791,7 +1857,9 @@ def assessment_users():
                                access=get_access(current_user), team_id=team_id, voting_results=voting_results,
                                dates=dates_str,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team,
-                               voting_dict=voting_dict)
+                               voting_dict=voting_dict, is_first=is_first,
+                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, voting_num_auth=voting_num_auth)
     else:
         team_members = [(member.user_id,
                          User.query.filter_by(id=member.user_id).first().name,
@@ -1819,7 +1887,9 @@ def assessment_users():
         team = Teams.query.filter_by(id=team_id).first().name
         return render_template('relations_voting.html', title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team)
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team, is_first=is_first,
+                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, voting_num_auth=voting_num_auth)
 
 
 @app.route('/get_members_of_team', methods=['GET', 'POST'])
