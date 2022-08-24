@@ -12,7 +12,7 @@ app.controller("ctrl", function ($scope, $http) {
                 $scope.members = response.data['members'];
                 $scope.results = [];
                 for(let i=0;i<$scope.members.length;i++){
-                    $scope.results[$scope.members[i][0]] = [1,1,1,1,1,1,1,1,1];//[-1,-1,-1,-1,-1,-1,-1,-1,-1];
+                    $scope.results[$scope.members[i][0]] = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
                 }
             });
 	}
