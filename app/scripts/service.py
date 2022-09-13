@@ -1,4 +1,15 @@
-from app.models import User, QuestionnaireTable, VotingTable, Membership, TeamRoles, Questionnaire
+from app.models import User, QuestionnaireTable, VotingTable, Membership, TeamRoles, Questionnaire, Log
+from flask_login import current_user
+import datetime
+from app import db
+
+
+def log(action, user_id=None):
+    if user_id is None:
+        user_id = current_user.id
+    new_log = Log(user_id=user_id, action=action, date=datetime.datetime.today().strftime("%d-%m-%Y %H:%M:%S"))
+    db.session.add(new_log)
+    db.session.commit()
 
 
 def get_access(current_user):

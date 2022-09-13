@@ -27,9 +27,10 @@ KT_BITS_IN_KT = 1000000000000000000
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')
 
-from app import routes, models
+from app import models
 from app import token_utils
 from app.token import routes
+from app.routes import routes, questionnaire_routes
 from app.admin.views import MyAdminIndexView, TransactionView, AllBudgetRecordsView, CurrentBudgetView, ProfitRecordView
 
 admin = Admin(app, name='Korpus Token', index_view=MyAdminIndexView(url='/'), template_mode='bootstrap3')
@@ -39,8 +40,7 @@ admin.add_view(AllBudgetRecordsView(models.BudgetRecord, db.session, name='Вс�
 admin.add_view(CurrentBudgetView(models.BudgetRecord, db.session, name='Текущий бюджет', endpoint='current_budget'))
 
 jobstores = {
-    'default': SQLAlchemyJobStore(url=os.environ.get('DATABASE_URI')\
-        or 'mysql+pymysql://korpus_user:korpus_password@localhost/korpus_db_test')
+    'default': SQLAlchemyJobStore(url=Config.SQLALCHEMY_DATABASE_URI)
 }
 
 job_defaults = {
