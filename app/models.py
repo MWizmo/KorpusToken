@@ -432,6 +432,15 @@ class QuestionnaireInfo(db.Model):
     question_answ = db.Column(db.Text)
 
 
+class QuestionnairePositionEnergy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    questionnaire_id = db.Column(db.Integer)
+    type = db.Column(db.Integer)  # 3 для позиции, 4 для энергии
+    cadet_id = db.Column(db.Integer)  # кто оценивает
+    voted_id = db.Column(db.Integer)  # кого оценивает
+    question_answ = db.Column(db.Integer)
+
+
 class Statuses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(64), unique=True)

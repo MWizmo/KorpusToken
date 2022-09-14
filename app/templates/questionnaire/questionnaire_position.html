@@ -7,11 +7,10 @@
         <p>Ясность позиции - это критерий, который отражает насколько очевидны и понятны мотивация человека, иерархия целей, приоритеты, роль, картина мира (ценности, установки), отношение к проекту и команде, сообществу, к целям Корпуса.</p>
         <form action="/fix_quest_position" method="post" class="form">
             <p><b>{{ q.text }}</b><br>Выберите вариант ответа, который наиболее соответствует лично вашему мнению.</p>
-            <p><label><input type="radio" name="self" value="1" required>&nbspЯ считаю, что мои приоритеты, отношение к проекту и команде предельно ясны. </label></p>
-            <p><label><input type="radio" name="self" value="2" required>&nbspЯ не уверен, что все, с кем я работаю, в полной мере понимают, почему я решил учавствовать в проекте.</label></p>
-            <p><label><input type="radio" name="self" value="3" required>&nbspЯ думаю, что в основной массе члены моей команды (команд) не понимают моей позиции в полной мере.</label></p>
+            <p><label><input type="radio" name="position_{{current_user.id}}_{{current_user.id}}" value="1" required>&nbspЯ считаю, что мои приоритеты, отношение к проекту и команде предельно ясны. </label></p>
+            <p><label><input type="radio" name="position_{{current_user.id}}_{{current_user.id}}" value="2" required>&nbspЯ не уверен, что все, с кем я работаю, в полной мере понимают, почему я решил учавствовать в проекте.</label></p>
+            <p><label><input type="radio" name="position_{{current_user.id}}_{{current_user.id}}" value="3" required>&nbspЯ думаю, что в основной массе члены моей команды (команд) не понимают моей позиции в полной мере.</label></p>
             <p><b>Укажите, насколько вам ясна позиция каждого из участников вашей команды (комад).</b> <br>Выберите вариант ответа, который наиболее точно отражает ваше мнение.</p>
-            <input type="hidden" name="team_id" value="{{team_id}}">
             {% for u in users %}
                 <p><b>{{u[1]}} {{u[2]}}</b></p>
                 <p><label><input type="radio" name="position_{{current_user.id}}_{{u[0]}}" value="1" required>&nbspМне предельно понятна его (её) позиция, ясны мотивы и картина мира.</label></p>

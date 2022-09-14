@@ -7,11 +7,10 @@
         <p>Энергией мы называем интенсивность работы участника, его выносливость: количество инициированных и выполняемых процессов, доля сил и времени, инвестируемых в проект. Человек, постоянно толкающий проект вперёд, достоин балла по этому критерию.</p>
         <form action="/fix_quest_energy" method="post" class="form">
             <p><b>{{ q.text }}</b><br>Выберите вариант ответа, который наиболее соответствует лично вашему мнению.</p>
-            <p><label><input type="radio" name="self" value="1" required>&nbspЯ считаю что был предельно энергичен, прикладывал все усилия, чтобы наш с командой проект развивался.</label></p>
-            <p><label><input type="radio" name="self" value="2" required>&nbspВ заданном промежутке в основном я был довольно энергичен, но порой случались и провалы.</label></p>
-            <p><label><input type="radio" name="self" value="3" required>&nbspПрошедший период в плане энергии прошёл не так, как хотелось бы, не могу сказать, что был на пике.</label></p>
+            <p><label><input type="radio" name="energy_{{current_user.id}}_{{current_user.id}}" value="1" required>&nbspЯ считаю что был предельно энергичен, прикладывал все усилия, чтобы наш с командой проект развивался.</label></p>
+            <p><label><input type="radio" name="energy_{{current_user.id}}_{{current_user.id}}" value="2" required>&nbspВ заданном промежутке в основном я был довольно энергичен, но порой случались и провалы.</label></p>
+            <p><label><input type="radio" name="energy_{{current_user.id}}_{{current_user.id}}" value="3" required>&nbspПрошедший период в плане энергии прошёл не так, как хотелось бы, не могу сказать, что был на пике.</label></p>
             <p><b>Оцените уровень энергии каждого из участников вашей команды (комад).</b> <br>Выберите вариант ответа, который наиболее точно отражает ваше мнение.</p>
-            <input type="hidden" name="team_id" value="{{team_id}}">
             {% for u in users %}
                 <p><b>{{u[1]}} {{u[2]}}</b></p>
                 <p><label><input type="radio" name="energy_{{current_user.id}}_{{u[0]}}" value="1" required>&nbspНа мой взгляд, он (она) был максимально энергичен.</label></p>

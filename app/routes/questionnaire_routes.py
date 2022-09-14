@@ -6,7 +6,7 @@ from app.scripts.service import get_access, log
 from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
-    Profit, KorpusServices, ServicePayments, Budget, Skill, WorkExperience, Language
+    Profit, KorpusServices, ServicePayments, Budget, Skill, WorkExperience, Language, QuestionnairePositionEnergy
 from flask import render_template, redirect, url_for, request
 from sqlalchemy import func
 from app.forms import *
@@ -17,48 +17,56 @@ from flask_login import current_user, login_required
 @login_required
 def questionnaire_position():
     cur_quest = QuestionnaireTable.current_questionnaire_id()
-    user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=3).all()
+    # user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=3).all()
+    user_quest = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                                                          QuestionnairePositionEnergy.cadet_id == current_user.id,
+                                                          QuestionnairePositionEnergy.type == 3).all()
     if user_quest:
-        user_quest = user_quest[-1]
-        if user_quest.questionnaire_id == cur_quest:
-            if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 1:
-                return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
-            else:
-                membership = Membership.query.filter_by(user_id=current_user.id).first()
-                if not membership:
-                    return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
-                else:
-                    return redirect('/questionnaire_energy')
+        return redirect('/questionnaire_energy')
+        # user_quest = user_quest[-1]
+        # if user_quest.questionnaire_id == cur_quest:
+        #     if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 1:
+        #         return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
+        #     else:
+        #         membership = Membership.query.filter_by(user_id=current_user.id).first()
+        #         if not membership:
+        #             return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
+        #         else:
+        #             return redirect('/questionnaire_energy')
     q = Questions.query.filter_by(type=3).first()
-    membership = Membership.query.filter_by(user_id=current_user.id).first()
-    users = Membership.get_crew_of_team(membership.team_id)
-    users = [(u[0], u[1], u[2]) for u in users if u[0] != current_user.id]
-    return render_template('questionnaire/questionnaire_position.html', title='Анкетирование - ясность позиции', users=users, q=q,
-                           team_id=membership.team_id)
+    membership = Membership.query.filter_by(user_id=current_user.id).all()
+    teams_ids = []
+    for m in membership:
+        team = Teams.query.get(m.team_id)
+        if team.type in [1]:
+            teams_ids.append(team.id)
+    users_ids = set()
+    for t in teams_ids:
+        m = Membership.query.filter(Membership.team_id == t, Membership.user_id != current_user.id).all()
+        for u in m:
+            users_ids.add(u.user_id)
+    users = []
+    for u in users_ids:
+        user = User.query.get(u)
+        users.append((user.id, user.name, user.surname))
+    return render_template('questionnaire/questionnaire_position.html', title='Анкетирование - ясность позиции',
+                           users=users, q=q)
 
 
 @app.route('/fix_quest_position', methods=['POST'])
 @login_required
 def fix_quest_position():
     cur_quest = QuestionnaireTable.current_questionnaire_id()
-    quest = Questionnaire(user_id=current_user.id, team_id=int(request.form.get('team_id')), type=3,
-                          questionnaire_id=cur_quest, assessment=1, date=datetime.datetime.now())
-    db.session.add(quest)
-    db.session.commit()
-    q = Questions.query.filter_by(type=3).first()
+    # quest = Questionnaire(user_id=current_user.id, team_id=int(request.form.get('team_id')), type=3,
+    #                       questionnaire_id=cur_quest, assessment=1, date=datetime.datetime.now())
+    # db.session.add(quest)
+    # db.session.commit()
     for value in request.form:
-        if value != 'team_id':
-            if value == 'self':
-                answer = QuestionnaireInfo(questionnaire_id=quest.id, question_id=q.id, question_num=current_user.id,
-                                           question_answ=int(request.form.get(value)))
-                db.session.add(answer)
-                db.session.commit()
-            else:
-                items = value.split('_')
-                answer = QuestionnaireInfo(questionnaire_id=quest.id, question_id=q.id, question_num=int(items[2]),
-                                           question_answ=int(request.form.get(value)))
-                db.session.add(answer)
-                db.session.commit()
+        items = value.split('_')
+        answer = QuestionnairePositionEnergy(questionnaire_id=cur_quest, type=3, cadet_id=int(items[1]),
+                                             voted_id=int(items[2]), question_answ=int(request.form.get(value)))
+        db.session.add(answer)
+        db.session.commit()
     return redirect('/questionnaire_energy')
 
 
@@ -66,24 +74,16 @@ def fix_quest_position():
 @login_required
 def fix_quest_energy():
     cur_quest = QuestionnaireTable.current_questionnaire_id()
-    quest = Questionnaire(user_id=current_user.id, team_id=int(request.form.get('team_id')), type=4,
-                          questionnaire_id=cur_quest, assessment=1, date=datetime.datetime.now())
-    db.session.add(quest)
-    db.session.commit()
-    q = Questions.query.filter_by(type=4).first()
+    # quest = Questionnaire(user_id=current_user.id, team_id=int(request.form.get('team_id')), type=3,
+    #                       questionnaire_id=cur_quest, assessment=1, date=datetime.datetime.now())
+    # db.session.add(quest)
+    # db.session.commit()
     for value in request.form:
-        if value != 'team_id':
-            if value == 'self':
-                answer = QuestionnaireInfo(questionnaire_id=quest.id, question_id=q.id, question_num=current_user.id,
-                                           question_answ=int(request.form.get(value)))
-                db.session.add(answer)
-                db.session.commit()
-            else:
-                items = value.split('_')
-                answer = QuestionnaireInfo(questionnaire_id=quest.id, question_id=q.id, question_num=int(items[2]),
-                                           question_answ=int(request.form.get(value)))
-                db.session.add(answer)
-                db.session.commit()
+        items = value.split('_')
+        answer = QuestionnairePositionEnergy(questionnaire_id=cur_quest, type=4, cadet_id=int(items[1]),
+                                             voted_id=int(items[2]), question_answ=int(request.form.get(value)))
+        db.session.add(answer)
+        db.session.commit()
     return redirect('/questionnaire_self')
 
 
@@ -91,24 +91,39 @@ def fix_quest_energy():
 @login_required
 def questionnaire_energy():
     cur_quest = QuestionnaireTable.current_questionnaire_id()
-    user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=4).all()
+    # user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=3).all()
+    user_quest = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                                                          QuestionnairePositionEnergy.cadet_id == current_user.id,
+                                                          QuestionnairePositionEnergy.type == 4).all()
     if user_quest:
-        user_quest = user_quest[-1]
-        if user_quest.questionnaire_id == cur_quest:
-            if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 1:
-                return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
-            else:
-                membership = Membership.query.filter_by(user_id=current_user.id).first()
-                if not membership:
-                    return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
-                else:
-                    return redirect('/questionnaire_self')
-    q = Questions.query.filter_by(type=4).first()
-    membership = Membership.query.filter_by(user_id=current_user.id).first()
-    users = Membership.get_crew_of_team(membership.team_id)
-    users = [(u[0], u[1], u[2]) for u in users if u[0] != current_user.id]
-    return render_template('questionnaire/questionnaire_energy.html', title='Анкетирование - энергия', users=users, q=q,
-                           team_id=membership.team_id)
+        return redirect('/questionnaire_self')
+        # user_quest = user_quest[-1]
+        # if user_quest.questionnaire_id == cur_quest:
+        #     if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 1:
+        #         return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
+        #     else:
+        #         membership = Membership.query.filter_by(user_id=current_user.id).first()
+        #         if not membership:
+        #             return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
+        #         else:
+        #             return redirect('/questionnaire_energy')
+    q = Questions.query.filter_by(type=3).first()
+    membership = Membership.query.filter_by(user_id=current_user.id).all()
+    teams_ids = []
+    for m in membership:
+        team = Teams.query.get(m.team_id)
+        if team.type in [1]:
+            teams_ids.append(team.id)
+    users_ids = set()
+    for t in teams_ids:
+        m = Membership.query.filter(Membership.team_id == t, Membership.user_id != current_user.id).all()
+        for u in m:
+            users_ids.add(u.user_id)
+    users = []
+    for u in users_ids:
+        user = User.query.get(u)
+        users.append((user.id, user.name, user.surname))
+    return render_template('questionnaire/questionnaire_energy.html', title='Анкетирование - энергия', users=users, q=q)
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
