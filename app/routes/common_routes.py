@@ -1418,8 +1418,11 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = datetime.datetime.now().month
-        dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
+        #current_month = datetime.datetime.now().month
+        monthes = [5, 6, 7, 8, 9]
+        dates = []
+        for current_month in monthes:
+            dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
         voting_results = []
