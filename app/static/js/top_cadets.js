@@ -40,7 +40,7 @@ app.controller("ctrl", function ($scope, $http) {
                         async:false
                     }).then(function success (response) {
                     alert("Спасибо за ваш выбор!");
-                        document.location.href = "assessment_page";
+                        document.location.href = "participate";
                     });
             }
         }

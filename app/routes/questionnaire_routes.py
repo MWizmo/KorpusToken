@@ -107,7 +107,7 @@ def questionnaire_energy():
         #             return render_template('questionnaire/questionnaire_error.html', access=get_access(current_user))
         #         else:
         #             return redirect('/questionnaire_energy')
-    q = Questions.query.filter_by(type=3).first()
+    q = Questions.query.filter_by(type=4).first()
     membership = Membership.query.filter_by(user_id=current_user.id).all()
     teams_ids = []
     for m in membership:
