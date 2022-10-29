@@ -2346,12 +2346,14 @@ def assessment_results():
 @app.route('/weekly_results', methods=['GET'])
 @login_required
 def weekly_results():
-    votings = WeeklyVoting.query.group_by(WeeklyVoting.date).all()
-    for v in votings:
-        day = f'0{v.date.day}' if v.date.day < 10 else v.date.day
-        month = f'0{v.date.month}' if v.date.month < 10 else v.date.month
-        v.date_str = f'{day}.{month}.{v.date.year}'
-        v.date = f'{v.date.year}-{v.date.month}-{v.date.day}'
+    voting_dates = [voting[0] for voting in db.session.query(WeeklyVoting.date).distinct(WeeklyVoting.date).all()]
+    votings = []
+    
+    for date in voting_dates:
+        day = f'0{date.day}' if date.day < 10 else date.day
+        month = f'0{date.month}' if date.month < 10 else date.month
+        
+        votings.append({ 'date_str': f'{day}.{month}.{date.year}', 'date': f'{date.year}-{date.month}-{date.day}' })
     return render_template('weekly_results.html', title='Результаты еженедельной оценки',
                            access=get_access(current_user), votings=votings[::-1])
 
@@ -2382,7 +2384,17 @@ def get_results_of_voting():
 @login_required
 def get_results_of_weekly_voting():
     date = request.args.get('voting_date')
-    date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    if date:
+        date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        
+    if start_date and end_date:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+
+
     teams = [t for t in Teams.query.all() if t.type in [1,4]]
     summary_results = []
     for t in teams:
@@ -2390,41 +2402,50 @@ def get_results_of_weekly_voting():
                      User.query.filter_by(id=member.user_id).first().surname)
                     for member in Membership.query.filter_by(team_id=t.id) if User.check_cadet(member.user_id)]
         voting_results = []
-        voting_dict = {}
-        for user in team_members:
-            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
-        dates_str = []
-
-        date_info = {'date': f'{date.day}.{date.month}.{date.year}'}
-        dates_str.append(f'{date.day}.{date.month}.{date.year}')
-        marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
-            filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
-            group_by(WeeklyVoting.criterion_id).all()
-        mark_res = []
-        for mark in marks:
-            mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] >= 0.5 else 0})
-        if len(marks) == 0:
-            mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
-        date_info['marks'] = mark_res
-        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
+            
+        date_info = {'date': f'{date.day}.{date.month}.{date.year}'} if date else { 'start_date': f'{start_date.day}.{start_date.month}.{start_date.year}', 'end_date': f'{end_date.day}.{end_date.month}.{end_date.year}' }
+       
+        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date if date else and_(start_date <= WeeklyVotingMembers.date, WeeklyVotingMembers
+                                                                          .date <= end_date),
                                                                           WeeklyVotingMembers.team_id == t.id).all()
         if len(teammates) == 0:
-            teammates = [user_id for user_id in voting_dict]
+            teammates = [user[0] for user in team_members]
         else:
             teammates = [t[0] for t in teammates]
-        for user in voting_dict:
-            if user in teammates and mark_res[0]['mark'] == 1:
-                voting_dict[user]['marks1'].append(1)
-            else:
-                voting_dict[user]['marks1'].append(0)
-            if user in teammates and mark_res[1]['mark'] == 1:
-                voting_dict[user]['marks2'].append(1)
-            else:
-                voting_dict[user]['marks2'].append(0)
-            if user in teammates and mark_res[2]['mark'] == 1:
-                voting_dict[user]['marks3'].append(1)
-            else:
-                voting_dict[user]['marks3'].append(0)
+        marks = db.session.query(WeeklyVoting.criterion_id, WeeklyVoting.user_id, func.avg(WeeklyVoting.mark), WeeklyVoting.date). \
+            filter(WeeklyVoting.date == date if date else and_(start_date <= WeeklyVoting.date, WeeklyVoting.date <= end_date), WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
+            group_by(WeeklyVoting.criterion_id, WeeklyVoting.user_id, WeeklyVoting.date).all()
+        voting_dates = list(set([mark[3] for mark in marks]))
+        mark_res = { teammate: { date: [] for date in voting_dates } for teammate in teammates }
+        for mark in marks:
+            mark_res.get(mark.user_id).get(mark[3]).append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
+        if len(marks) == 0:
+            mark_res = { teammate: { date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0 }] for date in voting_dates } for teammate in teammates }
+        date_info['marks'] = mark_res
+        
+        voting_list = []
+
+        for user in team_members:
+            for voting_date in voting_dates:
+                row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+                row['voting_date'] = voting_date.strftime('%Y-%m-%d')
+                
+                if user[0] in teammates and mark_res[user[0]][voting_date][0]['mark'] == 1:
+                    row['marks1'].append(1)
+                else:
+                    row['marks1'].append(0)
+                if user[0] in teammates and mark_res[user[0]][voting_date][1]['mark'] == 1:
+                    row['marks2'].append(1)
+                else:
+                    row['marks2'].append(0)
+                if user[0] in teammates and mark_res[user[0]][voting_date][2]['mark'] == 1:
+                    row['marks3'].append(1)
+                else:
+                    row['marks3'].append(0)
+                    
+                    
+                voting_list.append(row)
+        
         teammates_info = []
         for member in team_members:
             if member[0] in teammates and len(teammates) > 0:
@@ -2433,7 +2454,7 @@ def get_results_of_weekly_voting():
                 teammates_info.append(member)
         date_info['teammates'] = teammates_info
         voting_results.append(date_info)
-        summary_results.append({'team': t.name, 'marks': voting_dict})
+        summary_results.append({'team': t.name, 'marks': voting_list})
     return jsonify({'results': summary_results})
 
 

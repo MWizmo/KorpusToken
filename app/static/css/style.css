@@ -1971,3 +1971,22 @@ input[type='radio'] {
   overflow-x: auto;
   width: 100%;
 }
+
+select {
+  min-width: 7rem;
+}
+
+.voting-button {
+  background-color: black;
+  font-family: 'Decima Mono Cyr';
+  font-weight: 300;
+  border-radius: 0.5rem;
+  border: 1px solid white;
+  color: white;
+  width: 10rem;
+  height: 1.7rem;
+}
+
+.voting-button:hover {
+  cursor: pointer;
+}
