@@ -5,7 +5,7 @@ from flask import render_template, redirect, url_for, request, jsonify, send_fil
 from flask_login import current_user, login_required
 from app.token.forms import *
 import app.token.utils as token_utils
-from app.routes import log
+from app.routes.common_routes import log
 
 
 @app.route('/accounting', methods=['GET', 'POST'])

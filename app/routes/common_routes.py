@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-import datetime
-import threading
-import os
-import csv
-import requests
+import datetime, os, csv, requests
+from app.routes.questionnaire_routes import get_questionnaire_progress
 from sqlalchemy import func, or_, and_
 from sqlalchemy.sql import text
 from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
-from app.scripts import graphs
-from app.scripts.service import get_access
+from app.scripts.service import get_access, log
 from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
@@ -24,13 +20,6 @@ import json
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import html
-
-def log(action, user_id=None):
-    if user_id is None:
-        user_id = current_user.id
-    new_log = Log(user_id=user_id, action=action, date=datetime.datetime.today().strftime("%d-%m-%Y %H:%M:%S"))
-    db.session.add(new_log)
-    db.session.commit()
 
 
 @app.route('/')
@@ -136,147 +125,7 @@ def signup():
             statuses = UserStatuses(user_id=user.id, status_id=10)
         db.session.add(statuses)
         db.session.commit()
-        return render_template('after_register.html', title='Регистрация')
-
-
-@app.route('/questionnaire_self', methods=['GET', 'POST'])
-@login_required
-def questionnaire_self():
-    log('Просмотр страницы с личной анкетой')
-    cur_quest = QuestionnaireTable.current_questionnaire_id()
-    user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=1).all()
-    if user_quest:
-        user_quest = user_quest[-1]
-        if user_quest.questionnaire_id == cur_quest:
-            if len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 9:
-                return render_template('questionnaire_error.html', access=get_access(current_user))
-            else:
-                membership = Membership.query.filter_by(user_id=current_user.id).first()
-                if not membership:
-                    return render_template('questionnaire_error.html', access=get_access(current_user))
-                else:
-                    return redirect('/questionnaire_team')
-
-    form = QuestionnairePersonal()
-    questions = Questions.query.filter_by(type=1)  # type=1 - вопросы 1-го типа, т. е. личные
-    membership = Membership.query.filter_by(user_id=current_user.id).first()
-    if form.validate_on_submit():
-        if membership:
-            q = Questionnaire(user_id=current_user.id,
-                              team_id=membership.team_id,
-                              date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
-                                                 datetime.datetime.now().day),
-                              type=1, questionnaire_id=cur_quest, assessment=1)
-        else:
-            q = Questionnaire(user_id=current_user.id,
-                              date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
-                                                 datetime.datetime.now().day),
-                              type=1, questionnaire_id=cur_quest, assessment=1)
-        db.session.add(q)
-        db.session.commit()
-        answs = [form.qst_personal_growth.data, form.qst_controllability.data,
-                 form.qst_selfcontrol.data, form.qst_strategy.data]
-        i = 0
-
-        for question in questions[:4]:
-            answ = QuestionnaireInfo(question_id=question.id,
-                                     questionnaire_id=Questionnaire.query.all()[-1].id,
-                                     question_num=i + 1,
-                                     question_answ=answs[i])
-            db.session.add(answ)
-            i += 1
-        db.session.commit()
-        log('Заполнение личной анкеты')
-        return redirect('/questionnaire_team')
-
-    return render_template('questionnaire_self.html', title='Личная анкета', form=form, q1=questions[0].text,
-                           q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
-                           access=get_access(current_user), membership=membership)
-
-
-@app.route('/questionnaire_team', methods=['GET', 'POST'])
-@login_required
-def questionnaire_team():
-    log('Просмотр страницы с командной анкетой')
-    membership = Membership.query.filter_by(user_id=current_user.id).first()
-    if not membership:
-        return redirect('/participate')
-    cur_quest = QuestionnaireTable.current_questionnaire_id()
-    user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
-    if user_quest:
-        teams = Membership.query.filter_by(user_id=current_user.id).all()
-        teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
-        teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
-        teams_id = [t for t in teams_id if t]
-        if len(teams_id) == 1:
-            user_quest = user_quest[-1]
-            if user_quest.questionnaire_id == cur_quest and \
-                    len(QuestionnaireInfo.query.filter_by(questionnaire_id=user_quest.id).all()) == 5:
-                return render_template('questionnaire_error.html',
-                                       access=get_access(current_user))
-    teammates = []
-    # lst_teammates_bd = Membership.query.filter_by(
-    #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
-    teams = Membership.query.filter_by(user_id=current_user.id).all()
-    teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
-    teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
-    teams_id = [t.id for t in teams_id if t]
-    if len(teams_id) == 1:
-        team_id = teams_id[0]
-    else:
-        done_teams = [q.team_id for q in
-                      Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
-        if len(teams_id) == len(done_teams):
-            return render_template('questionnaire_error.html', access=get_access(current_user))
-        else:
-            team_id = list(set(teams_id).difference(set(done_teams)))[0]
-    lst_teammates_bd = Membership.query.filter(Membership.team_id == team_id,
-                                               Membership.user_id != current_user.id).all()
-    for teammate in lst_teammates_bd:
-        if teammate.user_id == current_user.id or not (User.check_cadet(teammate.user_id)):
-            continue
-        try:
-            cur_user = User.query.filter_by(id=teammate.user_id).first()
-            name = cur_user.name
-            surname = cur_user.surname
-            teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
-        except Exception as e:
-            pass
-
-    form = QuestionnaireTeam()
-    questions = Questions.query.filter_by(type=2)
-    if form.validate_on_submit():
-        q = Questionnaire(user_id=current_user.id, team_id=team_id,
-                          date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
-                                             datetime.datetime.now().day),
-                          type=2, questionnaire_id=cur_quest, assessment=1)
-
-        db.session.add(q)
-        db.session.commit()
-
-        answs = [form.qst_q1.data, form.qst_q2.data, form.qst_q3.data, form.qst_q4.data, form.qst_q5.data]
-        i = 0
-
-        for question in questions[:5]:
-            answ = QuestionnaireInfo(question_id=question.id,
-                                     questionnaire_id=Questionnaire.query.all()[-1].id,
-                                     question_num=i + 1,
-                                     question_answ=answs[i])
-            db.session.add(answ)
-            i += 1
-        db.session.commit()
-        log('Заполнение командной анкеты')
-        done_teams = [q.team_id for q in
-                      Questionnaire.query.filter_by(user_id=current_user.id, type=2, questionnaire_id=cur_quest).all()]
-        if len(teams_id) == len(done_teams):
-            return redirect('/participate')
-        else:
-            return redirect(url_for('questionnaire_team'))
-    team_title = Teams.query.filter_by(id=team_id).first().name
-    return render_template('questionnaire_team.html', title='Командная анкета', teammates=teammates, form=form,
-                           q1=questions[0].text, q2=questions[1].text, q3=questions[2].text, q4=questions[3].text,
-                           q5=questions[4].text, team_title=team_title,
-                           access=get_access(current_user))
+        return render_template('after_register.html', title='Регистрация', name=values['first_name'])
 
 
 @app.route('/logout')
@@ -284,253 +133,6 @@ def logout():
     log('Выход из системы')
     logout_user()
     return redirect(url_for('home'))
-
-
-@app.route('/question_adding', methods=['POST', 'GET'])
-@login_required
-def question_adding():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы добавления вопросов (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
-
-    log('Просмотр страницы с редактированием вопросов')
-    type_of_questionnaire = int(request.args.get('type')) if request.args.get('type') else None
-    form = QuestionAdding()
-
-    if type_of_questionnaire:
-        log('Просмотр страницы с редактированием вопросов для анкеты {}-го типа'.format(type_of_questionnaire))
-        q = Questions.query.filter_by(type=type_of_questionnaire).all()[:5]
-        questions = [qst.text for qst in q]
-        if form.validate_on_submit():
-            new_questions = [(form.question_1.data, 0), (form.question_2.data, 1), (form.question_3.data, 2),
-                             (form.question_4.data, 3), (form.question_5.data, 4)]
-            new_questions = [question for question in new_questions if question[0].replace(' ', '')]
-            for question in new_questions:
-                q[question[1]].text = question[0]
-
-            db.session.commit()
-            log('Изменение вопроса(ов) {}-го типа c id {} '.format(type_of_questionnaire,
-                                                                   [question_id[1] for question_id in new_questions]))
-            return redirect(url_for('question_adding'))
-        return render_template('question_adding.html', title='Конструктор вопросов', form=form, successful=False,
-                               type=True,
-                               questions=questions,
-                               access=get_access(current_user))
-    return render_template('question_adding.html', title='Конструктор вопросов', type=False,
-                           access=get_access(current_user))
-
-
-def get_questionnaire_progress():
-    questionnaire = dict(
-        max_particip=0,
-        already_self=0,
-        already_team=0,
-        all_team_particip=0,
-        participaters=[],
-        participaters_self_ids=[],
-        participaters_team_ids=[],
-        participated_self=[],
-        participated_team=[],
-    )
-    cur_questionnaire = QuestionnaireTable.query.filter_by(status='Active').first().id
-    if User.query.all():
-        for user in User.query.all():
-            if User.check_can_be_marked(user.id):
-                questionnaire['participaters'].append(user.id)
-                questionnaire['participaters_self_ids'].append(user.id)
-                questionnaire['max_particip'] += 1
-                if User.is_in_team(user.id):
-                    questionnaire['all_team_particip'] += 1
-                    questionnaire['participaters_team_ids'].append(user.id)
-
-            if Questionnaire.query.filter_by(user_id=user.id, type=1, assessment=1, questionnaire_id=cur_questionnaire).first():
-                # for qst in Questionnaire.query.filter_by(user_id=user.id, type=1):
-                #     if qst.questionnaire_id == cur_questionnaire:
-                        questionnaire['already_self'] += 1
-                        questionnaire['participated_self'].append(user.id)
-
-            if Questionnaire.query.filter_by(user_id=user.id, type=2, assessment=1, questionnaire_id=cur_questionnaire).first():
-                # for qst in Questionnaire.query.filter_by(user_id=user.id, type=2):
-                #     if qst.questionnaire_id == cur_questionnaire:
-                        questionnaire['already_team'] += 1
-                        questionnaire['participated_team'].append(user.id)
-
-    not_participated_self_ids = [user for user in questionnaire['participaters_self_ids']
-                                 if user not in questionnaire['participated_self']]
-    not_participated_self_names = [User.query.filter_by(id=user).first().name
-                                   for user in questionnaire['participaters_self_ids']
-                                   if user not in questionnaire['participated_self']]
-    not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
-                                      for user in questionnaire['participaters_self_ids']
-                                      if user not in questionnaire['participated_self']]
-    # not_participated_self_statuses = [Statuses.query.filter_by(
-    #     id=UserStatuses.query.filter_by(
-    #         user_id=user).first().status_id).first().status
-    #                                   for user in questionnaire['participaters_self_ids']
-    #                                   if user not in questionnaire['participated_self']]
-    # not_participated_self_teams = [Teams.query.filter_by(
-    #     id=Membership.query.filter_by(user_id=user).first().team_id
-    # ).first().name
-    #                                for user in questionnaire['participaters_self_ids']
-    #                                if user not in questionnaire['participated_self']]
-    not_participated_self_teams = []
-    for user in questionnaire['participaters_self_ids']:
-        if user not in questionnaire['participated_self']:
-            teams = Membership.query.filter_by(user_id=user).all()
-            teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
-            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
-            teams_id = [t for t in teams_id if t]
-            if len(teams_id) > 0:
-                not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
-            else:
-                not_participated_self_teams.append('-')
-    not_participated_self_info = []
-
-    for i in range(len(not_participated_self_ids)):
-        not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
-                                           not_participated_self_surnames[i], not_participated_self_teams[i]])
-
-    not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
-                                 if user not in questionnaire['participated_team']]
-    not_participated_team_names = [User.query.filter_by(id=user).first().name
-                                   for user in questionnaire['participaters_team_ids']
-                                   if user not in questionnaire['participated_team']]
-    not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
-                                      for user in questionnaire['participaters_team_ids']
-                                      if user not in questionnaire['participated_team']]
-    not_participated_team_teams = []
-    for user in questionnaire['participaters_team_ids']:
-        if user not in questionnaire['participated_team']:
-            teams = Membership.query.filter_by(user_id=user).all()
-            teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
-            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in
-                        teams]
-            teams_id = [t for t in teams_id if t]
-            if len(teams_id) > 0:
-                not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
-            else:
-                not_participated_team_teams.append('-')
-    # not_participated_team_teams = [Teams.query.filter(
-    #     Teams.id==Membership.query.filter_by(user_id=user).first().team_id, Teams.type==1
-    # ).first().name
-    #                                for user in questionnaire['participaters_team_ids']
-    #                                if user not in questionnaire['participated_team']]
-
-    not_participated_team_info = []
-
-    for i in range(len(not_participated_team_ids)):
-        not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
-                                           not_participated_team_surnames[i], not_participated_team_teams[i]])
-    counter = len(TopCadetsVoting.query.all())
-    return counter, questionnaire, not_participated_team_info, not_participated_self_info
-
-
-@app.route('/questionnaire_progress', methods=['POST', 'GET'])
-@login_required
-def questionnaire_progress():
-    # if not User.check_admin(current_user.id):
-    #     log('Попытка просмотра страницы с прогрессом анкетирования (ГВ)')
-    #     return render_template('gryazniy_vzlomshik.html',
-    #                            access=get_access(current_user))
-    log('Просмотр страницы с прогрессом анкетирования')
-    d1 = datetime.date.today()
-    d2 = datetime.date(d1.year - 1, d1.month, d1.day)
-    delta = d1 - d2
-    monthes = []
-    month_dict = {'December': 'декабрь', 'January': 'январь', 'February': 'февраль', 'March': 'март', 'April': 'апрель',
-                  'May': 'май',
-                  'June': 'июнь', 'July': 'июль', 'August': 'август', 'September': 'сентябрь', 'October': 'октябрь',
-                  'November': 'ноябрь'}
-    for i in range(delta.days + 1):
-        month = (d2 + datetime.timedelta(i)).strftime('%B')
-        if month in month_dict:
-            month = month_dict[month]
-        row = f"{month} {(d2 + datetime.timedelta(i)).strftime('%Y')}г."
-        if row not in monthes:
-            monthes.append(row)
-    monthes = monthes[::-1]
-
-    form = StartAssessmentForm()
-    if form.validate_on_submit():
-        if QuestionnaireTable.is_opened():
-            return render_template('questionnaire_progress.html', title='Прогресс голосования',
-                                   access=get_access(current_user), form=form,
-                                   msg='Сначала надо завершить текущий процесс анкетирования')
-        assessment_status = VotingTable(status='Active', month_from=form.month1.data, month_to=form.month2.data)
-        db.session.add(assessment_status)
-        db.session.commit()
-        log('Открыл оценку')
-        return redirect('voting_progress')
-    is_opened = QuestionnaireTable.is_opened()
-    if is_opened:
-        counter, questionnaire, not_participated_team_info, not_participated_self_info = get_questionnaire_progress()
-        return render_template('questionnaire_progress.html', title='Прогресс анкетирования',
-                               access=get_access(current_user), counter=counter,
-                               questionnaire=questionnaire, not_participated_self=not_participated_self_info,
-                               not_participated_team=not_participated_team_info)
-    elif QuestionnaireTable.is_in_assessment():
-        return render_template('questionnaire_progress.html', title='Прогресс оценки', ready=True,
-                               access=get_access(current_user), form=form, monthes=monthes)
-    elif VotingTable.current_fixed_voting_id():
-        cur_id = VotingTable.current_fixed_voting_id()
-        filename = 'results_' + str(cur_id) + '.csv'
-        # if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
-        user_info = list()
-        with open(os.path.join(app.root_path + '/results', filename)) as file:
-            reader = csv.reader(file)
-            next(reader)
-            for row in reader:
-                user_marks = row[0].split(';')
-                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
-                user_info.append(user_marks)
-        user_info.sort(key=lambda i: i[-1], reverse=True)
-        criterions = [c.name for c in Criterion.query.all()]
-        return render_template('questionnaire_progress.html', title='Прогресс оценки', fixed_id=cur_id,
-                               access=get_access(current_user), criterions=criterions, user_info=user_info)
-    elif VotingTable.current_emission_voting_id():
-        cur_id = VotingTable.current_emission_voting_id()
-        return render_template('questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
-                               access=get_access(current_user))
-    elif VotingTable.current_distribution_voting_id():
-        cur_id = VotingTable.current_distribution_voting_id()
-        return render_template('questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
-                               access=get_access(current_user))
-    else:
-        return render_template('questionnaire_progress.html', title='Прогресс оценки',
-                               access=get_access(current_user))
-
-
-@app.route('/finish_questionnaire')
-@login_required
-def finish_questionnaire():
-    if not User.check_admin(current_user.id):
-        log('Попытка закрыть анкету (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
-    questionnaire = QuestionnaireTable.query.filter_by(status='Active').first()
-    questionnaire.status = 'Ready for assessment'
-    db.session.commit()
-    teams = Teams.query.all()
-    for t in teams:
-        # requests.get(f'/f?team_id={t.id}')
-        make_all_graphs(t.id)
-    log('Закрытие анкетирования')
-    return redirect('questionnaire_progress')
-
-
-@app.route('/start_questionnaire')
-@login_required
-def start_questionnaire():
-    if not User.check_admin(current_user.id):
-        log('Попытка создать анкету (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
-    questionnaire = QuestionnaireTable(status='Active')
-    db.session.add(questionnaire)
-    db.session.commit()
-    log('Открытие анкетирования')
-    return redirect('questionnaire_progress')
 
 
 @app.route('/users_list', methods=['POST', 'GET'])
@@ -611,7 +213,7 @@ def red_team():
     tid = request.args.get('tid')
     team = Teams.query.get(tid)
     statuses = [(1, 'Оценивается'), (2, 'Не оценивается'), (3, 'Состояние не определено'),
-                (4, 'Участвует в еженедельной оценке'), (5, 'Заморожен')]
+                (4, 'Участвует в еженедельной оценке')]
     if form.validate_on_submit():
         team.name = form.title.data
         team.type = form.status.data
@@ -1095,6 +697,7 @@ def make_emission():
         exchange_rate = 248000
 
     kti_emission = int(((current_budget / exchange_rate) / kti_price) * KT_BITS_IN_KT)
+    ktd_emission = int((kti_emission * 3 / 7) * KT_BITS_IN_KT)
 
     contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
@@ -1141,7 +744,7 @@ def emission():
         exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
-    ktd_emission = kti_emission * 9
+    ktd_emission = kti_emission * 3 / 7
 
     voting_id = VotingTable.current_emission_voting_id()
     try:
@@ -1216,7 +819,7 @@ def make_tokens_distribution():
         exchange_rate = 248000
 
     kti_emission = (current_budget / exchange_rate) / kti_price
-    ktd_emission = kti_emission * 9
+    ktd_emission = kti_emission * 3 / 7
 
     cur_voting = VotingTable.query.filter_by(status='Distribution').first()
     if cur_voting:
@@ -1226,20 +829,25 @@ def make_tokens_distribution():
     criterions = [c.name for c in Criterion.query.all()]
     users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id)) for user in User.query.all() if
              User.check_can_be_marked(user.id)]
-    
-    PARTIAL_USER_LIMIT = 9
-    total_limit = 0
+    marks_counter = 0
     for user in users:
-        total_limit += PARTIAL_USER_LIMIT + db.session.query(func.count(Membership.team_id.distinct()).filter_by(user_id=user[0]))
-
-    ktd_in_mark = ktd_emission / total_limit if total_limit >= 0 else 0
+        res = [user[1]]
+        user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                         Voting.id == VotingInfo.voting_id).filter(
+            Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+            VotingInfo.criterion_id).all()
+        for mark in user_res:
+            if float(mark[0]) == 1.0:
+                marks_counter += 1
+    ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
     for user in users:
+        res = [user[1]]
         user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
                                                                          Voting.id == VotingInfo.voting_id).filter(
             Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
-        mint_amount = int(ktd_in_mark * marks * KT_BITS_IN_KT)
+        mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
         token_utils.mint_KTD(mint_amount, user[2], os.environ.get(
             'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
@@ -1586,7 +1194,8 @@ def assessment():
 
     log('Просмотр страницы с оценкой')
     if QuestionnaireTable.is_opened() and User.check_can_be_marked(current_user.id):
-        return redirect('/questionnaire_self')
+        return redirect('/questionnaire_position')
+        # return redirect('/questionnaire_self')
     if not VotingTable.is_opened():
         return render_template('voting_progress.html', title='Оценка', access=get_access(current_user))
     if (User.check_expert(current_user.id) + User.check_top_cadet(current_user.id)
@@ -1603,7 +1212,7 @@ def assessment():
 
     if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(
             current_user.id):  # and Axis.is_available(2):
-        teams_for_voting = len(Teams.get_teams_for_voting())
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1612,7 +1221,7 @@ def assessment():
         return redirect(url_for('assessment_team', axis_id=2))
 
     if User.check_top_cadet(current_user.id):  # and Axis.is_available(1):
-        teams_for_voting = len(Teams.get_teams_for_voting())
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1644,7 +1253,7 @@ def assessment_axis():
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.get_teams_for_voting())
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                          Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1682,7 +1291,7 @@ def start_voting():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = Teams.get_teams_for_voting()
+    teams_for_voting = Teams.query.filter_by(type=1).all()
     teams_for_voting = [t.id for t in teams_for_voting]
     if User.check_top_cadet(current_user.id):
         voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
@@ -1690,14 +1299,20 @@ def start_voting():
         if len(voting_num_rel) < len(teams_for_voting):
             voted_team = [row.team_id for row in voting_num_rel]
             left_teams = list(set(teams_for_voting).difference(set(voted_team)))
-            return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0]))
+            if len(left_teams) == 1:
+                return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0], last=1))
+            else:
+                return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0]))
     if User.check_tracker(current_user.id) or User.check_expert(current_user.id) or User.check_teamlead(current_user.id):
         voting_num_bus = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                              Voting.voting_id == assessment.id).all()
         if len(voting_num_bus) < len(teams_for_voting):
             voted_team = [row.team_id for row in voting_num_bus]
             left_teams = list(set(teams_for_voting).difference(set(voted_team)))
-            return redirect(url_for('assessment_users', axis_id=2, team_id=left_teams[0]))
+            if len(left_teams) == 1:
+                return redirect(url_for('assessment_users', axis_id=2, team_id=left_teams[0], last=1))
+            else:
+                return redirect(url_for('assessment_users', axis_id=2, team_id=left_teams[0]))
     if User.check_chieftain(current_user.id):
         voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
                                               Voting.voting_id == assessment.id).all())
@@ -1724,7 +1339,7 @@ def assessment_team():
         else:
             return redirect(url_for('assessment_error'))
 
-    first_type_teams = [(team.id, team.name) for team in Teams.get_teams_for_voting() if
+    first_type_teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
                         Voting.check_on_assessment(current_user.id, team.id, int(axis_id))]
     if not first_type_teams:
         log('Ошибка при выборе команд для оценки: команды первого типа отсутствуют')
@@ -1751,8 +1366,7 @@ def assessment_users():
     # q_ids = []
 
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.get_teams_for_voting())
-
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                              Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1804,8 +1418,11 @@ def assessment_users():
                         if User.check_cadet(member.user_id)]
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
-        current_month = datetime.datetime.now().month
-        dates = db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
+        #current_month = datetime.datetime.now().month
+        monthes = [5, 6, 7, 8, 9]
+        dates = []
+        for current_month in monthes:
+            dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
                                                            WeeklyVoting.team_id == team_id,
                                                            WeeklyVoting.finished == 1).distinct().all()
         voting_results = []
@@ -1885,10 +1502,11 @@ def assessment_users():
                                                        filename='graphs/graph_{}_{}_{}.png'.format(team_id, q_id, i))}
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
+        is_last = 1 if 'last' in request.args else 0
         return render_template('relations_voting.html', title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team, is_first=is_first,
-                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting, is_last=is_last,
                            voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, voting_num_auth=voting_num_auth)
 
 
@@ -1917,6 +1535,7 @@ def finish_vote():
     team_id = int(data['team_id'])
     axis_id = int(data['axis'])
     results = data['results']
+    is_last = int(data['is_last'])
     voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
                     date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
                                        datetime.datetime.now().day), voting_id=VotingTable.current_voting_id())
@@ -1935,7 +1554,49 @@ def finish_vote():
     #     db.session.commit()
 
     log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
-    return redirect(url_for('assessment'))
+    if is_last:
+        return redirect(url_for('voting_summary', axis_id=axis_id))
+    else:
+        return redirect(url_for('assessment'))
+
+
+@app.route('/voting_summary')
+def voting_summary():
+    axis_id = int(request.args.get('axis_id'))
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
+                                         Voting.voting_id == assessment.id).all()
+    voted_team = [row.team_id for row in voting_num_rel]
+    voting_info = {}
+    for t in voted_team:
+        cur_voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
+                                         Voting.voting_id == assessment.id, Voting.team_id == t).first()
+        team_members = [(member.user_id, User.query.filter_by(id=member.user_id).first().name,
+                     User.query.filter_by(id=member.user_id).first().surname)
+                    for member in Membership.query.filter_by(team_id=t) if User.check_cadet(member.user_id)]
+        voting_dict = {}
+        for user in team_members:
+            marks = VotingInfo.query.filter(VotingInfo.voting_id == cur_voting.id, VotingInfo.cadet_id == user[0]).all()
+            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}'}
+            for mark in marks:
+                voting_dict[user[0]][Criterion.query.get(mark.criterion_id).name] = mark.mark
+        voting_info[Teams.query.get(t).name] = {'id': t, 'marks': voting_dict}
+    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                             Voting.voting_id == assessment.id).all())
+    voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                             Voting.voting_id == assessment.id).all())
+    voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                              Voting.voting_id == assessment.id).all())
+    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
+    is_first = True if User.check_top_cadet(current_user.id) else False
+    is_second = True if User.check_tracker(current_user.id) or User.check_expert(current_user.id) \
+                        or User.check_teamlead(current_user.id) else False
+    is_third = True if User.check_chieftain(current_user.id) else False
+    return render_template('voting_summary.html', voting_info=voting_info, is_first=is_first,
+                           is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                           voting_num_auth=voting_num_auth, criterions=Criterion.query.filter_by(axis_id=axis_id).all())
 
 
 @app.route('/start_assessment')
@@ -2003,70 +1664,6 @@ def assessment_error():
                            access=get_access(current_user))
 
 
-@app.route('/graphs_teams')
-@login_required
-def graphs_teams():
-    if not User.check_admin(current_user.id):
-        log('Попытка просмотра страницы с выбором команды для генерации графов (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
-    log('Просмотр страницы с выбором команды для генерации графов')
-    return render_template('graphs_teams.html', title='Грязный багоюзер',
-                           access=get_access(current_user),
-                           teams=[(team.id, team.name) for team in Teams.get_teams_for_voting()])
-
-
-def make_all_graphs(team_id):
-    cur_quest = QuestionnaireTable.current_questionnaire_id()
-    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
-                                               Questionnaire.questionnaire_id == cur_quest).all()
-    res = list()
-    for q in questionaires:
-        user_res = [User.get_full_name(q.user_id)]
-        user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
-        for answer in user_answers:
-            user_res.append(User.get_full_name(int(answer.question_answ)))
-        res.append(user_res)
-
-    t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, cur_quest))
-    t.setDaemon(True)
-    t.start()
-
-    t.join()
-
-
-@app.route('/make_graphs')
-@login_required
-def make_graphs():
-    if not User.check_admin(current_user.id):
-        log('Попытка генерации графов (ГВ)')
-        return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
-                               access=get_access(current_user))
-
-    team_id = int(request.args.get('team_id'))
-    cur_quest = QuestionnaireTable.current_questionnaire_id()
-    questionaires = Questionnaire.query.filter(Questionnaire.team_id == team_id, Questionnaire.type == 2,
-                                               Questionnaire.questionnaire_id == cur_quest).all()
-    res = list()
-    for q in questionaires:
-        user_res = [User.get_full_name(q.user_id)]
-        user_answers = QuestionnaireInfo.query.filter_by(questionnaire_id=q.id).all()
-        for answer in user_answers:
-            user_res.append(User.get_full_name(int(answer.question_answ)))
-        res.append(user_res)
-
-    t = threading.Thread(target=graphs.Forms.command_form, args=([], res, team_id, cur_quest))
-    t.setDaemon(True)
-    t.start()
-
-    t.join()
-    log('Генерация графов для команды с id {}'.format(team_id))
-    return render_template('graphs_teams.html', title='Выбор команды для графов',
-                           access=get_access(current_user),
-                           teams=[(team.id, team.name) for team in Teams.get_teams_for_voting()],
-                           message='Графы для команды успешно сформированы')
-
-
 @app.route('/voting_progress', methods=['GET', 'POST'])
 @login_required
 def voting_progress():
@@ -2091,7 +1688,7 @@ def voting_progress():
             if user.user_id not in trackers:
                 trackers.append(user.user_id)
         atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
-        teams_for_voting = len(Teams.get_teams_for_voting())
+        teams_for_voting = len(Teams.query.filter_by(type=1).all())
         relation_results = list()
         for cadet_id in top_cadets:
             cadet = User.query.filter_by(id=cadet_id).first()
@@ -2346,14 +1943,12 @@ def assessment_results():
 @app.route('/weekly_results', methods=['GET'])
 @login_required
 def weekly_results():
-    voting_dates = [voting[0] for voting in db.session.query(WeeklyVoting.date).distinct(WeeklyVoting.date).all()]
-    votings = []
-    
-    for date in voting_dates:
-        day = f'0{date.day}' if date.day < 10 else date.day
-        month = f'0{date.month}' if date.month < 10 else date.month
-        
-        votings.append({ 'date_str': f'{day}.{month}.{date.year}', 'date': f'{date.year}-{date.month}-{date.day}' })
+    votings = WeeklyVoting.query.group_by(WeeklyVoting.date).all()
+    for v in votings:
+        day = f'0{v.date.day}' if v.date.day < 10 else v.date.day
+        month = f'0{v.date.month}' if v.date.month < 10 else v.date.month
+        v.date_str = f'{day}.{month}.{v.date.year}'
+        v.date = f'{v.date.year}-{v.date.month}-{v.date.day}'
     return render_template('weekly_results.html', title='Результаты еженедельной оценки',
                            access=get_access(current_user), votings=votings[::-1])
 
@@ -2384,17 +1979,7 @@ def get_results_of_voting():
 @login_required
 def get_results_of_weekly_voting():
     date = request.args.get('voting_date')
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    
-    if date:
-        date = datetime.datetime.strptime(date, '%Y-%m-%d')
-        
-    if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-
-
+    date = datetime.datetime.strptime(date, '%Y-%m-%d')
     teams = [t for t in Teams.query.all() if t.type in [1,4]]
     summary_results = []
     for t in teams:
@@ -2402,50 +1987,41 @@ def get_results_of_weekly_voting():
                      User.query.filter_by(id=member.user_id).first().surname)
                     for member in Membership.query.filter_by(team_id=t.id) if User.check_cadet(member.user_id)]
         voting_results = []
-            
-        date_info = {'date': f'{date.day}.{date.month}.{date.year}'} if date else { 'start_date': f'{start_date.day}.{start_date.month}.{start_date.year}', 'end_date': f'{end_date.day}.{end_date.month}.{end_date.year}' }
-       
-        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date if date else and_(start_date <= WeeklyVotingMembers.date, WeeklyVotingMembers
-                                                                          .date <= end_date),
+        voting_dict = {}
+        for user in team_members:
+            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+        dates_str = []
+
+        date_info = {'date': f'{date.day}.{date.month}.{date.year}'}
+        dates_str.append(f'{date.day}.{date.month}.{date.year}')
+        marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
+            filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
+            group_by(WeeklyVoting.criterion_id).all()
+        mark_res = []
+        for mark in marks:
+            mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] >= 0.5 else 0})
+        if len(marks) == 0:
+            mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
+        date_info['marks'] = mark_res
+        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
                                                                           WeeklyVotingMembers.team_id == t.id).all()
         if len(teammates) == 0:
-            teammates = [user[0] for user in team_members]
+            teammates = [user_id for user_id in voting_dict]
         else:
             teammates = [t[0] for t in teammates]
-        marks = db.session.query(WeeklyVoting.criterion_id, WeeklyVoting.user_id, func.avg(WeeklyVoting.mark), WeeklyVoting.date). \
-            filter(WeeklyVoting.date == date if date else and_(start_date <= WeeklyVoting.date, WeeklyVoting.date <= end_date), WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
-            group_by(WeeklyVoting.criterion_id, WeeklyVoting.user_id, WeeklyVoting.date).all()
-        voting_dates = list(set([mark[3] for mark in marks]))
-        mark_res = { teammate: { date: [] for date in voting_dates } for teammate in teammates }
-        for mark in marks:
-            mark_res.get(mark.user_id).get(mark[3]).append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
-        if len(marks) == 0:
-            mark_res = { teammate: { date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0 }] for date in voting_dates } for teammate in teammates }
-        date_info['marks'] = mark_res
-        
-        voting_list = []
-
-        for user in team_members:
-            for voting_date in voting_dates:
-                row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
-                row['voting_date'] = voting_date.strftime('%Y-%m-%d')
-                
-                if user[0] in teammates and mark_res[user[0]][voting_date][0]['mark'] == 1:
-                    row['marks1'].append(1)
-                else:
-                    row['marks1'].append(0)
-                if user[0] in teammates and mark_res[user[0]][voting_date][1]['mark'] == 1:
-                    row['marks2'].append(1)
-                else:
-                    row['marks2'].append(0)
-                if user[0] in teammates and mark_res[user[0]][voting_date][2]['mark'] == 1:
-                    row['marks3'].append(1)
-                else:
-                    row['marks3'].append(0)
-                    
-                    
-                voting_list.append(row)
-        
+        for user in voting_dict:
+            if user in teammates and mark_res[0]['mark'] == 1:
+                voting_dict[user]['marks1'].append(1)
+            else:
+                voting_dict[user]['marks1'].append(0)
+            if user in teammates and mark_res[1]['mark'] == 1:
+                voting_dict[user]['marks2'].append(1)
+            else:
+                voting_dict[user]['marks2'].append(0)
+            if user in teammates and mark_res[2]['mark'] == 1:
+                voting_dict[user]['marks3'].append(1)
+            else:
+                voting_dict[user]['marks3'].append(0)
         teammates_info = []
         for member in team_members:
             if member[0] in teammates and len(teammates) > 0:
@@ -2454,7 +2030,7 @@ def get_results_of_weekly_voting():
                 teammates_info.append(member)
         date_info['teammates'] = teammates_info
         voting_results.append(date_info)
-        summary_results.append({'team': t.name, 'marks': voting_list})
+        summary_results.append({'team': t.name, 'marks': voting_dict})
     return jsonify({'results': summary_results})
 
 
@@ -2528,65 +2104,6 @@ def log_page():
     logs = Log.query.order_by(Log.id.desc()).all()[:100]
     user_logs = [(l.action, User.get_full_name(l.user_id), l.date) for l in logs]
     return render_template('log_page.html', title='Логи', logs=user_logs,
-                           access=get_access(current_user))
-
-
-@app.route('/questionnaire_of_cadets', methods=['GET', 'POST'])
-@login_required
-def questionnaire_of_cadets():
-    if not (User.check_admin(current_user.id) or User.check_chieftain(current_user.id)):
-        log('Попытка просмотра анкет кадетов (ГВ)')
-        return render_template('gryazniy_vzlomshik.html',
-                               access=get_access(current_user))
-
-    teams = Teams.get_teams_for_voting()
-    form = ChooseTeamForm()
-    log('Просмотр анкет кадетов')
-    if form.validate_on_submit():
-        res_info = list()
-        monthes_name = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
-                        'Ноябрь', 'Декабрь']
-        _teams = [Teams.query.filter_by(id=int(form.team.data)).first()]
-        for team in _teams:
-            team_info = dict()
-            team_info['title'] = team.name
-            monthes = db.session.query(func.month(Questionnaire.date)) \
-                .filter(Questionnaire.team_id == team.id).group_by(func.month(Questionnaire.date)).all()
-            team_info['monthes'] = list()
-            members = Membership.get_crew_of_team(team.id)
-            for month in monthes:
-                month_info = dict()
-                month_info['title'] = monthes_name[month[0] - 1]
-                texts = Questions.query.filter_by(type=2).all()
-                month_info['graphs'] = [
-                    {'text': texts[i - 1].text,
-                     'src': url_for('static', filename='graphs/graph_{}_2020{}_{}.png'.format(team.id, month[0], i))}
-                    for i in range(1, 6)]
-                month_info['team'] = list()
-                for member in members:
-                    if User.check_can_be_marked(member.id):
-                        user_info = dict()
-                        user_info['name'] = member[1] + ' ' + member[2]
-                        user_info['answers'] = list()
-                        questionnaire = Questionnaire.query.filter(Questionnaire.team_id == team.id,
-                                                                   Questionnaire.user_id == member[0],
-                                                                   Questionnaire.type == 1,
-                                                                   func.month(Questionnaire.date) == month[0]).first()
-                        if questionnaire:
-                            answers = QuestionnaireInfo.query.filter_by(questionnaire_id=questionnaire.id).all()
-                            for answer in answers:
-                                user_info['answers'].append(
-                                    {'question': Questions.query.filter_by(id=answer.question_id).first().text,
-                                     'answer': answer.question_answ})
-                        month_info['team'].append(user_info)
-                team_info['monthes'].append(month_info)
-            res_info.append(team_info)
-        log('Просмотр анкет команды с id {}'.format(form.team.data))
-        return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', info=res_info,
-                               access=get_access(current_user), form=form,
-                               teams=teams)
-    return render_template('questionnaire_of_cadets.html', title='Анкеты курсантов', teams=teams,
-                           form=form,
                            access=get_access(current_user))
 
 
