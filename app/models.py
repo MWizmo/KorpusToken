@@ -6,6 +6,7 @@ from app import db, login, w3, kti_address, ktd_address, contract_address, ETH_I
 from web3.auto import Web3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy import func
 
 
 @login.user_loader
@@ -326,6 +327,16 @@ class Teams(db.Model):
             if TeamRoles.check_team_lead(m[0], team_id):
                 return True
         return False
+
+    @staticmethod
+    def get_teams_for_voting():
+        current_month = datetime.datetime.now().month
+        weekly_voting_teams = [team[0] for team in db.session.query(WeeklyVoting.team_id).filter(
+            func.month(WeeklyVoting.date) == current_month,
+            WeeklyVoting.finished == 1).distinct().all()]
+
+        return [team for team in Teams.query.filter(Teams.type.in_([1, 5])).all() if
+                                team.type == 1 or team.id in weekly_voting_teams]
 
 
 class TeamRoles(db.Model):
