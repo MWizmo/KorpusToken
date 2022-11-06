@@ -1944,7 +1944,7 @@ def assessment_results():
 @app.route('/weekly_results', methods=['GET'])
 @login_required
 def weekly_results():
-    votings = WeeklyVoting.query.all()
+    votings = WeeklyVoting.query.group_by(WeeklyVoting.date).all()
     for v in votings:
         day = f'0{v.date.day}' if v.date.day < 10 else v.date.day
         month = f'0{v.date.month}' if v.date.month < 10 else v.date.month
