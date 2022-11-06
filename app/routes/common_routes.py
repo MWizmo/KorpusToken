@@ -213,7 +213,7 @@ def red_team():
     tid = request.args.get('tid')
     team = Teams.query.get(tid)
     statuses = [(1, 'Оценивается'), (2, 'Не оценивается'), (3, 'Состояние не определено'),
-                (4, 'Участвует в еженедельной оценке')]
+                (4, 'Участвует в еженедельной оценке'), (5, 'Заморожен')]
     if form.validate_on_submit():
         team.name = form.title.data
         team.type = form.status.data
@@ -1212,7 +1212,7 @@ def assessment():
 
     if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(
             current_user.id):  # and Axis.is_available(2):
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1221,7 +1221,7 @@ def assessment():
         return redirect(url_for('assessment_team', axis_id=2))
 
     if User.check_top_cadet(current_user.id):  # and Axis.is_available(1):
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1253,7 +1253,7 @@ def assessment_axis():
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    teams_for_voting = len(Teams.get_teams_for_voting())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                          Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1291,7 +1291,7 @@ def start_voting():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = Teams.query.filter_by(type=1).all()
+    teams_for_voting = Teams.get_teams_for_voting()
     teams_for_voting = [t.id for t in teams_for_voting]
     if User.check_top_cadet(current_user.id):
         voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
@@ -1339,7 +1339,7 @@ def assessment_team():
         else:
             return redirect(url_for('assessment_error'))
 
-    first_type_teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+    first_type_teams = [(team.id, team.name) for team in Teams.get_teams_for_voting() if
                         Voting.check_on_assessment(current_user.id, team.id, int(axis_id))]
     if not first_type_teams:
         log('Ошибка при выборе команд для оценки: команды первого типа отсутствуют')
@@ -1366,7 +1366,7 @@ def assessment_users():
     # q_ids = []
 
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    teams_for_voting = len(Teams.get_teams_for_voting())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                              Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1688,7 +1688,7 @@ def voting_progress():
             if user.user_id not in trackers:
                 trackers.append(user.user_id)
         atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         relation_results = list()
         for cadet_id in top_cadets:
             cadet = User.query.filter_by(id=cadet_id).first()

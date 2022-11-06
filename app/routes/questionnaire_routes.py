@@ -192,7 +192,8 @@ def questionnaire_team():
     user_quest = Questionnaire.query.filter_by(user_id=current_user.id, type=2).all()
     if user_quest:
         teams = Membership.query.filter_by(user_id=current_user.id).all()
-        teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+        teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
+        teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
         teams_id = [t for t in teams_id if t]
         if len(teams_id) == 1:
             user_quest = user_quest[-1]
@@ -204,7 +205,8 @@ def questionnaire_team():
     # lst_teammates_bd = Membership.query.filter_by(
     #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
     teams = Membership.query.filter_by(user_id=current_user.id).all()
-    teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+    teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
+    teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
     teams_id = [t.id for t in teams_id if t]
     if len(teams_id) == 1:
         team_id = teams_id[0]
@@ -309,7 +311,7 @@ def graphs_teams():
     log('Просмотр страницы с выбором команды для генерации графов')
     return render_template('questionnaire/graphs_teams.html', title='Грязный багоюзер',
                            access=get_access(current_user),
-                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()])
+                           teams=[(team.id, team.name) for team in Teams.get_teams_for_voting()])
 
 
 def get_questionnaire_progress():
@@ -368,7 +370,9 @@ def get_questionnaire_progress():
     for user in questionnaire['participaters_self_ids']:
         if user not in questionnaire['participated_self']:
             teams = Membership.query.filter_by(user_id=user).all()
-            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+            teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
+            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in
+                        teams]
             teams_id = [t for t in teams_id if t]
             if len(teams_id) > 0:
                 not_participated_self_teams.append(', '.join([team.name for team in teams_id]))
@@ -392,7 +396,9 @@ def get_questionnaire_progress():
     for user in questionnaire['participaters_team_ids']:
         if user not in questionnaire['participated_team']:
             teams = Membership.query.filter_by(user_id=user).all()
-            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.type == 1).first() for t in teams]
+            teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
+            teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in
+                        teams]
             teams_id = [t for t in teams_id if t]
             if len(teams_id) > 0:
                 not_participated_team_teams.append(', '.join([team.name for team in teams_id]))
@@ -533,7 +539,7 @@ def make_graphs():
     log('Генерация графов для команды с id {}'.format(team_id))
     return render_template('questionnaire/graphs_teams.html', title='Выбор команды для графов',
                            access=get_access(current_user),
-                           teams=[(team.id, team.name) for team in Teams.query.filter_by(type=1).all()],
+                           teams=[(team.id, team.name) for team in Teams.get_teams_for_voting()],
                            message='Графы для команды успешно сформированы')
 
 
@@ -577,7 +583,7 @@ def questionnaire_of_cadets():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
 
-    teams = Teams.query.filter_by(type=1).all()
+    teams = Teams.get_teams_for_voting()
     form = ChooseTeamForm()
     log('Просмотр анкет кадетов')
     if form.validate_on_submit():
