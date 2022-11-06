@@ -25,11 +25,8 @@ app.controller('ctrl', function ($scope, $http) {
       async: false,
     }).then(function success(response) {
       $scope.info = response.data['results'];
-      if ($scope.info) {
-        $scope.results = true;
-      } else {
-        $scope.results = false;
-      }
+      $scope.tablePath = response.data['table_path']
+      $scope.results = !!$scope.info
       $scope.show_results = true;
     });
   };

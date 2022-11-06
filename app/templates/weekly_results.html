@@ -13,39 +13,10 @@
     <option value=""></option>
     {% for v in votings %}
     <option value="{{v.date}}">{{v.date_str}}</option>
-    {% endfor %}</select
-  ><br /><br />
-  <h2>или выгрузите результаты оценок</h2>
-  <div
-    style="
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 30rem;
-    "
-  >
-    <div>
-      <label for="startDate">От</label>
-      <select ng-model="startDate" ng-change="clear_selected();" id="startDate">
-        <option value=""></option>
-        {% for v in votings %}
-        <option value="{{v.date}}">{{v.date_str}}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <label for="endDate">По</label>
-      <select ng-model="endDate" ng-change="clear_selected();" id="endDate">
-        <option value=""></option>
-        {% for v in votings %}
-        <option value="{{v.date}}">{{v.date_str}}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <button class="voting-button" ng-click="choose_voting();">Выгрузить</button>
-  </div>
+    {% endfor %}
+  </select>
+    {% raw %}<a class="download-button" ng-show="show_results" href="{{tablePath}}">Скачать</a> {% endraw %}
+    <br /><br />
   <div ng-show="show_results">
     {% raw %}
     <h2 ng-show="!results">Результаты еще не подведены</h2>
