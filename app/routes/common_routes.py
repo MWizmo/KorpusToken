@@ -6,6 +6,7 @@ from sqlalchemy.sql import text
 from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts.service import get_access, log
+from app.scripts.generate_weekly_voting_xlsx import generate_weekly_voting_xlsx
 from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
@@ -213,7 +214,7 @@ def red_team():
     tid = request.args.get('tid')
     team = Teams.query.get(tid)
     statuses = [(1, 'Оценивается'), (2, 'Не оценивается'), (3, 'Состояние не определено'),
-                (4, 'Участвует в еженедельной оценке')]
+                (4, 'Участвует в еженедельной оценке'), (5, 'Заморожен')]
     if form.validate_on_submit():
         team.name = form.title.data
         team.type = form.status.data
@@ -1212,7 +1213,7 @@ def assessment():
 
     if User.check_expert(current_user.id) or User.check_tracker(current_user.id) or User.check_teamlead(
             current_user.id):  # and Axis.is_available(2):
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1221,7 +1222,7 @@ def assessment():
         return redirect(url_for('assessment_team', axis_id=2))
 
     if User.check_top_cadet(current_user.id):  # and Axis.is_available(1):
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         if len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                    Voting.voting_id == VotingTable.current_voting_id()).all()) >= teams_for_voting:
             return render_template('assessment_axis.html', title='Выбор оси', is_first=False,
@@ -1253,7 +1254,7 @@ def assessment_axis():
                                access=get_access(current_user))
     log('Просмотр страницы с выбором оси для оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    teams_for_voting = len(Teams.get_teams_for_voting())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                          Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1291,7 +1292,7 @@ def start_voting():
         return render_template('gryazniy_vzlomshik.html', title='Грязный багоюзер',
                                access=get_access(current_user))
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = Teams.query.filter_by(type=1).all()
+    teams_for_voting = Teams.get_teams_for_voting()
     teams_for_voting = [t.id for t in teams_for_voting]
     if User.check_top_cadet(current_user.id):
         voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
@@ -1339,7 +1340,7 @@ def assessment_team():
         else:
             return redirect(url_for('assessment_error'))
 
-    first_type_teams = [(team.id, team.name) for team in Teams.query.filter_by(type=1) if
+    first_type_teams = [(team.id, team.name) for team in Teams.get_teams_for_voting() if
                         Voting.check_on_assessment(current_user.id, team.id, int(axis_id))]
     if not first_type_teams:
         log('Ошибка при выборе команд для оценки: команды первого типа отсутствуют')
@@ -1366,7 +1367,7 @@ def assessment_users():
     # q_ids = []
 
     assessment = VotingTable.query.filter_by(status='Active').first()
-    teams_for_voting = len(Teams.query.filter_by(type=1).all())
+    teams_for_voting = len(Teams.get_teams_for_voting())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                              Voting.voting_id == assessment.id).all())
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -1688,7 +1689,7 @@ def voting_progress():
             if user.user_id not in trackers:
                 trackers.append(user.user_id)
         atamans = [user.user_id for user in UserStatuses.query.filter_by(status_id=2).all()]
-        teams_for_voting = len(Teams.query.filter_by(type=1).all())
+        teams_for_voting = len(Teams.get_teams_for_voting())
         relation_results = list()
         for cadet_id in top_cadets:
             cadet = User.query.filter_by(id=cadet_id).first()
@@ -1987,41 +1988,56 @@ def get_results_of_weekly_voting():
                      User.query.filter_by(id=member.user_id).first().surname)
                     for member in Membership.query.filter_by(team_id=t.id) if User.check_cadet(member.user_id)]
         voting_results = []
-        voting_dict = {}
-        for user in team_members:
-            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
-        dates_str = []
-
         date_info = {'date': f'{date.day}.{date.month}.{date.year}'}
-        dates_str.append(f'{date.day}.{date.month}.{date.year}')
-        marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
-            filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1). \
-            group_by(WeeklyVoting.criterion_id).all()
-        mark_res = []
-        for mark in marks:
-            mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] >= 0.5 else 0})
-        if len(marks) == 0:
-            mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
-        date_info['marks'] = mark_res
-        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date,
-                                                                          WeeklyVotingMembers.team_id == t.id).all()
+        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date, WeeklyVotingMembers.team_id == t.id).all()
+
         if len(teammates) == 0:
-            teammates = [user_id for user_id in voting_dict]
+            teammates = [user[0] for user in team_members]
         else:
             teammates = [t[0] for t in teammates]
-        for user in voting_dict:
-            if user in teammates and mark_res[0]['mark'] == 1:
-                voting_dict[user]['marks1'].append(1)
-            else:
-                voting_dict[user]['marks1'].append(0)
-            if user in teammates and mark_res[1]['mark'] == 1:
-                voting_dict[user]['marks2'].append(1)
-            else:
-                voting_dict[user]['marks2'].append(0)
-            if user in teammates and mark_res[2]['mark'] == 1:
-                voting_dict[user]['marks3'].append(1)
-            else:
-                voting_dict[user]['marks3'].append(0)
+        marks = db.session.query(
+                WeeklyVoting.criterion_id,
+                WeeklyVoting.user_id,
+                func.avg(WeeklyVoting.mark),
+                WeeklyVoting.date
+            )\
+            .filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1)\
+            .group_by(WeeklyVoting.criterion_id, WeeklyVoting.user_id, WeeklyVoting.date)\
+            .all()
+        voting_dates = list(set([mark[3] for mark in marks]))
+        mark_res = {teammate: {date: [] for date in voting_dates} for teammate in teammates}
+        for mark in marks:
+            mark_res.get(mark[1]).get(mark[3]).append(
+                {'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
+        if len(marks) == 0:
+            mark_res = {teammate: {
+                date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
+                       {'criterion': 'Подтверждение средой', 'mark': 0}] for date in voting_dates} for teammate in
+                        teammates}
+        date_info['marks'] = mark_res
+
+        voting_list = []
+
+        for user in team_members:
+            for voting_date in voting_dates:
+                row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+                row['voting_date'] = voting_date.strftime('%Y-%m-%d')
+
+                if user[0] in teammates and mark_res[user[0]][voting_date][0]['mark'] == 1:
+                    row['marks1'].append(1)
+                else:
+                    row['marks1'].append(0)
+                if user[0] in teammates and mark_res[user[0]][voting_date][1]['mark'] == 1:
+                    row['marks2'].append(1)
+                else:
+                    row['marks2'].append(0)
+                if user[0] in teammates and mark_res[user[0]][voting_date][2]['mark'] == 1:
+                    row['marks3'].append(1)
+                else:
+                    row['marks3'].append(0)
+
+                voting_list.append(row)
+
         teammates_info = []
         for member in team_members:
             if member[0] in teammates and len(teammates) > 0:
@@ -2030,8 +2046,12 @@ def get_results_of_weekly_voting():
                 teammates_info.append(member)
         date_info['teammates'] = teammates_info
         voting_results.append(date_info)
-        summary_results.append({'team': t.name, 'marks': voting_dict})
-    return jsonify({'results': summary_results})
+        summary_results.append({'team': t.name, 'marks': voting_list})
+
+    table_name = f"weekly_voting_{date.year}.{date.month}.{date.day}.xlsx"
+    generate_weekly_voting_xlsx(table_name, summary_results)
+
+    return {'results': summary_results, 'table_path': url_for('static', filename=f"weekly_votings/{table_name}")}
 
 
 @app.route('/send_results_of_weekly_voting')

@@ -1,55 +1,57 @@
-{% extends "base.html" %}
-
-{% block scripts %}
+{% extends "base.html" %} {% block scripts %}
 <!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
 <script src="{{url_for('static', filename='js/weekly_voting_result.js')}}"></script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="res_container" ng-app="app" ng-controller="ctrl" ng-cloak>
-    <div class="nav_href">
-        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a class="cur_href" href="">еженедельная оценка</a>
+  <div class="nav_href">
+    <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> -
+    <a class="cur_href" href="">еженедельная оценка</a>
+  </div>
+  <h2>Выберите дату, за которую хотите просмотреть оценки</h2>
+  <select ng-model="selected" ng-change="clear_interval(); choose_voting();">
+    <option value=""></option>
+    {% for v in votings %}
+    <option value="{{v.date}}">{{v.date_str}}</option>
+    {% endfor %}
+  </select>
+    {% raw %}<a class="download-button" ng-show="show_results" href="{{tablePath}}">Скачать</a> {% endraw %}
+    <br /><br />
+  <div ng-show="show_results">
+    {% raw %}
+    <h2 ng-show="!results">Результаты еще не подведены</h2>
+
+    <div ng-show="results" ng-cloak>
+      <div ng-repeat="team in info">
+        <h2>{{team['team']}}</h2>
+        <table
+          class="result_table"
+          cellspacing="0"
+          style="margin-bottom: 2vh; width: 60%"
+        >
+          <thead>
+            <tr>
+              <td style="width: 20%" ng-show="!selected">Дата оценки</td>
+              <td style="width: 20%">Имя</td>
+              <td style="width: 20%">Движение</td>
+              <td style="width: 20%">Завершенность</td>
+              <td style="width: 20%">Подтверждение средой</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="user in team['marks']">
+              <td ng-show="!selected">{{user['voting_date']}}</td>
+              <td>{{user['name']}}</td>
+              <td>{{user['marks1'][0]}}</td>
+              <td>{{user['marks2'][0]}}</td>
+              <td>{{user['marks3'][0]}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <h2>Выберите дату, за которую хотите просмотреть оценки</h2>
-    <select ng-model="selected" ng-change="choose_voting();">
-        <option value="0"></option>
-        {% for v in votings %}
-            <option value="{{v.date}}">{{v.date_str}}</option>
-        {% endfor %}
-    </select><br><br>
-    <div ng-show="show_results">
-        {% raw %}
-        <h3>Дата: {{selected}}</h3>
-        <h2 ng-show="!results">Результаты еще не подведены</h2>
 
-        <div ng-show="results" ng-cloak>
-            <div ng-repeat="team in info">
-                <h2>{{team['team']}}</h2>
-                <table  class="result_table" cellspacing="0" style="margin-bottom:2vh; width:60%;">
-                    <thead>
-                        <tr>
-                            <td style="width:25%;">Имя</td>
-                            <td style="width:25%;">Движение</td>
-                            <td style="width:25%;">Завершенность</td>
-                            <td style="width:25%;">Подтверждение средой</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat = "user in team['marks']">
-                            <td> {{user['name']}} </td>
-                            <td> {{user['marks1'][0]}} </td>
-                            <td> {{user['marks2'][0]}} </td>
-                            <td> {{user['marks3'][0]}} </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        {% endraw %}
-    </div>
-
+    {% endraw %}
+  </div>
 </div>
 {% endblock %}

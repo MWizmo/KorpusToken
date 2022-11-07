@@ -1971,3 +1971,34 @@ input[type='radio'] {
   overflow-x: auto;
   width: 100%;
 }
+
+select {
+  min-width: 7rem;
+}
+
+.voting-button {
+  background-color: black;
+  font-family: 'Decima Mono Cyr';
+  font-weight: 300;
+  border-radius: 0.5rem;
+  border: 1px solid white;
+  color: white;
+  width: 10rem;
+  height: 1.7rem;
+}
+
+.voting-button:hover {
+  cursor: pointer;
+}
+
+.download-button {
+  background-color: black;
+  padding: 0.2rem 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8em;
+  text-decoration: none;
+  border-radius: 0.3rem;
+  border: 1px solid white;
+  box-shadow: 0px 3px 5px #9b9b9b;
+  color: white;
+}
