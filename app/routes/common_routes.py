@@ -2008,8 +2008,10 @@ def get_results_of_weekly_voting():
         mark_res = {teammate: {date: [] for date in voting_dates} for teammate in teammates}
         print("Teammates: ", teammates, "\nMark_res: ", mark_res)
         for mark in marks:
-            mark_res.get(mark[1]).get(mark[3]).append(
-                {'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
+            teammate_mark_res = mark_res.get(mark[1])
+            if teammate_mark_res is not None:
+                teammate_mark_res.get(mark[3]).append(
+                    {'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
         if len(marks) == 0:
             mark_res = {teammate: {
                 date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
