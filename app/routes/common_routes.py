@@ -1998,47 +1998,41 @@ def get_results_of_weekly_voting():
         marks = db.session.query(
                 WeeklyVoting.criterion_id,
                 WeeklyVoting.user_id,
-                func.avg(WeeklyVoting.mark),
-                WeeklyVoting.date
+                func.avg(WeeklyVoting.mark)
             )\
-            .filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1)\
+            .filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1, WeeklyVoting.user_id.in_(teammates))\
             .group_by(WeeklyVoting.criterion_id, WeeklyVoting.user_id, WeeklyVoting.date)\
             .all()
-        voting_dates = list(set([mark[3] for mark in marks]))
-        mark_res = {teammate: {date: [] for date in voting_dates} for teammate in teammates}
+
+        mark_res = {teammate: {date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
+                       {'criterion': 'Подтверждение средой', 'mark': 0}]} for teammate in teammates}
         for mark in marks:
             teammate_mark_res = mark_res.get(mark[1])
             if teammate_mark_res is not None:
-                teammate_mark_res.get(mark[3]).append(
-                    {'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[2] >= 0.5 else 0})
-        if len(marks) == 0:
-            mark_res = {teammate: {
-                date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
-                       {'criterion': 'Подтверждение средой', 'mark': 0}] for date in voting_dates} for teammate in
-                        teammates}
+                criterion = next(criterion for criterion in teammate_mark_res.get(date) if criterion['criterion'] == Criterion.query.get(mark[0]).name)
+                criterion['mark'] = 1 if mark[2] >= 0.5 else 0
         date_info['marks'] = mark_res
 
         voting_list = []
 
         for user in team_members:
-            for voting_date in voting_dates:
-                row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
-                row['voting_date'] = voting_date.strftime('%Y-%m-%d')
+            row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
+            row['voting_date'] = date
 
-                if user[0] in teammates and mark_res[user[0]][voting_date][0]['mark'] == 1:
-                    row['marks1'].append(1)
-                else:
-                    row['marks1'].append(0)
-                if user[0] in teammates and mark_res[user[0]][voting_date][1]['mark'] == 1:
-                    row['marks2'].append(1)
-                else:
-                    row['marks2'].append(0)
-                if user[0] in teammates and mark_res[user[0]][voting_date][2]['mark'] == 1:
-                    row['marks3'].append(1)
-                else:
-                    row['marks3'].append(0)
+            if user[0] in teammates and mark_res[user[0]][date][0]['mark'] == 1:
+                row['marks1'].append(1)
+            else:
+                row['marks1'].append(0)
+            if user[0] in teammates and mark_res[user[0]][date][1]['mark'] == 1:
+                row['marks2'].append(1)
+            else:
+                row['marks2'].append(0)
+            if user[0] in teammates and mark_res[user[0]][date][2]['mark'] == 1:
+                row['marks3'].append(1)
+            else:
+                row['marks3'].append(0)
 
-                voting_list.append(row)
+            voting_list.append(row)
 
         teammates_info = []
         for member in team_members:
