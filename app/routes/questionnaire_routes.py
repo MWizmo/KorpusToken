@@ -49,8 +49,11 @@ def questionnaire_position():
     for u in users_ids:
         user = User.query.get(u)
         users.append((user.id, user.name, user.surname))
-    return render_template('questionnaire/questionnaire_position.html', title='Анкетирование - ясность позиции',
+    if len(users_ids):
+        return render_template('questionnaire/questionnaire_position.html', title='Анкетирование - ясность позиции',
                            users=users, q=q)
+    else:
+        return redirect('/questionnaire_energy')
 
 
 @app.route('/fix_quest_position', methods=['POST'])
@@ -123,7 +126,10 @@ def questionnaire_energy():
     for u in users_ids:
         user = User.query.get(u)
         users.append((user.id, user.name, user.surname))
-    return render_template('questionnaire/questionnaire_energy.html', title='Анкетирование - энергия', users=users, q=q)
+    if len(users_ids):
+        return render_template('questionnaire/questionnaire_energy.html', title='Анкетирование - энергия', users=users, q=q)
+    else:
+        return redirect('/questionnaire_self')
 
 
 @app.route('/questionnaire_self', methods=['GET', 'POST'])
@@ -229,7 +235,8 @@ def questionnaire_team():
             teammates.append({'id': teammate.user_id, 'name': '{} {}'.format(name, surname)})
         except Exception as e:
             pass
-
+    if len(teammates) == 0:
+        return redirect('/participate')
     form = QuestionnaireTeam()
     questions = Questions.query.filter_by(type=2)
     if form.validate_on_submit():
