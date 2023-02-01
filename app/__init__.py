@@ -30,7 +30,7 @@ app.register_blueprint(api_bp, url_prefix='/api')
 from app import models
 from app import token_utils
 from app.token import routes
-from app.routes import common_routes, questionnaire_routes
+from app.routes import common_routes, questionnaire_routes, voting_routes
 from app.admin.views import MyAdminIndexView, TransactionView, AllBudgetRecordsView, CurrentBudgetView, ProfitRecordView
 
 admin = Admin(app, name='Korpus Token', index_view=MyAdminIndexView(url='/'), template_mode='bootstrap3')

@@ -20,21 +20,39 @@
     </div>
     <br><br>
     <h2 style="text-align:center;">Оценка по оси дела</h2>
+    <div>
+        <p>На протяжении {{weekly_voting_counter}} трекшенов команда оценивалась по каждому из указанных ниже критериев. Мы подсчитали количество выставленных ”0” и “1” за этот период.<br>Предлагаем вам при выставлении итоговой оценки опираться на представленные данные. Вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
+    </div>
     <h3>Критерий 1 - “Движение”</h3>
-    <div style="width:60%;">
+    <div >
         <p>“Движение” - динамика выполнения проектных задач, доля сил времени затрачиваемых студентами на развитие проекта</p>
         <p>На протяжении последнего месяца, на каждом из публичных трекшенов команде выставлялась оценка по этому критерию, предлагаем вам опереться на промежуточные оценки. При выставлении оценки, вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
     </div>
     <table class="rel_table" cellspacing="0">
-        <tr>
+        <!--tr>
             <td class="rel_cell1">Имя</td>{% for date in dates %} <td>{{date}}</td> {% endfor %}<td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли движение?</td>
+        </tr-->
+        <tr>
+            <td class="rel_cell1">Имя</td> <td>Получено "1"</td> <td>Получено "0"</td> <td>Детальная таблица</td> <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли движение?</td>
         </tr>
         {% for member in voting_dict %}
-        <tr>
+        <!--tr>
             <td>{{voting_dict[member]['name']}}</td>
             {% for mark in voting_dict[member]['marks1'] %}
                 <td>{{mark}}</td>
             {% endfor %}
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[0].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[0].id}},1)">Да</div>
+                    <div><input type="radio" name="{{criterions[0].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[0].id}},0)">Нет</div>
+                </div>
+            </td>
+        </tr-->
+        <tr>
+            <td>{{voting_dict[member]['name']}}</td>
+            <td>{{voting_dict[member]['marks1_1']}}</td>
+            <td>{{voting_dict[member]['marks1_0']}}</td>
+            <td><a href="/business_details/{{team_id}}/{{member}}" target="_blank" style="color:black;">Подробнее</a></td>
             <td class="rel_cell3">
                 <div class="rel_flex">
                     <div><input type="radio" name="{{criterions[0].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[0].id}},1)">Да</div>
@@ -46,20 +64,35 @@
     </table>
     <br><br>
     <h3>Критерий 2 - “Завершённость”</h3>
-    <div style="width:60%;">
+    <div >
         <p>Завершенность - окончены ли этапы проектной работы, выполнены ли задачи, исчерпаны итерации?</p>
         <p>На протяжении послденего месяца, на каждом из публичных трекшенов команде выставлялась оценка по этому критерию, предлагаем вам опереться на промежуточные оценки. При выставлении оценки, вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
     </div>
     <table class="rel_table" cellspacing="0">
-        <tr>
+        <!--tr>
             <td class="rel_cell1">Имя</td>{% for date in dates %} <td>{{date}}</td> {% endfor %}<td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли завершенность?</td>
+        </tr-->
+        <tr>
+            <td class="rel_cell1">Имя</td> <td>Получено "1"</td> <td>Получено "0"</td> <td>Детальная таблица</td> <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли завершенность?</td>
         </tr>
         {% for member in voting_dict %}
-        <tr>
+        <!--tr>
             <td>{{voting_dict[member]['name']}}</td>
             {% for mark in voting_dict[member]['marks2'] %}
                 <td>{{mark}}</td>
             {% endfor %}
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[1].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[1].id}},1)">Да</div>
+                    <div><input type="radio" name="{{criterions[1].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[1].id}},0)">Нет</div>
+                </div>
+            </td>
+        </tr-->
+        <tr>
+            <td>{{voting_dict[member]['name']}}</td>
+            <td>{{voting_dict[member]['marks2_1']}}</td>
+            <td>{{voting_dict[member]['marks2_0']}}</td>
+            <td><a href="/business_details/{{team_id}}/{{member}}" target="_blank" style="color:black;">Подробнее</a></td>
             <td class="rel_cell3">
                 <div class="rel_flex">
                     <div><input type="radio" name="{{criterions[1].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[1].id}},1)">Да</div>
@@ -71,20 +104,35 @@
     </table>
     <br><br>
     <h3>Критерий 3 - “Подтверждение средой”</h3>
-    <div style="width:60%;">
+    <div >
         <p>Подтверждение средой - положительная обратная связь на проект от внешнего мира. Положительной обратной связью можно считать подтвержденные гипотезы (как подтверждение адекватности рынком), либо полезные артефакты полученные от взаимодействия с внешними референтными группами.</p>
         <p>На протяжении послденего месяца, на каждом из публичных трекшенов команде выставлялась оценка по этому критерию, предлагаем вам опереться на промежуточные оценки. При выставлении оценки, вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
     </div>
     <table class="rel_table" cellspacing="0">
-        <tr>
+        <!--tr>
             <td class="rel_cell1">Имя</td>{% for date in dates %} <td>{{date}}</td> {% endfor %}<td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли подтверждение средой?</td>
+        </tr-->
+        <tr>
+            <td class="rel_cell1">Имя</td> <td>Получено "1"</td> <td>Получено "0"</td> <td>Детальная таблица</td> <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли подтверждение средой?</td>
         </tr>
         {% for member in voting_dict %}
-        <tr>
+        <!--tr>
             <td>{{voting_dict[member]['name']}}</td>
             {% for mark in voting_dict[member]['marks3'] %}
                 <td>{{mark}}</td>
             {% endfor %}
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[2].id}},1)">Да</div>
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[2].id}},0)">Нет</div>
+                </div>
+            </td>
+        </tr-->
+        <tr>
+            <td>{{voting_dict[member]['name']}}</td>
+            <td>{{voting_dict[member]['marks3_1']}}</td>
+            <td>{{voting_dict[member]['marks3_0']}}</td>
+            <td><a href="/business_details/{{team_id}}/{{member}}" target="_blank" style="color:black;">Подробнее</a></td>
             <td class="rel_cell3">
                 <div class="rel_flex">
                     <div><input type="radio" name="{{criterions[2].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[2].id}},1)">Да</div>
