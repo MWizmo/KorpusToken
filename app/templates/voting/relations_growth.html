@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/relations_vote.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});"
+     style="margin-left:10%;width:80%;">
+    <br>
+    <div class="nav_href">
+        <!--a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a href="/assessment_team?axis_id=1">выбор команды</a> - <a class="cur_href" href="">оценивание по оси отношений</a-->
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать
+        в оценке</a> - <a class="cur_href" href="">оценивание по оси отношений</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
+        {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
+    </div>
+    <br><br>
+    <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>
+    <h3 style="text-align:center;">Оценка “Личностного роста”</h3>
+    <div >
+        <p>Личностный рост - динамика развития soft скилов (коммуникативные, лидерские, командные или другие социально
+            психологические навыки,
+            которые пригодятся в любой активности и процессе) курсанта.
+            Вам предстоит принять решение о том, давать курсанту балл по этому критерию или нет.</p>
+        <p>Курсанты отвечали на вопрос: “Считаете ли вы, что в этом месяце прокачали свои коммуникативные, лидерские,
+            командные или другие социально-психологические навыки? Дайте полный, развернутый ответ и приведите факты,
+            которые это подтверждают.”</p>
+    </div>
+    <h3>Ответы</h3>
+    <table class="rel_table" cellspacing="0">
+        <tr>
+            <td class="rel_cell1">Имя</td>
+            <td class="rel_cell2" style="text-align:center;">Ответ курсанта</td>
+            <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Зачтено?</td>
+        </tr>
+        {% for member in team_members %}
+        <tr>
+            <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
+            <td class="rel_cell2">{{answers[loop.index0]}}</td>
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[0].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[0].id}},1)">Да
+                    </div>
+                    <div><input type="radio" name="{{criterions[0].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[0].id}},0)">Нет
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br><br>
+    <div>
+        <div class="vote_block2">
+            <div style="width:40%;">
+                <button class="nav__link finish_vote_btn" id="finish_button"
+                        ng-click="finish_vote({{team_id}}, 1, {{is_last}});">Далее
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

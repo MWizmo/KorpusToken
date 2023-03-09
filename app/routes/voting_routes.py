@@ -7,7 +7,7 @@ from app.scripts.service import get_access, log
 from app.scripts.generate_weekly_voting_xlsx import generate_weekly_voting_xlsx
 from app.models import Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Axis, Criterion, Voting, VotingInfo, TopCadetsScore, TopCadetsVoting, \
-    VotingTable, WeeklyVoting, WeeklyVotingMembers
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, QuestionnairePositionEnergy
 from flask import render_template, redirect, url_for, request, jsonify, send_file
 from app.forms import *
 from flask_login import current_user, login_required
@@ -126,8 +126,18 @@ def start_voting():
     if User.check_top_cadet(current_user.id):
         voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                              Voting.voting_id == assessment.id).all()
-        if len(voting_num_rel) < len(teams_for_voting):
-            voted_team = [row.team_id for row in voting_num_rel]
+        voting_num = 0
+        voted_team = []
+        for voting in voting_num_rel:
+            if len(VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
+                                           VotingInfo.criterion_id == 1).all()) and len(
+                    VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
+                                            VotingInfo.criterion_id == 2).all()) and len(
+                    VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == 3).all()):
+                voting_num += 1
+                voted_team.append(voting.team_id)
+        if voting_num < len(teams_for_voting):
+            #voted_team = [row.team_id for row in voting_num_rel if row.flag]
             left_teams = list(set(teams_for_voting).difference(set(voted_team)))
             if len(left_teams) == 1:
                 return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0], last=1))
@@ -347,12 +357,33 @@ def assessment_users():
             for i in range(1, 6)]
         team = Teams.query.filter_by(id=team_id).first().name
         is_last = 1 if 'last' in request.args else 0
-        return render_template('voting/relations_voting.html', title='Ось отношений', answers=answers, images=images,
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == team_id,
+                                     Voting.voting_id == VotingTable.current_voting_id()).first()
+        if voting:
+            if len(VotingInfo.query.filter(VotingInfo.voting_id==voting.id, VotingInfo.criterion_id==2).all()):
+                template = 'voting/relations_position.html'
+            else:
+                template = 'voting/relations_energy.html'
+        else:
+            template = 'voting/relations_growth.html'
+        cur_quest = QuestionnaireTable.current_questionnaire_id()
+        energy_answers = {}
+        for cadet in team_members:
+            cadet_id = cadet[0]
+            energy_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                                                                                         QuestionnairePositionEnergy.type == 4,
+                                                                                         QuestionnairePositionEnergy.cadet_id == cadet_id,
+                                                                                         QuestionnairePositionEnergy.voted_id == cadet_id).first().question_answ}
+
+        #energy_answers = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest, QuestionnairePositionEnergy.type == 4, QuestionnairePositionEnergy.)
+        # QuestionnairePositionEnergy(questionnaire_id=cur_quest, type=4, cadet_id=int(items[1]),
+        #                             voted_id=int(items[2]), question_answ=int(request.form.get(value)))
+        return render_template(template, title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team,
                                is_first=is_first, is_last=is_last, voting_num_auth=voting_num_auth,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
-                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus)
+                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, energy_answers=energy_answers)
 
 
 @app.route('/business_details/<team_id>/<uid>')
@@ -423,6 +454,39 @@ def finish_vote():
     else:
         return redirect(url_for('assessment'))
 
+
+@app.route('/finish_relations_vote', methods=['POST'])
+def finish_relations_vote():
+    data = request.json
+    team_id = int(data['team_id'])
+    criterion_id = int(data['criterion_id'])
+    results = data['results']
+    is_last = int(data['is_last'])
+    if criterion_id == 1:
+        voting = Voting(user_id=current_user.id, axis_id=1, team_id=team_id,
+                    date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                       datetime.datetime.now().day), voting_id=VotingTable.current_voting_id())
+        db.session.add(voting)
+        db.session.commit()
+    else:
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == team_id,
+                                     Voting.voting_id == VotingTable.current_voting_id()).first()
+    voting_id = voting.id
+    for i in range(len(results)):
+        if not (results[i] is None):
+                vote_info = VotingInfo(voting_id=voting_id, criterion_id=criterion_id, cadet_id=i, mark=results[i][0])
+                db.session.add(vote_info)
+                db.session.commit()
+    # for q_id in q_ids:
+    #     questionnaire = Questionnaire.query.filter_by(id=q_id).first()
+    #     questionnaire.assessment = 0
+    #     db.session.commit()
+
+    # log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
+    if is_last:
+        return redirect(url_for('voting_summary', axis_id=1))
+    else:
+        return redirect(url_for('assessment'))
 
 @app.route('/voting_summary')
 def voting_summary():

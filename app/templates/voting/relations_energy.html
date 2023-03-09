@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/vote.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});"
+     style="margin-left:10%;width:80%;">
+    <br>
+    <div class="nav_href">
+        <!--a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a href="/assessment_team?axis_id=1">выбор команды</a> - <a class="cur_href" href="">оценивание по оси отношений</a-->
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать
+        в оценке</a> - <a class="cur_href" href="">оценивание по оси отношений</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
+        {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
+    </div>
+    <br><br>
+    <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>
+    <h3 style="text-align:center;">Оценка “Энергии”</h3>
+    <div>
+        <p>“Энергия” - интенсивность работы студента, его выносливость: количество инициированных и выполняемых
+            процессов, доля сил и времени, инвестируемых в проект. Студент, постоянно, толкающий проект вперёд, достоин
+            балла по этому критерию.</p>
+        <p>Участники, оценивая уровень своей энергии, выбирали один из 3 вариантов ответа: <br>
+            1. Я считаю что был предельно энергичен, прикладывал все усилия, чтобы наш с командой проект развивался. <br>
+            2. В заданном промежутке в основном я был довольно энергичен, но порой случались и провалы.<br>
+            3. Прошедший период в плане энергии прошёл не так как хотелось бы, не могу сказать что был на пике.</p>
+        <br><br>
+        <p>Далее каждый член команды оценивал уровень энергии участника, выбирая один из 3 вариантов:<br>
+        1.На мой взгляд он (она) был максимально энергичен.<br>
+        2.Кажется, что он (она) был достаточно энергичен, хотя бывали и спады.<br>
+        3.Считаю что уровень энергии на заданном промежутке времени был ниже обычного.<br>
+        Оцените энергию каждого участника опираясь на ответы оцениваемых и членов их команды.<br>
+        Кроме того, каждая команда также проходила социометрический опрос, результаты этого опроса можно просмотреть нажав на соответствующую кнопку.</p>
+    </div><br><br>
+    <table class="rel_table" cellspacing="0">
+        <tr>
+            <td class="rel_cell1">Имя</td>
+            <td class="rel_cell2" style="text-align:center;">Оценил сам</td>
+            <td class="rel_cell2" style="text-align:center;">Оценили члены команды</td>
+            <td class="rel_cell3" style="text-align:center;">Ваша оценка Энергии</td>
+        </tr>
+        {% for member in team_members %}
+        <tr>
+            <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
+            <td class="rel_cell2">{{ energy_answers[member[0]]['self'] }}</td>
+            <td class="rel_cell2"></td>
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[1].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[1].id}},1)">Да
+                    </div>
+                    <div><input type="radio" name="{{criterions[1].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)">Нет
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/socio_results?team_id={{team_id}}" target="_blank" class="nav__link finish_vote_btn" style="width:100%;margin-left: 0; margin-top: 5px; text-align:center;">Смотреть результаты социометрического опроса команды «{{team_title}}»</a>
+    <br><br>
+    <div>
+        <div class="vote_block2">
+            <div style="width:40%;">
+                <button class="nav__link finish_vote_btn" id="finish_button"
+                        ng-click="finish_vote({{team_id}},2, {{is_last}});">Далее
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
