@@ -93,8 +93,13 @@ def assessment_axis():
     log('Просмотр страницы с выбором оси для оценки')
     assessment = VotingTable.query.filter_by(status='Active').first()
     teams_for_voting = len(Teams.get_teams_for_voting())
-    voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
-                                             Voting.voting_id == assessment.id).all())
+    voting_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                             Voting.voting_id == assessment.id).first()
+    voting_num_rel = 0 if not voting_rel or len(VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                                                         VotingInfo.criterion_id == 1).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                VotingInfo.criterion_id == 2).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id, VotingInfo.criterion_id == 3).all()) == 0 else 1
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                              Voting.voting_id == assessment.id).all())
     voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
@@ -124,25 +129,15 @@ def start_voting():
     teams_for_voting = Teams.get_teams_for_voting()
     teams_for_voting = [t.id for t in teams_for_voting]
     if User.check_top_cadet(current_user.id):
-        voting_num_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
-                                             Voting.voting_id == assessment.id).all()
-        voting_num = 0
-        voted_team = []
-        for voting in voting_num_rel:
-            if len(VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
-                                           VotingInfo.criterion_id == 1).all()) and len(
-                    VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
-                                            VotingInfo.criterion_id == 2).all()) and len(
-                    VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == 3).all()):
-                voting_num += 1
-                voted_team.append(voting.team_id)
-        if voting_num < len(teams_for_voting):
-            #voted_team = [row.team_id for row in voting_num_rel if row.flag]
-            left_teams = list(set(teams_for_voting).difference(set(voted_team)))
-            if len(left_teams) == 1:
-                return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0], last=1))
-            else:
-                return redirect(url_for('assessment_users', axis_id=1, team_id=left_teams[0]))
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                                  Voting.voting_id == assessment.id).first()
+        if not voting or len(VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
+                                                                             VotingInfo.criterion_id == 1).all()) == 0 or len(
+            VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
+                                    VotingInfo.criterion_id == 2).all()) == 0 or len(
+            VotingInfo.query.filter(VotingInfo.voting_id == voting.id,
+                                    VotingInfo.criterion_id == 3).all()) == 0:
+            return redirect(url_for('assessment_users', axis_id=1, team_id=0))
     if User.check_tracker(current_user.id) or User.check_expert(current_user.id) or User.check_teamlead(
             current_user.id):
         voting_num_bus = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
@@ -208,8 +203,13 @@ def assessment_users():
 
     assessment = VotingTable.query.filter_by(status='Active').first()
     teams_for_voting = len(Teams.get_teams_for_voting())
-    voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
-                                             Voting.voting_id == assessment.id).all())
+    voting_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                     Voting.voting_id == assessment.id).first()
+    voting_num_rel = 0 if not voting_rel or len(VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                                                        VotingInfo.criterion_id == 1).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                VotingInfo.criterion_id == 2).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id, VotingInfo.criterion_id == 3).all()) == 0 else 1
     voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
                                              Voting.voting_id == assessment.id).all())
     voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
@@ -262,11 +262,13 @@ def assessment_users():
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
         # current_month = datetime.datetime.now().month
-        monthes = [5, 6, 7, 8, 9, 10, 11, 12]
+        monthes = {2022:[3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023:[1, 2, 3]}
         dates = []
-        for current_month in monthes:
-            dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
-                                                                WeeklyVoting.team_id == team_id,
+        for year in monthes:
+            for month in monthes[year]:
+                dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == month,
+                                                                    func.year(WeeklyVoting.date) == year,
+                                                                    WeeklyVoting.team_id == team_id,
                                                                 WeeklyVoting.finished == 1).distinct().all()
 
         voting_results = []
@@ -332,11 +334,9 @@ def assessment_users():
                                voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
                                voting_num_auth=voting_num_auth)
     else:
-        team_members = [(member.user_id,
-                         User.query.filter_by(id=member.user_id).first().name,
-                         User.query.filter_by(id=member.user_id).first().surname)
-                        for member in Membership.query.filter_by(team_id=team_id)
-                        if current_user.id != member.user_id and User.check_cadet(member.user_id)]
+        team_members = [(member.id, member.name, member.surname)
+                        for member in User.query.all()
+                        if current_user.id != member.id and User.check_cadet(member.id)]
         question = Questions.query.filter_by(type=1).first()
         answers = list()
         for member in team_members:
@@ -344,20 +344,12 @@ def assessment_users():
                                                        Questionnaire.user_id == member[0],
                                                        Questionnaire.type == 1).all()
             if questionnaire:
-                # q_ids.append(questionnaire.id)
                 questionnaire = questionnaire[-1]
                 answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
                                                               QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
             else:
                 answers.append('Нет ответа')
-        texts = Questions.query.filter_by(type=2).all()
-        images = [
-            {'text': texts[i - 1].text, 'src': url_for('static',
-                                                       filename='graphs/graph_{}_{}_{}.png'.format(team_id, q_id, i))}
-            for i in range(1, 6)]
-        team = Teams.query.filter_by(id=team_id).first().name
-        is_last = 1 if 'last' in request.args else 0
-        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == team_id,
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == 0,
                                      Voting.voting_id == VotingTable.current_voting_id()).first()
         if voting:
             if len(VotingInfo.query.filter(VotingInfo.voting_id==voting.id, VotingInfo.criterion_id==2).all()):
@@ -370,21 +362,19 @@ def assessment_users():
         energy_answers, position_answers = {}, {}
         for cadet in team_members:
             cadet_id = cadet[0]
+            cadet_teams = Membership.query.filter_by(user_id=cadet_id).all()
+            cadet_teams = [Teams.query.filter_by(id=team.team_id).first() for team in cadet_teams]
             energy_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
                                                                                          QuestionnairePositionEnergy.type == 4,
                                                                                          QuestionnairePositionEnergy.cadet_id == cadet_id,
                                                                                          QuestionnairePositionEnergy.voted_id == cadet_id).first()}
             energy_answers[cadet_id]['self'] = energy_answers[cadet_id]['self'].question_answ if energy_answers[cadet_id]['self'] else '-'
-            team_answers = []
-            for c in team_members:
-                if c[0] != cadet_id:
-                    answer = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+            team_answers = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
                                                                                          QuestionnairePositionEnergy.type == 4,
-                                                                                         QuestionnairePositionEnergy.cadet_id == c[0],
-                                                                                         QuestionnairePositionEnergy.voted_id == cadet_id).first()
-                    if answer:
-                        team_answers.append(answer.question_answ)
-            energy_answers[cadet_id]['team'] = list('/'.join(str(x) for x in team_answers))
+                                                                                         QuestionnairePositionEnergy.cadet_id != cadet_id,
+                                                                                         QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            energy_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in team_answers))
+            energy_answers[cadet_id]['teams'] = cadet_teams
 
             position_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(
                 QuestionnairePositionEnergy.questionnaire_id == cur_quest,
@@ -393,22 +383,16 @@ def assessment_users():
                 QuestionnairePositionEnergy.voted_id == cadet_id).first()}
             position_answers[cadet_id]['self'] = position_answers[cadet_id]['self'].question_answ if \
                 position_answers[cadet_id]['self'] else '-'
-            team_answers = []
-            for c in team_members:
-                if c[0] != cadet_id:
-                    answer = QuestionnairePositionEnergy.query.filter(
+            team_answers = QuestionnairePositionEnergy.query.filter(
                         QuestionnairePositionEnergy.questionnaire_id == cur_quest,
                         QuestionnairePositionEnergy.type == 3,
-                        QuestionnairePositionEnergy.cadet_id == c[0],
-                        QuestionnairePositionEnergy.voted_id == cadet_id).first()
-                    if answer:
-                        team_answers.append(answer.question_answ)
-            position_answers[cadet_id]['team'] = list('/'.join(str(x) for x in team_answers))
-
-        return render_template(template, title='Ось отношений', answers=answers, images=images,
-                               access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
-                               team_members=team_members, axis=axis, criterions=criterions, team_title=team,
-                               is_first=is_first, is_last=is_last, voting_num_auth=voting_num_auth,
+                        QuestionnairePositionEnergy.cadet_id != cadet_id,
+                        QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            position_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in team_answers))
+            position_answers[cadet_id]['teams'] = cadet_teams
+        return render_template(template, title='Ось отношений', answers=answers, access=get_access(current_user),
+                               team_members=team_members, axis=axis, criterions=criterions,
+                               is_first=is_first, voting_num_auth=voting_num_auth, team_id=0,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
                                voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
                                energy_answers=energy_answers, position_answers=position_answers)
@@ -417,14 +401,16 @@ def assessment_users():
 @app.route('/business_details/<team_id>/<uid>')
 @login_required
 def business_details(team_id, uid):
-    monthes = [5, 6, 7, 8, 9, 10, 11, 12]
+    monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3]}
     dates = []
-    for current_month in monthes:
-        dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == current_month,
+    for year in monthes:
+        for month in monthes[year]:
+            dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == month,
+                                                            func.year(WeeklyVoting.date) == year,
                                                             WeeklyVoting.team_id == team_id,
                                                             WeeklyVoting.finished == 1).distinct().all()
-
-    voting_dict = {'name': User.get_full_name(uid), 'marks1': [], 'marks2': [], 'marks3': []}
+    team = Teams.query.get(team_id)
+    voting_dict = {'name': User.get_full_name(uid),'team': team.name, 'marks1': [], 'marks2': [], 'marks3': []}
     dates_str = []
     for date in dates:
         dates_str.append(f'{date[0].day}.{date[0].month}.{date[0].year}')
@@ -518,16 +504,17 @@ def finish_relations_vote():
                 vote_info = VotingInfo(voting_id=voting_id, criterion_id=criterion_id, cadet_id=i, mark=results[i][0])
                 db.session.add(vote_info)
                 db.session.commit()
+    return redirect(url_for('assessment'))
     # for q_id in q_ids:
     #     questionnaire = Questionnaire.query.filter_by(id=q_id).first()
     #     questionnaire.assessment = 0
     #     db.session.commit()
 
     # log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
-    if is_last:
-        return redirect(url_for('voting_summary', axis_id=1))
-    else:
-        return redirect(url_for('assessment'))
+    # if is_last:
+    #     return redirect(url_for('voting_summary', axis_id=1))
+    # else:
+    #
 
 @app.route('/voting_summary')
 def voting_summary():

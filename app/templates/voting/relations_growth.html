@@ -17,19 +17,19 @@
     </div>
     <br>
     <div class="nav_href" style="display:flex; justify-content:center;">
-        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/1</span>
         {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
         {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
     </div>
     <br><br>
-    <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>
+    <h2 style="text-align:center;">Оценка участников Корпуса по оси отношений</h2>
     <h3 style="text-align:center;">Оценка “Личностного роста”</h3>
     <div >
         <p>Личностный рост - динамика развития soft скилов (коммуникативные, лидерские, командные или другие социально
             психологические навыки,
-            которые пригодятся в любой активности и процессе) курсанта.
-            Вам предстоит принять решение о том, давать курсанту балл по этому критерию или нет.</p>
-        <p>Курсанты отвечали на вопрос: “Считаете ли вы, что в этом месяце прокачали свои коммуникативные, лидерские,
+            которые пригодятся в любой активности и процессе) участника.
+            Вам предстоит принять решение о том, давать участнику балл по этому критерию или нет.</p>
+        <p>Участники отвечали на вопрос: “Считаете ли вы, что в этом месяце прокачали свои коммуникативные, лидерские,
             командные или другие социально-психологические навыки? Дайте полный, развернутый ответ и приведите факты,
             которые это подтверждают.”</p>
     </div>
@@ -37,7 +37,7 @@
     <table class="rel_table" cellspacing="0">
         <tr>
             <td class="rel_cell1">Имя</td>
-            <td class="rel_cell2" style="text-align:center;">Ответ курсанта</td>
+            <td class="rel_cell2" style="text-align:center;">Ответ участника</td>
             <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Зачтено?</td>
         </tr>
         {% for member in team_members %}
@@ -57,15 +57,8 @@
         </tr>
         {% endfor %}
     </table>
-    <br><br>
-    <div>
-        <div class="vote_block2">
-            <div style="width:40%;">
-                <button class="nav__link finish_vote_btn" id="finish_button"
-                        ng-click="finish_vote({{team_id}}, 1, {{is_last}});">Далее
-                </button>
-            </div>
-        </div>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote(0, 1);">Далее</button>
     </div>
 </div>
 

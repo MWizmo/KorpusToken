@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container" style="margin-left:10%;width:80%;">
     <br>
-    <h2 style="text-align:center;">Результаты социометрического анкетирования коминды "{{team}}"</h2>
+    <h2 style="text-align:center;">Результаты социометрического анкетирования команды "{{team}}"</h2>
     <p>
       Участники отвечали на поставленные вопросы, выбирая кандидата из списка участников своей команды. Вы увидите ответы участников команды в виде графа, где направление стрелки указывает, кто кого выбрал в определенном вопросе. Сам вопрос написан под графом, переключение между вопросами - по нажатию кнопок на слайдере.
     </p>
@@ -11,7 +11,7 @@
         {% for img in images %}
         <input type="radio" name="slider2" id="slider2_{{loop.index0}}" checked="checked">
         <label for="slider2_{{loop.index0}}"></label>
-        <div><img src="{{img['src']}}"
+        <div><img src="{{img['src']}}" style="height:53vh;"
                   onError="this.onerror=null;this.src='{{url_for('static', filename='images/no_graph.png')}}';">
             <p>{{img['text']}}</p></div>
         {% endfor %}

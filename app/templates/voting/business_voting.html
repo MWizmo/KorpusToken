@@ -14,18 +14,18 @@
     </div>
     <br>
     <div class="nav_href" style="display:flex; justify-content:center;">
-        {% if is_first %} ось Отношений {{voting_num_rel}}/{{teams_for_voting}}, {% endif %}
+        {% if is_first %} ось Отношений {{voting_num_rel}}/1, {% endif %}
         <span class="cur_href">  ось Дела {{voting_num_bus}}/{{teams_for_voting}}</span>
         {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
     </div>
     <br><br>
-    <h2 style="text-align:center;">Оценка по оси дела</h2>
+    <h2 style="text-align:center;">Оценка по оси дела команды "{{team_title}}"</h2>
     <div>
         <p>На протяжении {{weekly_voting_counter}} трекшенов команда оценивалась по каждому из указанных ниже критериев. Мы подсчитали количество выставленных ”0” и “1” за этот период.<br>Предлагаем вам при выставлении итоговой оценки опираться на представленные данные. Вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
     </div>
     <h3>Критерий 1 - “Движение”</h3>
     <div >
-        <p>“Движение” - динамика выполнения проектных задач, доля сил времени затрачиваемых студентами на развитие проекта</p>
+        <p>“Движение” - динамика выполнения проектных задач, доля сил времени затрачиваемых участниками на развитие проекта</p>
         <p>На протяжении последнего месяца, на каждом из публичных трекшенов команде выставлялась оценка по этому критерию, предлагаем вам опереться на промежуточные оценки. При выставлении оценки, вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
     </div>
     <table class="rel_table" cellspacing="0">
@@ -142,9 +142,9 @@
         </tr>
         {% endfor %}
     </table>
-    <br><br>
-            <button class="nav__link finish_vote_btn" id="finish_button" ng-click="finish_vote({{team_id}},{{axis.id}});">Закончить оценку</button>
-        <br><br>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote({{team_id}},{{axis.id}});">Далее</button>
+    </div>
 </div>
 
 

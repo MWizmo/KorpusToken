@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container" style="margin-left:10%;width:80%;">
     <br>
-    <h2 style="text-align:center;">Оценка {{voting_results['name']}} по оси дела</h2>
+    <h2 style="text-align:center;">Оценка {{voting_results['name']}} по оси дела в команде "{{voting_results['team']}}"</h2>
     <table class="rel_table" cellspacing="0">
         <tr><td class="rel_cell1">Дата выставления оценки</td> <td>Движение</td> <td>Завершенность</td> <td>Подтверждение средой</td></tr>
         {% for date in dates %}
@@ -15,9 +15,9 @@
         </tr>
         {% endfor %}
     </table>
-    <br><br>
-    <button class="nav__link finish_vote_btn" id="finish_button" onclick="window.close();">Закрыть</button>
-    <br><br>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" onclick="window.close();">Закрыть</button>
+    </div>
 </div>
 
 

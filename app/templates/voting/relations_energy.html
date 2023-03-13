@@ -17,16 +17,16 @@
     </div>
     <br>
     <div class="nav_href" style="display:flex; justify-content:center;">
-        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/1</span>
         {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
         {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
     </div>
     <br><br>
-    <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>
+    <h2 style="text-align:center;">Оценка участников Корпуса по оси отношений</h2>
     <h3 style="text-align:center;">Оценка “Энергии”</h3>
     <div>
-        <p>“Энергия” - интенсивность работы студента, его выносливость: количество инициированных и выполняемых
-            процессов, доля сил и времени, инвестируемых в проект. Студент, постоянно, толкающий проект вперёд, достоин
+        <p>“Энергия” - интенсивность работы участника, его выносливость: количество инициированных и выполняемых
+            процессов, доля сил и времени, инвестируемых в проект. Участник, постоянно, толкающий проект вперёд, достоин
             балла по этому критерию.</p>
         <p>Участники, оценивая уровень своей энергии, выбирали один из 3 вариантов ответа: <br>
             <span class="voting_label1">1</span>. Я считаю что был предельно энергичен, прикладывал все усилия, чтобы наш с командой проект развивался. <br>
@@ -38,13 +38,14 @@
         <span class="voting_label2">2</span>.Кажется, что он (она) был достаточно энергичен, хотя бывали и спады.<br>
         <span class="voting_label3">3</span>.Считаю что уровень энергии на заданном промежутке времени был ниже обычного.<br>
         Оцените энергию каждого участника опираясь на ответы оцениваемых и членов их команды.<br>
-        Кроме того, каждая команда также проходила социометрический опрос, результаты этого опроса можно просмотреть нажав на соответствующую кнопку.</p>
+        Кроме того, каждая команда также проходила социометрический опрос, результаты этого опроса можно просмотреть нажав на название команды в соответствующей ячейке таблицы.</p>
     </div><br><br>
     <table class="rel_table" cellspacing="0">
         <tr>
             <td class="rel_cell1">Имя</td>
-            <td class="center_cell" style="text-align:center;">Оценил сам</td>
-            <td class="center_cell" style="text-align:center;">Оценили члены команды</td>
+            <td class="center_cell">Оценил сам</td>
+            <td class="center_cell">Оценили члены команд</td>
+            <td class="center_cell">Результаты социометрических опросов</td>
             <td class="rel_cell3" style="text-align:center;">Ваша оценка Энергии</td>
         </tr>
         {% for member in team_members %}
@@ -54,6 +55,11 @@
             <td class="center_cell">
                 {% for answer in energy_answers[member[0]]['team'] %}
                     <span class="voting_label{{answer}}">{{answer}}</span>
+                {% endfor %}
+            </td>
+            <td class="center_cell">
+                {% for team in energy_answers[member[0]]['teams'] %}
+                    <a href="/socio_results/{{team.id}}" target="_blank">{{team.name}}</a>
                 {% endfor %}
             </td>
             <td class="rel_cell3">
@@ -69,16 +75,8 @@
         </tr>
         {% endfor %}
     </table>
-    <a href="/socio_results/{{team_id}}" target="_blank" class="nav__link finish_vote_btn" style="width:100%;margin-left: 0; margin-top: 5px; text-align:center;">Смотреть результаты социометрического опроса команды «{{team_title}}»</a>
-    <br><br>
-    <div>
-        <div class="vote_block2">
-            <div style="width:40%;">
-                <button class="nav__link finish_vote_btn" id="finish_button"
-                        ng-click="finish_vote({{team_id}},2, {{is_last}});">Далее
-                </button>
-            </div>
-        </div>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote(0, 2);">Далее</button>
     </div>
 </div>
 
