@@ -395,6 +395,10 @@ font-family: 'Share Tech Mono', monospace;
   width: 30%;
 }
 
+.center_cell{
+    text-align:center;
+}
+
 .rel_flex {
   display: flex;
   flex-direction: row;
@@ -438,8 +442,9 @@ font-family: 'Share Tech Mono', monospace;
 
 /* Slider style */
 .slide {
-  width: 500px;
-  height: 300px;
+  width: 80%;
+  margin-left:10%;
+  height: 53vh;
   border: 1px solid #888;
   position: relative;
   text-align: center;

@@ -367,23 +367,38 @@ def assessment_users():
         else:
             template = 'voting/relations_growth.html'
         cur_quest = QuestionnaireTable.current_questionnaire_id()
-        energy_answers = {}
+        energy_answers, position_answers = {}, {}
         for cadet in team_members:
             cadet_id = cadet[0]
             energy_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
                                                                                          QuestionnairePositionEnergy.type == 4,
                                                                                          QuestionnairePositionEnergy.cadet_id == cadet_id,
                                                                                          QuestionnairePositionEnergy.voted_id == cadet_id).first().question_answ}
+            energy_answers_from_team = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                                                                                         QuestionnairePositionEnergy.type == 4,
+                                                                                         QuestionnairePositionEnergy.cadet_id != cadet_id,
+                                                                                         QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            energy_answers[cadet_id]['team'] = '/'.join(str(x.question_answ) for x in energy_answers_from_team)
 
-        #energy_answers = QuestionnairePositionEnergy.query.filter(QuestionnairePositionEnergy.questionnaire_id == cur_quest, QuestionnairePositionEnergy.type == 4, QuestionnairePositionEnergy.)
-        # QuestionnairePositionEnergy(questionnaire_id=cur_quest, type=4, cadet_id=int(items[1]),
-        #                             voted_id=int(items[2]), question_answ=int(request.form.get(value)))
+            position_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 3,
+                QuestionnairePositionEnergy.cadet_id == cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).first().question_answ}
+            position_answers_from_team = QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 3,
+                QuestionnairePositionEnergy.cadet_id != cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            position_answers[cadet_id]['team'] = '/'.join(str(x.question_answ) for x in position_answers_from_team)
+
         return render_template(template, title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team,
                                is_first=is_first, is_last=is_last, voting_num_auth=voting_num_auth,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
-                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, energy_answers=energy_answers)
+                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                               energy_answers=energy_answers, position_answers=position_answers)
 
 
 @app.route('/business_details/<team_id>/<uid>')
@@ -423,6 +438,19 @@ def business_details(team_id, uid):
             voting_dict['marks3'].append(0)
     return render_template('voting/business_details.html', title='Ось дела - Подробнее',
                            access=get_access(current_user), voting_results=voting_dict, dates=dates_str)
+
+
+@app.route('/socio_results/<team_id>')
+@login_required
+def socio_results(team_id):
+    texts = Questions.query.filter_by(type=2).all()
+    q_id = QuestionnaireTable.query.filter_by(status='Ready for assessment').first().id
+    images = [
+        {'text': texts[i - 1].text, 'src': url_for('static',
+                                                   filename='graphs/graph_{}_{}_{}.png'.format(team_id, q_id, i))}
+        for i in range(1, 6)]
+    team = Teams.query.filter_by(id=team_id).first().name
+    return render_template('voting/socio_results.html', title='Ось отношений - Подробнее', team=team, images=images)
 
 @app.route('/finish_vote', methods=['POST'])
 def finish_vote():

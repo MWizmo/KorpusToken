@@ -1,10 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/relations_vote.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}});"
+     style="margin-left:10%;width:80%;">
+    <br>
+    <div class="nav_href">
+        <!--a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">выбор оси</a> - <a href="/assessment_team?axis_id=1">выбор команды</a> - <a class="cur_href" href="">оценивание по оси отношений</a-->
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать
+        в оценке</a> - <a class="cur_href" href="">оценивание по оси отношений</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        <span class="cur_href">ось Отношений {{voting_num_rel}}/{{teams_for_voting}}</span>
+        {% if is_second %}, ось Дела {{voting_num_bus}}/{{teams_for_voting}} {% endif %}
+        {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
+    </div>
+    <br><br>
+    <h2 style="text-align:center;">Оценка команды «{{team_title}}» по оси отношений</h2>
+    <h3 style="text-align:center;">Оценка “Ясности позиции”</h3>
+    <div>
+        <p>“Ясность позиции” - насколько очевидны и понятны мотивация участника, иерархия целей, приоритеты, роль, картина мира (ценности, установки),
+            отношение к проекту и команде, сообществу, к целям Корпуса. Насколько цели участника совпадают с целями команды, комьюнити, Корпуса.</p>
+        <p>Участники, оценивая ясность своей позиции, выбирали один из 3 вариантов ответа:<br>
+            1. Я считаю что мои приоритеты, отношение к проекту и команде предельно ясны. <br>
+            2. Я не уверен, что все, с кем я работаю, в полной мере понимают, почему я решил учавствовать в проекте.<br>
+            3. Я думаю, что, в основной массе, члены моей команды (команд) не понимают моей позиции в полной мере.</p>
+        <br><br>
+        <p>Далее каждый член команды оценивал ясность позиции участника, выбирая один из 3 вариантов:<br>
+        1.Мне предельно понятна его позиция, ясны его мотивы и картина мира.<br>
+        2.Кажется, что его (её) позиция мне ясна, но я не уверен.<br>
+        3.Мне не ясна его (её) позиция<br>
+        Оцените ясность позиции каждого участника опираясь на ответы оцениваемых и членов их команды.<br>
+        Кроме того, каждая команда также проходила социометрический опрос, результаты этого опроса можно просмотреть нажав на соответствующую кнопку.</p>
+    </div><br><br>
+    <table class="rel_table" cellspacing="0">
+        <tr>
+            <td class="rel_cell1">Имя</td>
+            <td class="center_cell" style="text-align:center;">Оценил сам</td>
+            <td class="center_cell" style="text-align:center;">Оценили члены команды</td>
+            <td class="rel_cell3" style="text-align:center;">Ваша оценка Ясности позиции</td>
+        </tr>
+        {% for member in team_members %}
+        <tr>
+            <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
+            <td class="center_cell">{{ position_answers[member[0]]['self'] }}</td>
+            <td class="center_cell">{{ position_answers[member[0]]['team'] }}</td>
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[2].id}},1)">Да
+                    </div>
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member[0]}}"
+                                ng-click="vote_for({{member[0]}},{{criterions[2].id}},0)">Нет
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/socio_results/{{team_id}}" target="_blank" class="nav__link finish_vote_btn" style="width:100%;margin-left: 0; margin-top: 5px; text-align:center;">Смотреть результаты социометрического опроса команды «{{team_title}}»</a>
+    <br><br>
+    <div>
+        <div class="vote_block2">
+            <div style="width:40%;">
+                <button class="nav__link finish_vote_btn" id="finish_button"
+                        ng-click="finish_vote({{team_id}},3, {{is_last}});">Далее
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

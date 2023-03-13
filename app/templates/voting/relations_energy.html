@@ -3,7 +3,7 @@
 {% block scripts %}
 <!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-<script src="{{url_for('static', filename='js/vote.js')}}"></script>
+<script src="{{url_for('static', filename='js/relations_vote.js')}}"></script>
 {% endblock %}
 
 {% block content %}
@@ -43,15 +43,15 @@
     <table class="rel_table" cellspacing="0">
         <tr>
             <td class="rel_cell1">Имя</td>
-            <td class="rel_cell2" style="text-align:center;">Оценил сам</td>
-            <td class="rel_cell2" style="text-align:center;">Оценили члены команды</td>
+            <td class="center_cell" style="text-align:center;">Оценил сам</td>
+            <td class="center_cell" style="text-align:center;">Оценили члены команды</td>
             <td class="rel_cell3" style="text-align:center;">Ваша оценка Энергии</td>
         </tr>
         {% for member in team_members %}
         <tr>
             <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
-            <td class="rel_cell2">{{ energy_answers[member[0]]['self'] }}</td>
-            <td class="rel_cell2"></td>
+            <td class="center_cell">{{ energy_answers[member[0]]['self'] }}</td>
+            <td class="center_cell">{{ energy_answers[member[0]]['team'] }}</td>
             <td class="rel_cell3">
                 <div class="rel_flex">
                     <div><input type="radio" name="{{criterions[1].id}}_{{member[0]}}"
@@ -65,7 +65,7 @@
         </tr>
         {% endfor %}
     </table>
-    <a href="/socio_results?team_id={{team_id}}" target="_blank" class="nav__link finish_vote_btn" style="width:100%;margin-left: 0; margin-top: 5px; text-align:center;">Смотреть результаты социометрического опроса команды «{{team_title}}»</a>
+    <a href="/socio_results/{{team_id}}" target="_blank" class="nav__link finish_vote_btn" style="width:100%;margin-left: 0; margin-top: 5px; text-align:center;">Смотреть результаты социометрического опроса команды «{{team_title}}»</a>
     <br><br>
     <div>
         <div class="vote_block2">
