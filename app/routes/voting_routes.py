@@ -378,7 +378,7 @@ def assessment_users():
                                                                                          QuestionnairePositionEnergy.type == 4,
                                                                                          QuestionnairePositionEnergy.cadet_id != cadet_id,
                                                                                          QuestionnairePositionEnergy.voted_id == cadet_id).all()
-            energy_answers[cadet_id]['team'] = '/'.join(str(x.question_answ) for x in energy_answers_from_team)
+            energy_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in energy_answers_from_team))
 
             position_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(
                 QuestionnairePositionEnergy.questionnaire_id == cur_quest,
@@ -390,7 +390,7 @@ def assessment_users():
                 QuestionnairePositionEnergy.type == 3,
                 QuestionnairePositionEnergy.cadet_id != cadet_id,
                 QuestionnairePositionEnergy.voted_id == cadet_id).all()
-            position_answers[cadet_id]['team'] = '/'.join(str(x.question_answ) for x in position_answers_from_team)
+            position_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in position_answers_from_team))
 
         return render_template(template, title='Ось отношений', answers=answers, images=images,
                                access=get_access(current_user), team_id=team_id,  # q_ids=q_ids,

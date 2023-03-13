@@ -309,6 +309,19 @@ td_main {
   border: 0.6px solid black;
 }
 
+.voting_label1{
+    color: green;
+}
+
+.voting_label2{
+    color: orange;
+}
+
+.voting_label3{
+    color: red;
+}
+
+
 /* Crew */
 .crew_div {
   padding: 20px;
