@@ -849,19 +849,21 @@ def get_results_of_weekly_voting():
             WeeklyVoting.user_id,
             func.avg(WeeklyVoting.mark)
         ) \
-            .filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1,
-                    WeeklyVoting.user_id.in_(teammates)) \
-            .group_by(WeeklyVoting.criterion_id, WeeklyVoting.user_id, WeeklyVoting.date) \
+            .filter(WeeklyVoting.date == date, WeeklyVoting.team_id == t.id, WeeklyVoting.finished == 1) \
+            .group_by(WeeklyVoting.criterion_id) \
             .all()
 
         mark_res = {teammate: {date: [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
                                       {'criterion': 'Подтверждение средой', 'mark': 0}]} for teammate in teammates}
-        for mark in marks:
-            teammate_mark_res = mark_res.get(mark[1])
-            if teammate_mark_res is not None:
-                criterion = next(criterion for criterion in teammate_mark_res.get(date) if
-                                 criterion['criterion'] == Criterion.query.get(mark[0]).name)
-                criterion['mark'] = 1 if mark[2] >= 0.5 else 0
+
+        mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0}, {'criterion': 'Подтверждение средой', 'mark': 0}]
+        for j, mark in enumerate(marks):
+            mark_res[j]['mark'] = 1 if mark[2] >= 0.5 else 0
+            # teammate_mark_res = mark_res.get(mark[1])
+            # if teammate_mark_res is not None:
+            #     criterion = next(criterion for criterion in teammate_mark_res.get(date) if
+            #                      criterion['criterion'] == Criterion.query.get(mark[0]).name)
+            #     criterion['mark'] = 1 if mark[2] >= 0.5 else 0
         date_info['marks'] = mark_res
 
         voting_list = []
@@ -870,15 +872,15 @@ def get_results_of_weekly_voting():
             row = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': []}
             row['voting_date'] = date
 
-            if user[0] in teammates and mark_res[user[0]][date][0]['mark'] == 1:
+            if user[0] in teammates and mark_res[0]['mark'] == 1:
                 row['marks1'].append(1)
             else:
                 row['marks1'].append(0)
-            if user[0] in teammates and mark_res[user[0]][date][1]['mark'] == 1:
+            if user[0] in teammates and mark_res[1]['mark'] == 1:
                 row['marks2'].append(1)
             else:
                 row['marks2'].append(0)
-            if user[0] in teammates and mark_res[user[0]][date][2]['mark'] == 1:
+            if user[0] in teammates and mark_res[2]['mark'] == 1:
                 row['marks3'].append(1)
             else:
                 row['marks3'].append(0)
@@ -898,7 +900,7 @@ def get_results_of_weekly_voting():
     table_name = f"weekly_voting_{date.year}.{date.month}.{date.day}.xlsx"
     generate_weekly_voting_xlsx(table_name, summary_results)
 
-    return {'results': summary_results, 'table_path': url_for('static', filename=f"weekly_votings/{table_name}")}
+    return jsonify({'results': summary_results, 'table_path': url_for('static', filename=f"weekly_votings/{table_name}")})
 
 
 @app.route('/send_results_of_weekly_voting')

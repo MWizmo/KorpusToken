@@ -52,13 +52,13 @@
             <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
             <td class="center_cell"><span class="voting_label{{ position_answers[member[0]]['self'] }}">{{ position_answers[member[0]]['self'] }}</span></td>
             <td class="center_cell">
-                {% for team in position_answers[member[0]]['teams'] %}
-                    <a href="/socio_results/{{team.id}}" target="_blank">{{team.name}}</a>
+                {% for answer in position_answers[member[0]]['team'] %}
+                    <span class="voting_label{{answer}}">{{answer}}</span>
                 {% endfor %}
             </td>
             <td class="center_cell">
-                {% for answer in position_answers[member[0]]['team'] %}
-                    <span class="voting_label{{answer}}">{{answer}}</span>
+                {% for team in position_answers[member[0]]['teams'] %}
+                    <a href="/socio_results/{{team.id}}" target="_blank">{{team.name}}</a>
                 {% endfor %}
             </td>
             <td class="rel_cell3">
