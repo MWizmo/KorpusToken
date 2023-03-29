@@ -420,7 +420,11 @@ def business_details(team_id, uid):
         mark_res = []
         for mark in marks:
             mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
-        if len(marks) == 0:
+        teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date[0],
+                                                                          WeeklyVotingMembers.team_id == team_id).all()
+        if len(teammates) != 0:
+            teammates = [str(t[0]) for t in teammates]
+        if len(marks) == 0 or(len(teammates) != 0 and uid not in teammates):
             mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
                         {'criterion': 'Подтверждение средой', 'mark': 0}]
         if mark_res[0]['mark'] == 1:
