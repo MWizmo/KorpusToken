@@ -6,135 +6,146 @@
       {{ user.name }} {{ user.surname }}
     </h1>
 
-    <section class="resume-section">
-      <h3 class="resume-section-title" style="text-transform: none">
-        Контактные данные
-      </h3>
+    {% if user.phone or user.tg_nickname or user.country or user.city %}
+      <section class="resume-section">
+        <h3 class="resume-section-title" style="text-transform: none">
+          Контактные данные
+        </h3>
 
-      <div class="resume-form-control">
-        <span>Номер телефона</span>
-        <span class="resume-span">{{ user.phone or '-' }}</span>
-      </div>
+        {% if user.phone %}
+          <div class="resume-form-control">
+            <span>Номер телефона</span>
+            <span class="resume-span">{{ user.phone }}</span>
+          </div>
+        {% endif %}
 
-      <div class="resume-form-control">
-        <span>Профиль Telegram</span>
-        <span class="resume-span">{{ user.tg_nickname or '-' }}</span>
-      </div>
+        {% if user.tg_nickname %}
+          <div class="resume-form-control">
+            <span>Профиль Telegram</span>
+            <span class="resume-span">{{ user.tg_nickname }}</span>
+          </div>
+        {% endif %}
 
-      <div class="resume-form-control">
-        <span>Страна проживания</span>
-        <span class="resume-span">{{ user.country or '-' }}</span>
-      </div>
+        {% if user.country %}
+          <div class="resume-form-control">
+            <span>Страна проживания</span>
+            <span class="resume-span">{{ user.country }}</span>
+          </div>
+        {% endif %}
 
-      <div class="resume-form-control">
-        <span>Город проживания</span>
-        <span class="resume-span">{{ user.city or '-' }}</span>
-      </div>
-    </section>
+        {% if user.city %}
+          <div class="resume-form-control">
+            <span>Город проживания</span>
+            <span class="resume-span">{{ user.city }}</span>
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
 
     <section class="resume-section">
       <h3 class="resume-section-title" style="text-transform: none">
         Основная информация
       </h3>
 
-      <div class="resume-form-control">
-        <span>Дата рождения</span>
-        <span class="resume-span"
-          >{{ user.birthdate.strftime('%d') if user.birthdate else '-' }}.{{
-          user.birthdate.strftime('%m') if user.birthdate else '-' }}.{{
-          user.birthdate.strftime('%Y') if user.birthdate else '' }}</span
-        >
-      </div>
+      {% if user.birthdate %}
+        <div class="resume-form-control">
+          <span>Дата рождения</span>
+          <span class="resume-span">{{ user.birthdate.strftime('%d.%m.%Y') if user.birthdate }}</span>
+        </div>
+      {% endif %}
 
-      <div class="resume-form-control">
-        <span>Пол</span>
-        <span class="resume-span"
-          >{{ 'Мужской' if user.sex == 'male' else 'Женский' if user.sex else
-          '-' }}</span
-        >
-      </div>
+      {% if user.sex %}
+        <div class="resume-form-control">
+          <span>Пол</span>
+          <span class="resume-span">{{ 'Мужской' if user.sex == 'male' else 'Женский' }}</span>
+        </div>
+      {% endif %}
 
-      <div class="resume-form-control">
-        <span>Гражданство</span>
-        <span class="resume-span"
-          >{{ user.citizenship if user.citizenship else '-' }}</span
-        >
-      </div>
+      {% if user.citizenship %}
+        <div class="resume-form-control">
+          <span>Гражданство</span>
+          <span class="resume-span">{{ user.citizenship if user.citizenship }}</span>
+        </div>
+      {% endif %}
 
-      <div class="resume-textarea-form-control">
-        <span>Навыки</span>
-        <div class="resume-skills-container" id="resume-skills-container">
-          {% for skill in skills %}
-          <div class="resume-card resume-skill-card" style="cursor: pointer">
-            <div>
-              <div class="resume-card-title">{{ skill.title }}</div>
-              <div class="resume-hidden-field">{{ skill.id }}</div>
+      {% if skills|length > 0 %}
+        <div class="resume-textarea-form-control">
+          <span>Навыки</span>
+          <div class="resume-skills-container" id="resume-skills-container">
+            {% for skill in skills %}
+            <div class="resume-card resume-skill-card" style="cursor: pointer">
               <div>
-                {% for keyword in skill.keywords %}
-                <span
-                  >{{ keyword.value }}{% if loop.index0 != ((skill.keywords
-                  |length) - 1) %}, {% endif %}</span
-                >
-                {% endfor %}
+                <div class="resume-card-title">{{ skill.title }}</div>
+                <div class="resume-hidden-field">{{ skill.id }}</div>
+                <div>
+                  {% for keyword in skill.keywords %}
+                  <span
+                    >{{ keyword.value }}{% if loop.index0 != ((skill.keywords
+                    |length) - 1) %}, {% endif %}</span
+                  >
+                  {% endfor %}
+                </div>
               </div>
             </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
-      </div>
+      {% endif %}
 
-      <div class="resume-textarea-form-control">
-        <span>Опыт работы</span>
-        <div id="resume-work-exps-container">
-          {% for job in work_experience %}
-          <div class="resume-card resume-work-exp-card" style="cursor: pointer">
-            <div>
-              <div class="resume-hidden-field">{{ job.id }}</div>
-              <div class="resume-card-title">
-                {{ job.start_at.strftime('%m.%Y') }} - {{
-                job.end_at.strftime('%m.%Y') if job.is_ended else 'По настоящее
-                время' }}
+      {% if work_experience|length > 0 %}
+        <div class="resume-textarea-form-control">
+          <span>Опыт работы</span>
+          <div id="resume-work-exps-container">
+            {% for job in work_experience %}
+              <div class="resume-card resume-work-exp-card" style="cursor: pointer">
+                <div>
+                  <div class="resume-hidden-field">{{ job.id }}</div>
+                  <div class="resume-card-title">
+                    {{ job.start_at.strftime('%m.%Y') }} - {{
+                    job.end_at.strftime('%m.%Y') if job.is_ended else 'По настоящее
+                    время' }}
+                  </div>
+                  <div>{{ job.position }}</div>
+                  <div>{{ job.place }}</div>
+                </div>
               </div>
-              <div>{{ job.position }}</div>
-              <div>{{ job.place }}</div>
-            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
-      </div>
+      {% endif %}
 
-      <div class="resume-textarea-form-control">
-        <span>Владение языками</span>
-        {% if user_languages|length == 0 %}
-        <span class="resume-span">-</span>
-        {% else %}
-        <div>
-          {% for user_language in user_languages %}
-          <div class="resume-language-view">
-            <div class="resume-language-content-container">
-              <div class="resume-language-name-view">
-                {{ user_language.name }}
+      {% if user_languages|length > 0 %}
+        <div class="resume-textarea-form-control">
+          <span>Владение языками</span>
+          <div>
+            {% for user_language in user_languages %}
+              <div class="resume-language-view">
+                <div class="resume-language-content-container">
+                  <div class="resume-language-name-view">
+                    {{ user_language.name }}
+                  </div>
+                  <div class="resume-language-level-view">
+                    {{ user_language.level }}
+                  </div>
+                </div>
               </div>
-              <div class="resume-language-level-view">
-                {{ user_language.level }}
-              </div>
-            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
-        {% endif %}
-      </div>
+      {% endif %}
 
-      <div class="resume-textarea-form-control">
-        <span>О себе</span>
-        <div
-          name="description"
-          class="resume-textarea"
-          style="overflow-x: auto"
-        >
-          {{ user.description or '' }}
+      {% if user.description %}
+        <div class="resume-textarea-form-control">
+          <span>О себе</span>
+          <div
+            name="description"
+            class="resume-textarea"
+            style="overflow-x: auto"
+          >
+            {{ user.description }}
+          </div>
         </div>
-      </div>
+      {% endif %}
     </section>
   </div>
 </div>
