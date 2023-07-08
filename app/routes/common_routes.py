@@ -1642,7 +1642,8 @@ def get_resumes():
         (
             LOWER(job.position) LIKE :search OR
             LOWER(skill.title) LIKE :search OR
-            LOWER(keyword.value) LIKE :search
+            LOWER(keyword.value) LIKE :search OR
+            LOWER(CONCAT(user.name, ' ', user.surname)) LIKE :search
         )
     """ if len(search) != 0 else "(1 = 1)"
     
@@ -1715,7 +1716,7 @@ def get_resumes():
         update_work_experience(user)
         resume['work_experience_in_ms'] = user.work_experience_in_ms
         
-        resume['match'] = None
+        resume['match'] = 'fullname' if search in f'{user.name} {user.surname}'.lower() else None
         
         jobs = [dict(job) for job in db.engine.execute(find_jobs_query, {
             "user_id": resume['id']
