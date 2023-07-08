@@ -361,13 +361,7 @@
 
           const matchBlockContent = document.createElement('div');
           matchBlockContent.classList.add('resume-list-card-section-content');
-          matchBlockContent.textContent = `${
-            resume.match === 'position'
-              ? 'Должность'
-              : resume.match === 'skill'
-              ? 'Навык'
-              : 'Уточнение в навыке'
-          }: ${matchedText}`;
+          matchBlockContent.textContent = `${({ position: 'Должность: ', skill: 'Навык: ', fullname: 'ФИО' })[resume.match] ?? 'Уточнение в навыке'}${matchedText}`;
 
           matchBlock.appendChild(matchBlockTitle);
           matchBlock.appendChild(matchBlockContent);
