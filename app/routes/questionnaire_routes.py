@@ -496,6 +496,10 @@ def questionnaire_progress():
         cur_id = VotingTable.current_distribution_voting_id()
         return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,
                                access=get_access(current_user))
+    elif VotingTable.is_opened():
+        cur_id = VotingTable.current_voting_id()
+        return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки', active_id=cur_id,
+                               access=get_access(current_user))
     else:
         return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки',
                                access=get_access(current_user))
