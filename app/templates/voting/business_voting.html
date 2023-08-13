@@ -143,7 +143,7 @@
         {% endfor %}
     </table>
     <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
-        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote({{team_id}},{{axis.id}});">Далее</button>
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote({{team_id}},{{axis.id}}, {{is_last}}, {{revote}});">Далее</button>
     </div>
 </div>
 

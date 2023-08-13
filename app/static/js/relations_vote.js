@@ -47,7 +47,7 @@ app.controller("ctrl", function ($scope, $http) {
                 async: false
             }).then(function success (response) {
                 console.log('Анкета успешно заполнена');
-                document.location.href = "start_vote";
+                document.location.href = response.data.url;
             });
         }
         else
