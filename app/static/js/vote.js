@@ -23,14 +23,16 @@ app.controller("ctrl", function ($scope, $http) {
         console.log(1);
     }
 
-    $scope.finish_vote = function(team_id, axis_id, is_last=0){
+    $scope.finish_vote = function(team_id, axis_id, is_last=0, revote=0){
         //document.getElementById("finish_button").disabled = true;
         let user_data = {
             'team_id':team_id,
              'axis':axis_id,
              "results":$scope.results,
-             'is_last': is_last
+             'is_last': is_last,
+             'revote': revote
         };
+        console.log(is_last);
         let flag = true;
         $scope.results.forEach(function(item, i, arr) {
             for(let j=3 * (axis_id-1); j < 3 * axis_id; j++)
@@ -47,7 +49,7 @@ app.controller("ctrl", function ($scope, $http) {
                 async: false
             }).then(function success (response) {
                 console.log('Анкета успешно заполнена');
-                document.location.href = "start_vote";
+                document.location.href = response.data.url;
             });
         }
         else

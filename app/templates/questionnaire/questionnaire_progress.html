@@ -30,7 +30,7 @@
                     {% if current_user.is_chieftain or current_user.is_admin %}
                         <div class="">
                             <!--a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a-->
-                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Завершить оценку</a>
+                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Фиксировать оценку</a>
                         </div>
                     {% endif %}
                     <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
@@ -100,6 +100,16 @@
 
             {% elif emission_id %}
                 <h2>Результаты оценки вклада записаны в блокчейн<br><br>Ожидаем эмиссии токенов</h2>
+            {% elif active_id %}
+                <h2>В настоящее время проходит оценка вклада</h2>
+                <br><br>
+                {% if current_user.is_chieftain or current_user.is_admin %}
+                    <div class="">
+                        <!--a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a-->
+                        <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Фиксировать оценку</a>
+                    </div>
+                {% endif %}
+                <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
             {% else %}
                 <h2>В данный момент нет активного анкетирования</h2>
                 <br><br>

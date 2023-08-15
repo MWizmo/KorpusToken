@@ -222,6 +222,10 @@ def assessment_users():
 
     team_id = int(request.args.get('team_id'))
     axis_id = request.args.get('axis_id')
+    if 'last' in request.args:
+        is_last = int(request.args.get('last'))
+    else:
+        is_last = 0
     log('Просмотр страницы с оценкой по оси id {} команды с id {}'.format(axis_id, team_id))
     criterions = Criterion.query.filter_by(axis_id=axis_id).all()
     axis = Axis.query.filter_by(id=axis_id).first()
@@ -262,7 +266,7 @@ def assessment_users():
         # if current_user.id != member.user_id and User.check_cadet(member.user_id)]
         team = Teams.query.filter_by(id=team_id).first().name
         # current_month = datetime.datetime.now().month
-        monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3]}
+        monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3, 4, 5, 6, 7, 8, 9]}
         dates = []
         for year in monthes:
             for month in monthes[year]:
@@ -332,7 +336,7 @@ def assessment_users():
                                voting_dict=voting_dict, is_first=is_first,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
                                voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
-                               voting_num_auth=voting_num_auth)
+                               voting_num_auth=voting_num_auth, is_last=is_last, revote=0)
     else:
         team_members = [(member.id, member.name, member.surname)
                         for member in User.query.all()
@@ -404,7 +408,7 @@ def assessment_users():
 @app.route('/business_details/<team_id>/<uid>')
 @login_required
 def business_details(team_id, uid):
-    monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3]}
+    monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3, 4, 5, 6, 7, 8, 9]}
     dates = []
     for year in monthes:
         for month in monthes[year]:
@@ -466,10 +470,17 @@ def finish_vote():
     axis_id = int(data['axis'])
     results = data['results']
     is_last = int(data['is_last'])
-    voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
+    revote = int(data['revote'])
+    if revote:
+        assessment = VotingTable.query.filter_by(status='Active').first()
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
+                                         Voting.voting_id == assessment.id, Voting.team_id == team_id).first()
+        VotingInfo.query.filter_by(voting_id=voting.id).delete()
+    else:
+        voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
                     date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
                                        datetime.datetime.now().day), voting_id=VotingTable.current_voting_id())
-    db.session.add(voting)
+        db.session.add(voting)
     db.session.commit()
     voting_id = voting.id
     for i in range(len(results)):
@@ -485,9 +496,11 @@ def finish_vote():
 
     log('Завершение оценки по оси c id {} команды с id {}'.format(axis_id, team_id))
     if is_last:
-        return redirect(url_for('voting_summary', axis_id=axis_id))
+        return jsonify({'url': f'voting_summary?axis_id={axis_id}'})
+        #return redirect(url_for('voting_summary', axis_id=axis_id))
     else:
-        return redirect(url_for('assessment'))
+        return jsonify({'url': 'assessment'})
+        #return redirect(url_for('assessment'))
 
 
 @app.route('/finish_relations_vote', methods=['POST'])
@@ -496,7 +509,6 @@ def finish_relations_vote():
     team_id = int(data['team_id'])
     criterion_id = int(data['criterion_id'])
     results = data['results']
-    is_last = int(data['is_last'])
     if criterion_id == 1:
         voting = Voting(user_id=current_user.id, axis_id=1, team_id=team_id,
                         date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
@@ -512,7 +524,11 @@ def finish_relations_vote():
             vote_info = VotingInfo(voting_id=voting_id, criterion_id=criterion_id, cadet_id=i, mark=results[i][0])
             db.session.add(vote_info)
             db.session.commit()
-    return redirect(url_for('assessment'))
+    if criterion_id < 3:
+        return jsonify({'url': 'start_vote'})
+    else:
+        return jsonify({'url': f'voting_summary?axis_id=1&team_id={team_id}'})
+    # return redirect(url_for('assessment'))
     # for q_id in q_ids:
     #     questionnaire = Questionnaire.query.filter_by(id=q_id).first()
     #     questionnaire.assessment = 0
@@ -536,7 +552,12 @@ def voting_summary():
     for t in voted_team:
         cur_voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
                                          Voting.voting_id == assessment.id, Voting.team_id == t).first()
-        team_members = [(member.user_id, User.query.filter_by(id=member.user_id).first().name,
+        if t == 0:
+            team_members = [(member.id, member.name, member.surname)
+                            for member in User.query.all()
+                            if current_user.id != member.id and User.check_cadet(member.id)]
+        else:
+            team_members = [(member.user_id, User.query.filter_by(id=member.user_id).first().name,
                          User.query.filter_by(id=member.user_id).first().surname)
                         for member in Membership.query.filter_by(team_id=t) if User.check_cadet(member.user_id)]
         voting_dict = {}
@@ -545,7 +566,10 @@ def voting_summary():
             voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}'}
             for mark in marks:
                 voting_dict[user[0]][Criterion.query.get(mark.criterion_id).name] = mark.mark
-        voting_info[Teams.query.get(t).name] = {'id': t, 'marks': voting_dict}
+        if t == 0:
+            voting_info["Все участники"] = {'id': t, 'marks': voting_dict}
+        else:
+            voting_info[Teams.query.get(t).name] = {'id': t, 'marks': voting_dict}
     teams_for_voting = len(Teams.query.filter_by(type=1).all())
     voting_num_rel = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
                                              Voting.voting_id == assessment.id).all())
@@ -560,7 +584,7 @@ def voting_summary():
     is_third = True if User.check_chieftain(current_user.id) else False
     return render_template('voting/voting_summary.html', voting_info=voting_info, is_first=is_first,
                            is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
-                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                           voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus, axis_id=axis_id,
                            voting_num_auth=voting_num_auth, criterions=Criterion.query.filter_by(axis_id=axis_id).all())
 
 
@@ -999,3 +1023,202 @@ def confirm_top_cadets():
     db.session.commit()
     log('Выбор топовых кадетов')
     return jsonify({'response': 'ok'})
+
+
+@app.route('/revote')
+def revote():
+    axis_id = int(request.args.get('axis_id'))
+    team_id = int(request.args.get('team_id'))
+    assessment = VotingTable.query.filter_by(status='Active').first()
+    cur_voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
+                                         Voting.voting_id == assessment.id, Voting.team_id == team_id).first()
+
+    teams_for_voting = len(Teams.get_teams_for_voting())
+    voting_rel = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1,
+                                     Voting.voting_id == assessment.id).first()
+    voting_num_rel = 0 if not voting_rel or len(VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                                                        VotingInfo.criterion_id == 1).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id,
+                                VotingInfo.criterion_id == 2).all()) == 0 or len(
+        VotingInfo.query.filter(VotingInfo.voting_id == voting_rel.id, VotingInfo.criterion_id == 3).all()) == 0 else 1
+    voting_num_bus = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                             Voting.voting_id == assessment.id).all())
+    voting_num_auth = len(Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3,
+                                              Voting.voting_id == assessment.id).all())
+    axises = [(axis.id, axis.name) for axis in Axis.query.all()]
+    is_first = True if User.check_top_cadet(current_user.id) else False
+    is_second = True if User.check_tracker(current_user.id) or User.check_expert(current_user.id) \
+                        or User.check_teamlead(current_user.id) else False
+    is_third = True if User.check_chieftain(current_user.id) else False
+    criterions = Criterion.query.filter_by(axis_id=axis_id).all()
+    axis = Axis.query.filter_by(id=axis_id).first()
+    q_id = QuestionnaireTable.query.filter_by(status='Ready for assessment').first().id
+    if axis_id == 2:
+        team_members = [(member.user_id,
+                         User.query.filter_by(id=member.user_id).first().name,
+                         User.query.filter_by(id=member.user_id).first().surname)
+                        for member in Membership.query.filter_by(team_id=team_id)
+                        if User.check_cadet(member.user_id)]
+        team = Teams.query.filter_by(id=team_id).first().name
+        monthes = {2022: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 2023: [1, 2, 3, 4, 5, 6, 7, 8, 9]}
+        dates = []
+        for year in monthes:
+            for month in monthes[year]:
+                dates += db.session.query(WeeklyVoting.date).filter(func.month(WeeklyVoting.date) == month,
+                                                                    func.year(WeeklyVoting.date) == year,
+                                                                    WeeklyVoting.team_id == team_id,
+                                                                    WeeklyVoting.finished == 1).distinct().all()
+
+        voting_results = []
+        voting_dict = {}
+        for user in team_members:
+            voting_dict[user[0]] = {'name': f'{user[1]} {user[2]}', 'marks1': [], 'marks2': [], 'marks3': [],
+                                    'marks1_1': 0, 'marks1_0': 0, 'marks2_1': 0, 'marks2_0': 0, 'marks3_1': 0,
+                                    'marks3_0': 0}
+        dates_str = []
+        for date in dates:
+            date_info = {'date': f'{date[0].day}.{date[0].month}.{date[0].year}'}
+            dates_str.append(f'{date[0].day}.{date[0].month}.{date[0].year}')
+            marks = db.session.query(WeeklyVoting.criterion_id, func.avg(WeeklyVoting.mark)). \
+                filter(WeeklyVoting.date == date[0], WeeklyVoting.team_id == team_id, WeeklyVoting.finished == 1). \
+                group_by(WeeklyVoting.criterion_id).all()
+            mark_res = []
+            for mark in marks:
+                mark_res.append({'criterion': Criterion.query.get(mark[0]).name, 'mark': 1 if mark[1] == 1 else 0})
+            if len(marks) == 0:
+                mark_res = [{'criterion': 'Движение', 'mark': 0}, {'criterion': 'Завершенность', 'mark': 0},
+                            {'criterion': 'Подтверждение средой', 'mark': 0}]
+            date_info['marks'] = mark_res
+            teammates = db.session.query(WeeklyVotingMembers.cadet_id).filter(WeeklyVotingMembers.date == date[0],
+                                                                              WeeklyVotingMembers.team_id == team_id).all()
+            if len(teammates) == 0:
+                teammates = [user_id for user_id in voting_dict]
+            else:
+                teammates = [t[0] for t in teammates]
+
+            for user in voting_dict:
+                if user in teammates and mark_res[0]['mark'] == 1:
+                    voting_dict[user]['marks1'].append(1)
+                    voting_dict[user]['marks1_1'] += 1
+                else:
+                    voting_dict[user]['marks1'].append(0)
+                    voting_dict[user]['marks1_0'] += 1
+                if user in teammates and mark_res[1]['mark'] == 1:
+                    voting_dict[user]['marks2'].append(1)
+                    voting_dict[user]['marks2_1'] += 1
+                else:
+                    voting_dict[user]['marks2'].append(0)
+                    voting_dict[user]['marks2_0'] += 1
+                if user in teammates and mark_res[2]['mark'] == 1:
+                    voting_dict[user]['marks3'].append(1)
+                    voting_dict[user]['marks3_1'] += 1
+                else:
+                    voting_dict[user]['marks3'].append(0)
+                    voting_dict[user]['marks3_0'] += 1
+            teammates_info = []
+            for member in team_members:
+                if member[0] in teammates and len(teammates) > 0:
+                    teammates_info.append(member)
+                elif len(teammates) == 0:
+                    teammates_info.append(member)
+            date_info['teammates'] = teammates_info
+            voting_results.append(date_info)
+        return render_template('voting/business_voting.html', title='Ось дела',
+                               access=get_access(current_user), team_id=team_id, voting_results=voting_results,
+                               dates=dates_str,
+                               team_members=team_members, axis=axis, criterions=criterions, team_title=team,
+                               voting_dict=voting_dict, is_first=is_first,
+                               is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                               voting_num_auth=voting_num_auth, is_last=1, revote=1)
+    elif axis_id == 1:
+        team_members = [(member.id, member.name, member.surname)
+                        for member in User.query.all()
+                        if current_user.id != member.id and User.check_cadet(member.id)]
+        question = Questions.query.filter_by(type=1).first()
+        answers = list()
+        for member in team_members:
+            questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id,
+                                                       Questionnaire.user_id == member[0],
+                                                       Questionnaire.type == 1).all()
+            if questionnaire:
+                questionnaire = questionnaire[-1]
+                answers.append(QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == question.id,
+                                                              QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
+            else:
+                answers.append('Нет ответа')
+        Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == 0,
+                                     Voting.voting_id == VotingTable.current_voting_id()).delete()
+        db.session.commit()
+        template = 'voting/relations_growth.html'
+        cur_quest = QuestionnaireTable.current_questionnaire_id()
+        energy_answers, position_answers = {}, {}
+        for cadet in team_members:
+            cadet_id = cadet[0]
+            cadet_teams = Membership.query.filter_by(user_id=cadet_id).all()
+            cadet_teams = [Teams.query.filter_by(id=team.team_id).first() for team in cadet_teams]
+            energy_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 4,
+                QuestionnairePositionEnergy.cadet_id == cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).first()}
+            energy_answers[cadet_id]['self'] = energy_answers[cadet_id]['self'].question_answ if \
+            energy_answers[cadet_id]['self'] else '-'
+            team_answers = QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 4,
+                QuestionnairePositionEnergy.cadet_id != cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            energy_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in team_answers))
+            energy_answers[cadet_id]['teams'] = cadet_teams
+
+            position_answers[cadet_id] = {'self': QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 3,
+                QuestionnairePositionEnergy.cadet_id == cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).first()}
+            position_answers[cadet_id]['self'] = position_answers[cadet_id]['self'].question_answ if \
+                position_answers[cadet_id]['self'] else '-'
+            team_answers = QuestionnairePositionEnergy.query.filter(
+                QuestionnairePositionEnergy.questionnaire_id == cur_quest,
+                QuestionnairePositionEnergy.type == 3,
+                QuestionnairePositionEnergy.cadet_id != cadet_id,
+                QuestionnairePositionEnergy.voted_id == cadet_id).all()
+            position_answers[cadet_id]['team'] = list('/'.join(str(x.question_answ) for x in team_answers))
+            position_answers[cadet_id]['teams'] = cadet_teams
+        return render_template(template, title='Ось отношений', answers=answers, access=get_access(current_user),
+                               team_members=team_members, axis=axis, criterions=criterions,
+                               is_first=is_first, voting_num_auth=voting_num_auth, team_id=0,
+                               is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                               energy_answers=energy_answers, position_answers=position_answers)
+    else:
+        Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3, Voting.team_id == 0,
+                            Voting.voting_id == VotingTable.current_voting_id()).delete()
+        db.session.commit()
+        questions = Questions.query.filter_by(type=1)[1:4]
+        cadets = [(user.id,
+                   User.query.filter_by(id=user.id).first().name,
+                   User.query.filter_by(id=user.id).first().surname)
+                  for user in User.query.all() if User.check_can_be_marked(user.id) and current_user.id != user.id]
+        answers = dict()
+        for i, q in enumerate(criterions):
+            answers[q.id] = list()
+            for c in cadets:
+                questionnaire = Questionnaire.query.filter(Questionnaire.questionnaire_id == q_id,
+                                                           Questionnaire.user_id == c[0], Questionnaire.type == 1).all()
+                if questionnaire:
+                    # q_ids.append(questionnaire.id)
+                    questionnaire = questionnaire[-1]
+                    answers[q.id].append(
+                        QuestionnaireInfo.query.filter(QuestionnaireInfo.question_id == questions[i].id,
+                                                       QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
+                else:
+                    answers[q.id].append('Нет ответа')
+        return render_template('voting/authority_voting.html', title='Ось власти', answers=answers,
+                               access=get_access(current_user), questions=questions,
+                               team_members=cadets, criterions=criterions, axis=axis, team_id=team_id,
+                               is_first=is_first,
+                               is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
+                               voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
+                               voting_num_auth=voting_num_auth)
