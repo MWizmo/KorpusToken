@@ -1,57 +1,27 @@
 {% extends "base.html" %} {% block scripts %}
-<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-<script src="{{url_for('static', filename='js/weekly_voting_result.js')}}"></script>
+<script defer src="{{url_for('static', filename='js/weekly_voting_result.js')}}"></script>
 {% endblock %} {% block content %}
 <div class="res_container" ng-app="app" ng-controller="ctrl" ng-cloak>
   <div class="nav_href">
     <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> -
     <a class="cur_href" href="">еженедельная оценка</a>
   </div>
-  <h2>Выберите дату, за которую хотите просмотреть оценки</h2>
-  <select ng-model="selected" ng-change="clear_interval(); choose_voting();">
-    <option value=""></option>
-    {% for v in votings %}
-    <option value="{{v.date}}">{{v.date_str}}</option>
-    {% endfor %}
-  </select>
-    {% raw %}<a class="download-button" ng-show="show_results" href="{{tablePath}}">Скачать</a> {% endraw %}
-    <br /><br />
-  <div ng-show="show_results">
-    {% raw %}
-    <h2 ng-show="!results">Результаты еще не подведены</h2>
-
-    <div ng-show="results" ng-cloak>
-      <div ng-repeat="team in info">
-        <h2>{{team['team']}}</h2>
-        <table
-          class="result_table"
-          cellspacing="0"
-          style="margin-bottom: 2vh; width: 60%"
-        >
-          <thead>
-            <tr>
-              <td style="width: 20%" ng-show="!selected">Дата оценки</td>
-              <td style="width: 20%">Имя</td>
-              <td style="width: 20%">Движение</td>
-              <td style="width: 20%">Завершенность</td>
-              <td style="width: 20%">Подтверждение средой</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr ng-repeat="user in team['marks']">
-              <td ng-show="!selected">{{user['voting_date']}}</td>
-              <td>{{user['name']}}</td>
-              <td>{{user['marks1'][0]}}</td>
-              <td>{{user['marks2'][0]}}</td>
-              <td>{{user['marks3'][0]}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    {% endraw %}
+  <h2 class="voting-title">Прогресс команд по оси дела</h2>
+  <p class="voting-advice">Выберите период, за который требуется показать прогресс</p>
+  <div class="voting-range-container">
+    <div class="voting-range-date voting-range-start-date">{{ votings[0].date_str }}</div>
+    <div class="voting-range-date voting-range-end-date">{{ votings[-1].date_str }}</div>
+    <input type="range" class="voting-range-input" value="0" min="0" max="{{ votings|length - 1 }}" step="1" data-kind="from" id="voting-range-first-input">
+    <input type="range" class="voting-range-input" value="{{ votings|length - 1 }}" min="0" max="{{ votings|length - 1 }}" step="1" data-kind="to" id="voting-range-second-input">
+    <hr class="voting-range-line" />
+    <label class="voting-range-date voting-range-first-date" for="voting-range-first-input" data-value="">-</label>
+    <label class="voting-range-date voting-range-second-date" for="voting-range-second-input" data-value="">-</label>
+    <ul class="voting-range-options">
+      {% for v in votings %}
+        <li data-value="{{v.date}}" class="voting-range-option">{{v.date_str}}</li>
+      {% endfor %}
+    </ul>
   </div>
+  <section id="weekly-results-container"></section>
 </div>
 {% endblock %}
