@@ -879,6 +879,10 @@ def get_results_of_weekly_voting():
                     WeeklyVoting.finished == 1) \
             .group_by(WeeklyVoting.criterion_id) \
             .all()
+
+        if len(total_marks) == 0:
+            continue
+
         gained_marks = db.session.query(
             WeeklyVoting.criterion_id,
             func.sum(WeeklyVoting.mark)
@@ -887,9 +891,7 @@ def get_results_of_weekly_voting():
                     WeeklyVoting.mark == 1, WeeklyVoting.finished == 1) \
             .group_by(WeeklyVoting.criterion_id) \
             .all()
-        criteria = Criterion.query.filter(Criterion.id.in_(map(lambda mark: mark[0], total_marks))).all()
-        print(gained_marks)
-        print(total_marks)
+        criteria = Criterion.query.filter_by(axis_id=2).all()
         summary_results.append({
             'id': t.id,
             'name': t.name,

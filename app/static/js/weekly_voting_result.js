@@ -51,6 +51,41 @@ const votingRangeState = {
   from: +votingRangeInputs.find((input) => input.dataset.kind === 'from')?.value,
   to: +votingRangeInputs.find((input) => input.dataset.kind === 'to')?.value,
 };
+let lastResults = {};
+
+const isResultsEqual = (current, last) => {
+  if (current.length !== Object.keys(last).length) {
+    return false;
+  }
+
+  const isTeamsChanged = current.some((team) => !last[team.id]);
+
+  if (isTeamsChanged) {
+    return false;
+  }
+
+  const isCriteriaChanged = current.some((team) => {
+    if (team.criteria.length !== Object.keys(last[team.id].criteria).length) {
+      return true;
+    }
+
+    return team.criteria.some((criterion) => !last[team.id].criteria[criterion.id]);
+  });
+
+  if (isCriteriaChanged) {
+    return false;
+  }
+
+  const isMembersChanged = current.some((team) => {
+    if (team.members.length !== Object.keys(last[team.id].members).length) {
+      return true;
+    }
+
+    return team.members.some((member) => !last[team.id].members[member.id]);
+  });
+
+  return !isMembersChanged;
+};
 
 const weeklyResultsContainer = document.querySelector('#weekly-results-container');
 
@@ -64,98 +99,103 @@ const updateResults = async () => {
 
   const MAX_LINE_WIDTH_IN_REM = 22;
 
-  if (weeklyResultsContainer.hasChildNodes()) {
-    let isRepaintingNeeded = false;
-
+  if (weeklyResultsContainer.hasChildNodes() && isResultsEqual(results, lastResults)) {
     results.forEach((result) => {
       result.criteria.forEach((criterion) => {
         const line = document.querySelector(`.weekly-result-stat-rectangle[data-criterion-id="${criterion.id}"][data-team-id="${result.id}"]`);
         const summary = document.querySelector(`.weekly-result-stat-summary[data-criterion-id="${criterion.id}"][data-team-id="${result.id}"]`);
 
-        if (!line || !summary) {
-          isRepaintingNeeded = true;
-
-          return;
-        }
-
         line.style.width = `${(criterion.gained / criterion.total) * MAX_LINE_WIDTH_IN_REM}rem`;
         summary.textContent = `${criterion.gained} / ${criterion.total}`;
       });
     });
+  } else {
+    removeChildren(weeklyResultsContainer);
 
-    if (!isRepaintingNeeded) {
-      return;
-    }
+    results.forEach((result) => {
+      const card = document.createElement('article');
+      card.classList.add('weekly-results-card');
+
+      const title = document.createElement('h3');
+      title.classList.add('weekly-result-name');
+      title.textContent = result.name;
+      card.appendChild(title);
+
+      const body = document.createElement('div');
+      body.classList.add('weekly-result-body');
+      card.appendChild(body);
+
+      const membersContainer = document.createElement('div');
+      membersContainer.classList.add('weekly-result-members-container');
+      body.appendChild(membersContainer);
+
+      const members = document.createElement('div');
+      members.classList.add('weekly-result-members');
+      const membersList = document.createElement('ul');
+      result.members.forEach((member) => {
+        const memberRow = document.createElement('li');
+        memberRow.classList.add('weekly-result-member');
+        memberRow.textContent = `${member.name} ${member.surname}`;
+        membersList.appendChild(memberRow);
+      });
+      members.appendChild(membersList);
+      const membersLabel = document.createElement('span');
+      membersLabel.classList.add('weekly-result-members-label');
+      membersLabel.textContent = 'СОСТАВ КОМАНДЫ';
+      members.appendChild(membersLabel);
+      membersContainer.appendChild(members);
+
+      const diagramsContainer = document.createElement('div');
+      diagramsContainer.classList.add('weekly-result-diagram-container');
+      body.appendChild(diagramsContainer);
+
+      result.criteria.forEach((criterion) => {
+        const statContainer = document.createElement('div');
+        statContainer.classList.add('weekly-result-stat-container');
+        diagramsContainer.appendChild(statContainer);
+
+        const statLabel = document.createElement('span');
+        statLabel.classList.add('weekly-result-stat-label');
+        statLabel.textContent = criterion.name
+        statContainer.appendChild(statLabel);
+
+        const stat = document.createElement('div');
+        stat.classList.add('weekly-result-stat');
+        statContainer.appendChild(stat);
+
+        const line = document.createElement('hr');
+        line.classList.add('weekly-result-stat-rectangle');
+        line.dataset.criterionId = criterion.id;
+        line.dataset.teamId = result.id;
+        line.style.width = `${(criterion.gained / criterion.total) * MAX_LINE_WIDTH_IN_REM}rem`;
+        stat.appendChild(line);
+
+        const summary = document.createElement('span');
+        summary.classList.add('weekly-result-stat-summary');
+        summary.dataset.criterionId = criterion.id;
+        summary.dataset.teamId = result.id;
+        summary.textContent = `${criterion.gained} / ${criterion.total}`;
+        stat.appendChild(summary);
+      });
+
+      weeklyResultsContainer.appendChild(card);
+    });
   }
 
-  results.forEach((result) => {
-    const card = document.createElement('article');
-    card.classList.add('weekly-results-card');
-
-    const title = document.createElement('h3');
-    title.classList.add('weekly-result-name');
-    title.textContent = result.name;
-    card.appendChild(title);
-
-    const body = document.createElement('div');
-    body.classList.add('weekly-result-body');
-    card.appendChild(body);
-
-    const membersContainer = document.createElement('div');
-    membersContainer.classList.add('weekly-result-members-container');
-    body.appendChild(membersContainer);
-
-    const members = document.createElement('div');
-    members.classList.add('weekly-result-members');
-    const membersList = document.createElement('ul');
-    result.members.forEach((member) => {
-      const memberRow = document.createElement('li');
-      memberRow.classList.add('weekly-result-member');
-      memberRow.textContent = `${member.name} ${member.surname}`;
-      membersList.appendChild(memberRow);
-    });
-    members.appendChild(membersList);
-    const membersLabel = document.createElement('span');
-    membersLabel.classList.add('weekly-result-members-label');
-    membersLabel.textContent = 'СОСТАВ КОМАНДЫ';
-    members.appendChild(membersLabel);
-    membersContainer.appendChild(members);
-
-    const diagramsContainer = document.createElement('div');
-    diagramsContainer.classList.add('weekly-result-diagram-container');
-    body.appendChild(diagramsContainer);
-
-    result.criteria.forEach((criterion) => {
-      const statContainer = document.createElement('div');
-      statContainer.classList.add('weekly-result-stat-container');
-      diagramsContainer.appendChild(statContainer);
-
-      const statLabel = document.createElement('span');
-      statLabel.classList.add('weekly-result-stat-label');
-      statLabel.textContent = criterion.name
-      statContainer.appendChild(statLabel);
-
-      const stat = document.createElement('div');
-      stat.classList.add('weekly-result-stat');
-      statContainer.appendChild(stat);
-
-      const line = document.createElement('hr');
-      line.classList.add('weekly-result-stat-rectangle');
-      line.dataset.criterionId = criterion.id;
-      line.dataset.teamId = result.id;
-      line.style.width = `${(criterion.gained / criterion.total) * MAX_LINE_WIDTH_IN_REM}rem`;
-      stat.appendChild(line);
-
-      const summary = document.createElement('span');
-      summary.classList.add('weekly-result-stat-summary');
-      summary.dataset.criterionId = criterion.id;
-      summary.dataset.teamId = result.id;
-      summary.textContent = `${criterion.gained} / ${criterion.total}`;
-      stat.appendChild(summary);
-    });
-
-    weeklyResultsContainer.appendChild(card);
-  });
+  lastResults = results.reduce((store, current) => {
+    return {
+      ...store,
+      [current.id]: {
+        ...current,
+        criteria: current.criteria.reduce((store, current) => {
+          return { ...store, [current.id]: current };
+        }, {}),
+        members: current.members.reduce((store, current) => {
+          return { ...store, [current.id]: current };
+        }, {}),
+      },
+    };
+  }, {});
 };
 
 updateResults().catch(console.error);
