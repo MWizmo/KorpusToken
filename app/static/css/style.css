@@ -2163,6 +2163,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  padding-bottom: 3rem;
 }
 
 .weekly-result-members-container {
