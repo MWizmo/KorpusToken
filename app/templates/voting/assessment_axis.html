@@ -24,13 +24,25 @@
             {% if is_third and is_second and is_first %} "ось Отношений", "ось Дела" и "ось Власти". {% endif %}
         </p>
         {% if is_first %}
-            <p>По оси Отношений оценено {{voting_num_rel}} из 1</p>
+            <p>По оси Отношений оценено {{voting_num_rel}} из 1
+            {% if voting_num_rel == 1 %}
+                <a class="black_button" href="/voting_summary?axis_id=1" style="margin-left:60px;">Смотреть выставленные оценки</a>
+            {% endif %}
+            </p>
         {% endif %}
         {% if is_second %}
-            <p>По оси Дела оценено {{voting_num_bus}} из {{teams_for_voting}}</p>
+            <p>По оси Дела оценено {{voting_num_bus}} из {{teams_for_voting}}
+            {% if voting_num_bus == teams_for_voting %}
+                <a class="black_button" href="/voting_summary?axis_id=2" style="margin-left:100px;">Смотреть выставленные оценки</a>
+            {% endif %}
+            </p>
         {% endif %}
         {% if is_third %}
-            <p>По оси Власти оценено {{voting_num_auth}} из 1</p>
+            <p>По оси Власти оценено {{voting_num_auth}} из 1
+            {% if voting_num_auth == 1 %}
+                <a class="black_button" href="/voting_summary?axis_id=3" style="margin-left:84px;">Смотреть выставленные оценки</a>
+            {% endif %}
+            </p>
         {% endif %}
         <br>
         {% if voting_num_bus == teams_for_voting and voting_num_rel == teams_for_voting and voting_num_auth == 1 %}
@@ -38,8 +50,10 @@
         {% else %}
             {% if voting_num_bus + voting_num_rel + voting_num_auth == 0 %}
                 <a class="black_button" href="/start_vote">Начать</a>
-            {% else %}
+            {% elif voting_num_bus + voting_num_rel + voting_num_auth < teams_for_voting + 2 %}
                 <a class="black_button" href="/start_vote">Продолжить</a>
+            {% else %}
+
             {% endif %}
         {% endif %}
 

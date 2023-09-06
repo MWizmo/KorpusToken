@@ -357,9 +357,9 @@ def assessment_users():
                                      Voting.voting_id == VotingTable.current_voting_id()).first()
         if voting:
             if len(VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == 2).all()):
-                template = 'voting/relations_position.html'
-            else:
                 template = 'voting/relations_energy.html'
+            else:
+                template = 'voting/relations_position.html'
         else:
             template = 'voting/relations_growth.html'
         cur_quest = QuestionnaireTable.current_questionnaire_id()
@@ -474,8 +474,26 @@ def finish_vote():
     if revote:
         assessment = VotingTable.query.filter_by(status='Active').first()
         voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
-                                         Voting.voting_id == assessment.id, Voting.team_id == team_id).first()
-        VotingInfo.query.filter_by(voting_id=voting.id).delete()
+                                     Voting.voting_id == assessment.id, Voting.team_id == team_id).first()
+        if axis_id == 3:
+            criterion_id = int(data['criterion_id'])
+            VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == criterion_id).delete()
+            for i in range(len(results)):
+                if not (results[i] is None):
+                    vote_info = VotingInfo(voting_id=voting.id, criterion_id=criterion_id, cadet_id=i, mark=results[i][0])
+                    db.session.add(vote_info)
+            db.session.commit()
+            return jsonify({'url': 'voting_summary?axis_id=3'})
+        elif axis_id == 2:
+            criterion_id = int(data['criterion_id'])
+            VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == criterion_id).delete()
+            for i in range(len(results)):
+                if not (results[i] is None):
+                    vote_info = VotingInfo(voting_id=voting.id, criterion_id=criterion_id, cadet_id=i,
+                                           mark=results[i][0])
+                    db.session.add(vote_info)
+            db.session.commit()
+            return jsonify({'url': 'voting_summary?axis_id=2'})
     else:
         voting = Voting(user_id=current_user.id, axis_id=axis_id, team_id=team_id,
                     date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
@@ -499,7 +517,19 @@ def finish_vote():
         return jsonify({'url': f'voting_summary?axis_id={axis_id}'})
         #return redirect(url_for('voting_summary', axis_id=axis_id))
     else:
-        return jsonify({'url': 'assessment'})
+        teams_for_voting = Teams.get_teams_for_voting()
+        teams_for_voting = [t.id for t in teams_for_voting]
+        assessment = VotingTable.query.filter_by(status='Active').first()
+        voting_num_bus = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2,
+                                             Voting.voting_id == assessment.id).all()
+        if len(voting_num_bus) < len(teams_for_voting):
+            voted_team = [row.team_id for row in voting_num_bus]
+            left_teams = list(set(teams_for_voting).difference(set(voted_team)))
+            if len(left_teams) == 1:
+                return jsonify({'url': f'assessment_users?axis_id=2&team_id={left_teams[0]}&last=1'})
+            else:
+                return jsonify({'url': f'assessment_users?axis_id=2&team_id={left_teams[0]}'})
+        #return jsonify({'url': 'assessment'})
         #return redirect(url_for('assessment'))
 
 
@@ -509,6 +539,18 @@ def finish_relations_vote():
     team_id = int(data['team_id'])
     criterion_id = int(data['criterion_id'])
     results = data['results']
+    revoting = int(data['revoting'])
+    if revoting:
+        voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == team_id,
+                                     Voting.voting_id == VotingTable.current_voting_id()).first()
+        VotingInfo.query.filter(VotingInfo.voting_id == voting.id, VotingInfo.criterion_id == criterion_id).delete()
+        db.session.commit()
+        for i in range(len(results)):
+            if not (results[i] is None):
+                vote_info = VotingInfo(voting_id=voting.id, criterion_id=criterion_id, cadet_id=i, mark=results[i][0])
+                db.session.add(vote_info)
+                db.session.commit()
+        return jsonify({'url': f'voting_summary?axis_id=1&team_id={team_id}'})
     if criterion_id == 1:
         voting = Voting(user_id=current_user.id, axis_id=1, team_id=team_id,
                         date=datetime.date(datetime.datetime.now().year, datetime.datetime.now().month,
@@ -1031,6 +1073,7 @@ def confirm_top_cadets():
 def revote():
     axis_id = int(request.args.get('axis_id'))
     team_id = int(request.args.get('team_id'))
+    criterion_id = int(request.args.get('c_id'))
     assessment = VotingTable.query.filter_by(status='Active').first()
     cur_voting = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == axis_id,
                                          Voting.voting_id == assessment.id, Voting.team_id == team_id).first()
@@ -1125,9 +1168,20 @@ def revote():
                     teammates_info.append(member)
             date_info['teammates'] = teammates_info
             voting_results.append(date_info)
-        return render_template('voting/business_voting.html', title='Ось дела',
+        my_answers = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 2, Voting.team_id == team_id,
+                                         Voting.voting_id == VotingTable.current_voting_id()).first()
+        my_answers = VotingInfo.query.filter(VotingInfo.voting_id == my_answers.id,
+                                             VotingInfo.criterion_id == criterion_id).all()
+        my_answers = [item.mark for item in my_answers]
+        if criterion_id == 4:
+            template = 'voting/revote_business1.html'
+        elif criterion_id == 5:
+            template = 'voting/revote_business2.html'
+        else:
+            template = 'voting/revote_business3.html'
+        return render_template(template, title='Ось дела',
                                access=get_access(current_user), team_id=team_id, voting_results=voting_results,
-                               dates=dates_str,
+                               dates=dates_str, my_answers=my_answers,
                                team_members=team_members, axis=axis, criterions=criterions, team_title=team,
                                voting_dict=voting_dict, is_first=is_first,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
@@ -1149,10 +1203,16 @@ def revote():
                                                               QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
             else:
                 answers.append('Нет ответа')
-        Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == 0,
-                                     Voting.voting_id == VotingTable.current_voting_id()).delete()
-        db.session.commit()
-        template = 'voting/relations_growth.html'
+        my_answers = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 1, Voting.team_id == 0,
+                                     Voting.voting_id == VotingTable.current_voting_id()).first()
+        my_answers = VotingInfo.query.filter(VotingInfo.voting_id == my_answers.id, VotingInfo.criterion_id == criterion_id).all()
+        my_answers = [item.mark for item in my_answers]
+        if criterion_id == 1:
+            template = 'voting/relations_growth.html'
+        elif criterion_id == 2:
+            template = 'voting/relations_position.html'
+        else:
+            template = 'voting/relations_energy.html'
         cur_quest = QuestionnaireTable.current_questionnaire_id()
         energy_answers, position_answers = {}, {}
         for cadet in team_members:
@@ -1193,11 +1253,9 @@ def revote():
                                is_first=is_first, voting_num_auth=voting_num_auth, team_id=0,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
                                voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
-                               energy_answers=energy_answers, position_answers=position_answers)
+                               energy_answers=energy_answers, position_answers=position_answers,
+                               revoting=True, my_answers=my_answers)
     else:
-        Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3, Voting.team_id == 0,
-                            Voting.voting_id == VotingTable.current_voting_id()).delete()
-        db.session.commit()
         questions = Questions.query.filter_by(type=1)[1:4]
         cadets = [(user.id,
                    User.query.filter_by(id=user.id).first().name,
@@ -1217,10 +1275,21 @@ def revote():
                                                        QuestionnaireInfo.questionnaire_id == questionnaire.id).first().question_answ)
                 else:
                     answers[q.id].append('Нет ответа')
-        return render_template('voting/authority_voting.html', title='Ось власти', answers=answers,
+        my_answers = Voting.query.filter(Voting.user_id == current_user.id, Voting.axis_id == 3, Voting.team_id == 0,
+                                         Voting.voting_id == VotingTable.current_voting_id()).first()
+        my_answers = VotingInfo.query.filter(VotingInfo.voting_id == my_answers.id,
+                                             VotingInfo.criterion_id == criterion_id).all()
+        my_answers = [item.mark for item in my_answers]
+        if criterion_id == 7:
+            template = 'voting/revote_authority1.html'
+        elif criterion_id == 8:
+            template = 'voting/revote_authority2.html'
+        else:
+            template = 'voting/revote_authority3.html'
+        return render_template(template, title='Ось власти', answers=answers,
                                access=get_access(current_user), questions=questions,
                                team_members=cadets, criterions=criterions, axis=axis, team_id=team_id,
-                               is_first=is_first,
+                               is_first=is_first, my_answers=my_answers,
                                is_third=is_third, is_second=is_second, teams_for_voting=teams_for_voting,
                                voting_num_rel=voting_num_rel, voting_num_bus=voting_num_bus,
                                voting_num_auth=voting_num_auth)

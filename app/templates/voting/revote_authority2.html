@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/revote_authority.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}}, {{my_answers}});" style="margin-left:10%;width:80%;">
+    <br>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать в оценке</a> - <a class="cur_href" href="">оценивание по оси власти</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        {% if is_first %} ось Отношений {{voting_num_rel}}/1, {% endif %}
+        {% if is_second %}ось Дела {{voting_num_bus}}/{{teams_for_voting}}, {% endif %}
+        <span class="cur_href"> ось Власти {{voting_num_auth}}/1 </span>
+    </div>
+    <br><br>
+    <h2 style="text-align:center;">Оценка по оси власти</h2>
+    <h3>Критерий 2 - “Самоуправление”</h3>
+    <div style="width:60%;">
+        <p>Самоуправление - запуск, организация и проведение студентами событий, процессов, встраивание их в расписание Корпуса без контроля сверху.</p>
+        <p>Участники оценки отвечали на вопрос; “Считаете ли вы, что в этом месяце организовывали и поддерживали полезный для сообщества процесс без контроля сверху? Дайте полный, развёрнутый ответ. Если есть артефакты, подтверждающие это - также укажите на их наличие.”</p>
+        <p>Ниже представлены ответы. Выставите свои оценки, опираясь на представленные ответы.</p>
+    </div>
+    <table class="rel_table" cellspacing="0">
+        <tr>
+            <td class="rel_cell1">Имя</td><td class="rel_cell2" style="text-align:center;">Ответ курсанта</td><td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли самоуправление?</td>
+        </tr>
+        {% for member in team_members %}
+            <tr>
+                <td class="rel_cell1"><b>{{member[1]}} {{member[2]}}</b></td>
+                <td class="rel_cell2" >{{answers[criterions[1].id][loop.index0]}}</td>
+                <td class="rel_cell3">
+                    <div class="rel_flex">
+                        <div ng-if="check({{member[0]}},{{criterions[1].id}}) == 1">
+                          <input type="radio" name="{{criterions[1].id}}_{{member[0]}}1"
+                                      ng-click="vote_for({{member[0]}},{{criterions[1].id}},1)" checked>Да
+                          </div>
+                            <div ng-if="check({{member[0]}},{{criterions[1].id}}) == 1">
+                              <input type="radio" name="{{criterions[1].id}}_{{member[0]}}1"
+                                          ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)">Нет
+                          </div>
+                          <div ng-if="check({{member[0]}},{{criterions[1].id}}) == 0">
+                              <input type="radio" name="{{criterions[1].id}}_{{member[0]}}0"
+                                          ng-click="vote_for({{member[0]}},{{criterions[1].id}},1)">Да
+                          </div>
+                        <div ng-if="check({{member[0]}},{{criterions[1].id}}) == 0">
+                              <input type="radio" name="{{criterions[1].id}}_{{member[0]}}0"
+                                          ng-click="vote_for({{member[0]}},{{criterions[1].id}},0)" checked>Нет
+                          </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br><br>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote(0, 3, 8, 0);">Изменить</button>
+    </div>
+</div>
+
+
+{% endblock %}

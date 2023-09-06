@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<!--script src="{{url_for('static', filename='js/angular_min.js')}}"></script-->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{url_for('static', filename='js/revote_business.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-app="app" ng-controller="ctrl" ng-init="start_voting({{team_id}}, {{my_answers}});" style="margin-left:10%;width:80%;">
+    <br>
+    <div class="nav_href">
+        <a href="/">главная</a> - <a href="/assessment_page">оценка вклада</a> - <a href="/assessment_axis">участвовать в оценке</a> - <a class="cur_href" href="">оценивание по оси дела</a>
+    </div>
+    <br>
+    <div class="nav_href" style="display:flex; justify-content:center;">
+        {% if is_first %} ось Отношений {{voting_num_rel}}/1, {% endif %}
+        <span class="cur_href">  ось Дела {{voting_num_bus}}/{{teams_for_voting}}</span>
+        {% if is_third %}, ось Власти {{voting_num_auth}}/1 {% endif %}
+    </div>
+    <br><br>
+    <h2 style="text-align:center;">Оценка по оси дела команды "{{team_title}}"</h2>
+    <div>
+        <p>На протяжении {{weekly_voting_counter}} трекшенов команда оценивалась по каждому из указанных ниже критериев. Мы подсчитали количество выставленных ”0” и “1” за этот период.<br>Предлагаем вам при выставлении итоговой оценки опираться на представленные данные. Вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
+    </div>
+    <h3>Критерий 1 - “Движение”</h3>
+    <div >
+        <p>“Движение” - динамика выполнения проектных задач, доля сил времени затрачиваемых участниками на развитие проекта</p>
+        <p>На протяжении последнего месяца, на каждом из публичных трекшенов команде выставлялась оценка по этому критерию, предлагаем вам опереться на промежуточные оценки. При выставлении оценки, вы также можете опираться на ту информацию, которой обладаете или можете запросить более подробную информацию у команд.</p>
+    </div>
+    <table class="rel_table" cellspacing="0">
+        <!--tr>
+            <td class="rel_cell1">Имя</td>{% for date in dates %} <td>{{date}}</td> {% endfor %}<td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли движение?</td>
+        </tr-->
+        <tr>
+            <td class="rel_cell1">Имя</td> <td>Получено "1"</td> <td>Получено "0"</td> <td>Детальная таблица</td> <td class="rel_cell3" style="text-align:center;">Ваша оценка<br>Есть ли движение?</td>
+        </tr>
+        {% for member in voting_dict %}
+        <!--tr>
+            <td>{{voting_dict[member]['name']}}</td>
+            {% for mark in voting_dict[member]['marks1'] %}
+                <td>{{mark}}</td>
+            {% endfor %}
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[2].id}},1)">Да</div>
+                    <div><input type="radio" name="{{criterions[2].id}}_{{member}}" ng-click="vote_for({{member}},{{criterions[2].id}},0)">Нет</div>
+                </div>
+            </td>
+        </tr-->
+        <tr>
+            <td>{{voting_dict[member]['name']}}</td>
+            <td>{{voting_dict[member]['marks1_1']}}</td>
+            <td>{{voting_dict[member]['marks1_0']}}</td>
+            <td><a href="/business_details/{{team_id}}/{{member}}" target="_blank" style="color:black;">Подробнее</a></td>
+            <td class="rel_cell3">
+                <div class="rel_flex">
+                    <div ng-if="check({{member}},{{criterions[2].id}}) == 1">
+                          <input type="radio" name="{{criterions[2].id}}_{{member}}1"
+                                      ng-click="vote_for({{member}},{{criterions[2].id}},1)" checked>Да
+                          </div>
+                            <div ng-if="check({{member}},{{criterions[2].id}}) == 1">
+                              <input type="radio" name="{{criterions[2].id}}_{{member}}1"
+                                          ng-click="vote_for({{member}},{{criterions[2].id}},0)">Нет
+                          </div>
+                          <div ng-if="check({{member}},{{criterions[2].id}}) == 0">
+                              <input type="radio" name="{{criterions[2].id}}_{{member}}0"
+                                          ng-click="vote_for({{member}},{{criterions[2].id}},1)">Да
+                          </div>
+                        <div ng-if="check({{member}},{{criterions[2].id}}) == 0">
+                              <input type="radio" name="{{criterions[2].id}}_{{member}}0"
+                                          ng-click="vote_for({{member}},{{criterions[2].id}},0)" checked>Нет
+                          </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br><br>
+    <div style="width:100%;display:flex;flex-direction:row;justify-content:flex-end;margin-top:20px;margin-bottom:30px;">
+        <button class="nav__link finish_vote_btn" id="finish_button" style="width:200px;" ng-click="finish_vote({{team_id}},2, 6, 0);">Изменить</button>
+    </div>
+</div>
+
+
+{% endblock %}

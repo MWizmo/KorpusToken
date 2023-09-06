@@ -62,10 +62,18 @@
                 {% endfor %}
             </tr>
         {% endfor %}
+            <tr>
+                <td></td>
+                {% for criterion in criterions %}
+                    <td>
+                        <div style="width:100%; display: flex; flex-direstion: row; justify-content: center;">
+                        <button class="nav__link finish_vote_btn" onclick="document.location.href='/revote?axis_id={{axis_id}}&c_id={{criterion.id}}&team_id={{voting_info[team]['id']}}';">Изменить</button>
+                        </div>
+                    </td>
+                {% endfor %}
+            </tr>
         </table><br>
-        <div style="width:100%; display: flex; flex-direstion: row; justify-content: flex-end;">
-            <button class="nav__link finish_vote_btn" onclick="document.location.href='/revote?axis_id={{axis_id}}&team_id={{voting_info[team]['id']}}';">Изменить</button>
-        </div>
+
         <br><br>
     {% endfor %}
     <div style="width:100%; display: flex; flex-direstion: row; justify-content: flex-end;">
