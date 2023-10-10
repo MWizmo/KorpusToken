@@ -688,6 +688,14 @@ def finish_assessment():
     return redirect('questionnaire_progress')
 
 
+@app.route('/fix_assessment')
+def fix_assessment():
+    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    cur_voting.status = 'Fixed'
+    db.session.commit()
+    return redirect('questionnaire_progress')
+
+
 @app.route('/assessment_error', methods=['GET'])
 def assessment_error():
     log('Ошибка при оценке')

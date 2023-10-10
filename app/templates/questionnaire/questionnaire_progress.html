@@ -30,7 +30,7 @@
                     {% if current_user.is_chieftain or current_user.is_admin %}
                         <div class="">
                             <!--a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a-->
-                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Фиксировать оценку</a>
+                            <a class='nav__link border' href="{{ url_for('fix_assessment') }}">Зафиксировать предварительные результаты</a>
                         </div>
                     {% endif %}
                     <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
@@ -74,7 +74,8 @@
                     <br><br>
                     {% if current_user.is_chieftain %}
                         <div class="">
-                            <a class='nav__link border' href="{{ url_for('add_to_blockchain') }}">Записать результаты в блокчейн</a>
+                            <!--a class='nav__link border' href="{{ url_for('add_to_blockchain') }}">Записать результаты в блокчейн</a-->
+                            <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Зафиксировать финальные результаты</a>
                         </div>
                     {% endif %}<br><br>
                     <table class="result_table" cellspacing="0">
@@ -106,7 +107,7 @@
                 {% if current_user.is_chieftain or current_user.is_admin %}
                     <div class="">
                         <!--a class='nav__link border' href="{{ url_for('sum_up_assessment') }}">Предварительные результаты оценки</a-->
-                        <a class='nav__link border' href="{{ url_for('finish_assessment') }}">Фиксировать оценку</a>
+                        <a class='nav__link border' href="{{ url_for('fix_assessment') }}">Зафиксировать предварительные результаты</a>
                     </div>
                 {% endif %}
                 <!--a class="nav__link border" href="{{url_for('graphs_teams')}}">Создать графы</a-->
