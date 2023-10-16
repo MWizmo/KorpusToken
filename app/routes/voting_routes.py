@@ -693,8 +693,28 @@ def fix_assessment():
     cur_voting = VotingTable.query.filter_by(status='Active').first()
     cur_voting.status = 'Fixed'
     questionnaire = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
-    questionnaire.status = 'Ready for assessment'
+    questionnaire.status = 'Fixed'
     db.session.commit()
+    voting_id = cur_voting.id
+    filename = 'results_' + str(voting_id) + '.csv'
+    with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
+        writer = csv.writer(output, delimiter=';')
+        criterions = [c.name for c in Criterion.query.all()]
+        writer.writerow([' '] + criterions)
+        users = [(user.id, user.name + ' ' + user.surname) for user in User.query.all() if
+                 User.check_can_be_marked(user.id)]
+        for user in users:
+            res = [user[1]]
+            user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
+                                                                             Voting.id == VotingInfo.voting_id).filter(
+                Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
+                VotingInfo.criterion_id).all()
+            for mark in user_res:
+                if float(mark[0]) < 1.0:
+                    res.append(0)
+                else:
+                    res.append(1)
+            writer.writerow(res)
     return redirect('questionnaire_progress')
 
 
