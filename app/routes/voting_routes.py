@@ -692,6 +692,8 @@ def finish_assessment():
 def fix_assessment():
     cur_voting = VotingTable.query.filter_by(status='Active').first()
     cur_voting.status = 'Fixed'
+    questionnaire = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
+    questionnaire.status = 'Ready for assessment'
     db.session.commit()
     return redirect('questionnaire_progress')
 
