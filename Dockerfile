@@ -4,13 +4,13 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 
+RUN pip install -U numpy==1.19.5
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN pip install Flask_Admin
 
-RUN pip install -U numpy
-
-RUN pip install cryptography
+RUN pip install -U tzlocal==2.1 cryptography
 
 COPY . .
 

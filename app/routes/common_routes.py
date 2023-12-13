@@ -3,7 +3,7 @@ import datetime, os, csv, requests
 from app.routes.questionnaire_routes import get_questionnaire_progress
 from sqlalchemy import func, or_, and_
 from sqlalchemy.sql import text
-from app import app, db, w3, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
+from app import app, db, w3, ktd_address, contract_address, chain_id, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts.service import get_access, log
 from app.scripts.generate_weekly_voting_xlsx import generate_weekly_voting_xlsx
@@ -563,9 +563,6 @@ def token_exchange_rate_by_profit():
 @app.route('/change_token_exchange_rate', methods=['GET', 'POST'])
 @login_required
 def change_token_exchange_rate():
-    if not current_user.is_accountant:
-        return redirect(url_for('home'))
-
     eth_exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
     if eth_exchange_rate_record:
         eth_exchange_rate = eth_exchange_rate_record.exchange_rate
@@ -1075,7 +1072,7 @@ def save_to_blockchain(budget_id):
 
         estimateGas = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).estimateGas({
             'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('11', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         })
         transaction = KorpusContract.functions.setBudget(int(timestamp), budget_item, int(cost)).buildTransaction(
             {
@@ -1083,7 +1080,7 @@ def save_to_blockchain(budget_id):
                 'from': account.address,
                 'gas': estimateGas,
                 'gasPrice': w3.toWei('29', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)

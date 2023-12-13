@@ -1,4 +1,5 @@
 from web3.auto import Web3
+from app import infura_url, chain_id
 import time
 privateKey = '3ec4440a4695f15f11fe9c48a764bc7df4783495d5096b6b4fe8ef33fb4cb147'
 # _receiver = '0x4C580b20Fa1C4d46821421c3229A0287Ce989322'
@@ -13,7 +14,7 @@ def createKTD(value, receiver):
     if value <= 0:
         return 'Число токенов должно быть положительным числом', False
     try:
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -27,7 +28,7 @@ def createKTD(value, receiver):
                 'from': account.address,
                 'gas': 75000,
                 'gasPrice': w3.toWei('1.5', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -50,7 +51,7 @@ def createKTI(value, receiver):
         return "Число токенов должно быть больше нуля.", False
     #privateKey = "" импорт ключа из базы данных. Если он не подходит к кошельку владельца смарт-контракта, то эфириум отменит транзакцию в конце
     try:
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -65,7 +66,7 @@ def createKTI(value, receiver):
                 'from': account.address,
                 'gas': 75000,
                 'gasPrice': w3.toWei('1.5', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -89,7 +90,7 @@ def transferWEI(value, receiver):
     try:
         _wei = int(value * 1000000000000000000)
         #privateKey = "" импорт ключа из базы данных. Если он не подходит к кошельку владельца смарт-контракта, то эфириум отменит транзакцию в конце
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -103,7 +104,7 @@ def transferWEI(value, receiver):
                 'from': account.address,
                 'gas': 75000,
                 'gasPrice': w3.toWei('1.5', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         abi_file.close()
@@ -123,7 +124,7 @@ def setBudget(date, budgetItem, cost):
     try:
         cost = int(cost)
         date = int(date)
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -137,7 +138,7 @@ def setBudget(date, budgetItem, cost):
                 'from': account.address,
                 'gas': 50000,
                 'gasPrice': w3.toWei('1.5', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         abi_file.close()
@@ -156,7 +157,7 @@ def setStudentResult(project, student, date, axis, points):
     try:
         date = int(date)
         #privateKey = "" импорт ключа из базы данных. Если он не подходит к кошельку владельца смарт-контракта, то эфириум отменит транзакцию в конце
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -171,7 +172,7 @@ def setStudentResult(project, student, date, axis, points):
                 'from': account.address,
                 'gas': 70000,
                 'gasPrice': w3.toWei('1.5', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -188,7 +189,7 @@ def setStudentResult(project, student, date, axis, points):
 def getBudget(date, budgetItem):
     date = int(date)
     #privateKey = "" импорт ключа из базы данных
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(privateKey)
     nonce = w3.eth.getTransactionCount(account.address)
     abi_file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -205,7 +206,7 @@ def getBudget(date, budgetItem):
 def getStudentResults(_project, _student, _date, _axis):
     _date = int(_date)
     #privateKey = "" импорт ключа из базы данных
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(privateKey)
     nonce = w3.eth.getTransactionCount(account.address)
     #интерфейс контракта
@@ -227,7 +228,7 @@ def sellKTD(value):   # обмен токенов вклада на эфир
         return 'Число токенов должно быть целым числом', False
     if value > 0:
         # privateKey = "" импорт ключа из базы данных
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(privateKey)
         nonce = w3.eth.getTransactionCount(account.address)
         file = open("app/static/ABI/KTD_ABI.json", "r")
@@ -237,7 +238,7 @@ def sellKTD(value):   # обмен токенов вклада на эфир
             abi=file.read()
         )
         file.close()
-        estimateGas = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress("0x47ae9eFf852D74f05FA3cc2F67C4563Ca2600B4C"), value).estimateGas({'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3})
+        estimateGas = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress("0x47ae9eFf852D74f05FA3cc2F67C4563Ca2600B4C"), value).estimateGas({'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': chain_id})
 
         transaction = KorpusToken_Deposit.functions.approve(Web3.toChecksumAddress("0x47ae9eFf852D74f05FA3cc2F67C4563Ca2600B4C"), value).buildTransaction(
             {
@@ -245,7 +246,7 @@ def sellKTD(value):   # обмен токенов вклада на эфир
                 'from': account.address,
                 'gas': estimateGas,
                 'gasPrice': w3.toWei('2', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -268,14 +269,14 @@ def sellKTD(value):   # обмен токенов вклада на эфир
                 )
                 file.close()
                 estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
-                    {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': 3})
+                    {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('2', 'gwei'), 'chainId': chain_id})
                 transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
                     {
                         'nonce': nonce,
                         'from': account.address,
                         'gas': estimateGas,
                         'gasPrice': w3.toWei('2', 'gwei'),
-                        'chainId': 3
+                        'chainId': chain_id
                     }
                 )
                 signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
