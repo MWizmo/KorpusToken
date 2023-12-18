@@ -16,7 +16,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
-w3 = Web3(Web3.HTTPProvider("https://polygon-mumbai.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+infura_url = "https://polygon-mumbai.infura.io/v3/35b77298442b49168bbe5a150071dd9f"
+chain_id = 80001
+w3 = Web3(Web3.HTTPProvider(infura_url))
 
 kti_address = '0x91f0ca3505c2b1d449b2cee338723bf5ea5a09da'
 ktd_address = '0xc408983fc1765c41acc42adc18d543929b11b217'
