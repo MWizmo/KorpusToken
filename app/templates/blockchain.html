@@ -111,7 +111,9 @@
             {% endif %}
         </div>
         {% endif %}
+        {% if current_user.is_admin %}
         <div class="small_card_rows">
+
             <a
                     href="/transactions"
                     class="small_card small_card_special2"
@@ -122,7 +124,6 @@
                 <img class="small_card_img" src="/static/images/transactions.png"/>
                 <p class="small_card_text">Транзакции</p>
             </a>
-            {% if current_user.is_developer %}
             <a
                     href="/change_address"
                     class="small_card small_card_special2"
@@ -158,7 +159,7 @@
                 <img class="small_card_img" src="/static/images/change_tokens.png"/>
                 <p class="small_card_text">Перевести токены</p>
             </a>
-            {% endif %}
+
             <a
                     href="/change_to_eth"
                     class="small_card small_card_special2"
@@ -170,7 +171,6 @@
                 <img class="small_card_img" src="/static/images/change_eth.png"/>
                 <p class="small_card_text">Обменять на eth</p>
             </a>
-            {% if current_user.is_developer %}
             <a
                     href="/budget"
                     class="small_card small_card_special2"
@@ -195,8 +195,74 @@
                     Доступ к токенам инвестиций
                 </p>
             </a>
-            {% endif %}
         </div>
+            {% else %}
+            <div style="width: 50%; display:flex;justify-content:center; align-items:center;margin-left: 10%;">
+                <p style="font-size:3vh;">В данный момент идёт доработка этого раздела, мы сообщим вам, когда раздел будет обновлён</p>
+            </div>
+            <!--
+            <a
+                    href="/transactions"
+                    class="small_card small_card_special"
+                    onmouseover="enlarge_block(11);"
+                    id="block11"
+                    onmouseleave="reduce_block(11);"
+            >
+                <img class="small_card_img" src="/static/images/transactions.png"/>
+                <p class="small_card_text">Транзакции</p>
+            </a>
+            <a
+                    href="/change_address"
+                    class="small_card small_card_special"
+                    onmouseover="enlarge_block(12);"
+                    id="block12"
+                    onmouseleave="reduce_block(12);"
+            >
+                <img class="small_card_img" src="/static/images/change_address.png"/>
+                <p class="small_card_text" style="text-align: center">
+                    Изменить адрес кошелька
+                </p>
+            </a>
+            <a
+                    href="/transfer_ktd"
+                    class="small_card small_card_special"
+                    onmouseover="enlarge_block(13);"
+                    id="block13"
+                    onmouseleave="reduce_block(13);"
+                    style="margin-bottom: 0"
+            >
+                <img class="small_card_img" src="/static/images/change_tokens.png"/>
+                <p class="small_card_text">Перевести токены</p>
+            </a>
+            <a
+                    href="/change_to_eth"
+                    class="small_card small_card_special"
+                    onmouseover="enlarge_block(14);"
+                    id="block14"
+                    onmouseleave="reduce_block(14);"
+                    style="margin-bottom: 0"
+            >
+                <img class="small_card_img" src="/static/images/change_eth.png"/>
+                <p class="small_card_text">Обменять на eth</p>
+            </a>-->
+            {% endif %}
+            {% if current_user.is_accountant %}
+            <a
+                    href="/emission"
+                    class="small_card small_card_special2"
+                    style="margin-top: 3vh"
+                    onmouseover="enlarge_block(38);"
+                    id="block38"
+                    onmouseleave="reduce_block(38);"
+            >
+                <img class="small_card_img" src="/static/images/emission.png"/>
+                <p class="small_card_text" style="text-align: center">
+                    Эмиссия токенов
+                </p>
+            </a>
+            {% endif %}
+
+
     </div>
 </div>
 

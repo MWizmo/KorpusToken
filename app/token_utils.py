@@ -1,4 +1,4 @@
-from app import w3, contract_address, ktd_address, kti_address, db# admin_wallet_address, db
+from app import w3, contract_address, ktd_address, kti_address, infura_url, chain_id, db# admin_wallet_address, db
 from app.models import TokenExchangeRate
 from web3.auto import Web3
 import time
@@ -7,7 +7,7 @@ import datetime
 import os
 
 def transfer_KTD(num, address, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/KTD_ABI.json", "r")
@@ -18,7 +18,7 @@ def transfer_KTD(num, address, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.transfer(address, num).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id
     })
 
     transaction = KorpusToken_Deposit.functions.transfer(address, num).buildTransaction(
@@ -27,7 +27,7 @@ def transfer_KTD(num, address, private_key):
             'from': account.address,
             'gas': estimateGas,
             'gasPrice': w3.toWei('35', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -79,7 +79,7 @@ def get_KTD_total(ktd_address):
     return Korpus_KTD.functions.totalSupply().call()
 
 def set_KTI_buyer(address, limit, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -90,7 +90,7 @@ def set_KTI_buyer(address, limit, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.addAddressToBuyers(address, limit).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id
     })
 
     transaction = KorpusContract.functions.addAddressToBuyers(address, limit).buildTransaction(
@@ -99,7 +99,7 @@ def set_KTI_buyer(address, limit, private_key):
             'from': account.address,
             'gas': estimateGas,
             'gasPrice': w3.toWei('35', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -110,7 +110,7 @@ def set_KTI_buyer(address, limit, private_key):
         return "Недопустимый адрес или недостаточно средств.", True
 
 def set_KTD_seller(address, limit, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -121,7 +121,7 @@ def set_KTD_seller(address, limit, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.addAddressToSellers(address, limit).estimateGas({
-      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3
+      'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id
     })
 
     transaction = KorpusContract.functions.addAddressToSellers(address, limit).buildTransaction(
@@ -130,7 +130,7 @@ def set_KTD_seller(address, limit, private_key):
             'from': account.address,
             'gas': estimateGas,
             'gasPrice': w3.toWei('35', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -146,7 +146,7 @@ def sell_KTD(amount, private_key):
     except ValueError:
         return 'Число токенов должно быть целым числом'
     if value > 0:
-        w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+        w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(private_key)
         nonce = w3.eth.getTransactionCount(account.address, "pending")
         file = open("app/static/ABI/KTD_ABI.json", "r")
@@ -156,7 +156,7 @@ def sell_KTD(amount, private_key):
         )
         file.close()
         estimateGas = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).estimateGas({
-          'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3
+          'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id
         })
 
         transaction = KorpusToken_Deposit.functions.increaseAllowance(Web3.toChecksumAddress(contract_address), value).buildTransaction(
@@ -165,7 +165,7 @@ def sell_KTD(amount, private_key):
                 'from': account.address,
                 'gas': estimateGas,
                 'gasPrice': w3.toWei('35', 'gwei'),
-                'chainId': 3
+                'chainId': chain_id
             }
         )
         signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -180,14 +180,14 @@ def sell_KTD(amount, private_key):
             file.close()
             nonce = w3.eth.getTransactionCount(account.address, "pending")
             estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
-                {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3})
+                {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id})
             transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
                 {
                     'nonce': nonce,
                     'from': account.address,
                     'gas': estimateGas,
                     'gasPrice': w3.toWei('35', 'gwei'),
-                    'chainId': 3
+                    'chainId': chain_id
                 }
             )
             signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -202,7 +202,7 @@ def sell_KTD(amount, private_key):
         return "Число токенов не должно быть меньше или равно нулю.", True
 
 def set_KTD_price(price, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -213,7 +213,7 @@ def set_KTD_price(price, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.setSellPriceKTD(price).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
     )
 
     transaction = KorpusContract.functions.setSellPriceKTD(price).buildTransaction(
@@ -222,7 +222,7 @@ def set_KTD_price(price, private_key):
             'from': account.address,
             'gas': estimateGas,
             'gasPrice': w3.toWei('35', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -236,7 +236,7 @@ def set_KTD_price(price, private_key):
         return eth_error, True
 
 def set_KTI_price(price, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -247,7 +247,7 @@ def set_KTI_price(price, private_key):
     file.close()
 
     estimateGas = KorpusContract.functions.setBuyPriceKTI(price).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
     )
 
     transaction = KorpusContract.functions.setBuyPriceKTI(price).buildTransaction(
@@ -256,7 +256,7 @@ def set_KTI_price(price, private_key):
             'from': account.address,
             'gas': estimateGas,
             'gasPrice': w3.toWei('35', 'gwei'),
-            'chainId': 3
+            'chainId': chain_id
         }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -271,7 +271,7 @@ def set_KTI_price(price, private_key):
 
 def mint_KTD(amount, receiver, private_key):
   if amount > 0:
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/KTD_ABI.json", "r")
@@ -282,7 +282,7 @@ def mint_KTD(amount, receiver, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.mint(receiver, amount).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
     )
 
     transaction = KorpusToken_Deposit.functions.mint(receiver, amount).buildTransaction(
@@ -291,7 +291,7 @@ def mint_KTD(amount, receiver, private_key):
         'from': account.address,
         'gas': estimateGas,
         'gasPrice': w3.toWei('35', 'gwei'),
-        'chainId': 3
+        'chainId': chain_id
       }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -308,7 +308,7 @@ def mint_KTD(amount, receiver, private_key):
 def mint_KTI(amount, receiver, private_key):
   print(private_key)
   if amount > 0:
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/KTI_ABI.json", "r")
@@ -319,7 +319,7 @@ def mint_KTI(amount, receiver, private_key):
     file.close()
 
     estimateGas = KorpusToken_Investment.functions.mint(receiver, amount).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
     )
 
     transaction = KorpusToken_Investment.functions.mint(receiver, amount).buildTransaction(
@@ -328,7 +328,7 @@ def mint_KTI(amount, receiver, private_key):
         'from': account.address,
         'gas': estimateGas,
         'gasPrice': w3.toWei('35', 'gwei'),
-        'chainId': 3
+        'chainId': chain_id
       }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
@@ -343,7 +343,7 @@ def mint_KTI(amount, receiver, private_key):
     return "Число токенов должно быть больше нуля.", True
 
 def save_voting_to_blockchain(team, student, date, axis, points, private_key):
-    w3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/v3/35b77298442b49168bbe5a150071dd9f"))
+    w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/KTD_ABI.json", "r")
@@ -354,7 +354,7 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     file.close()
 
     estimateGas = KorpusToken_Deposit.functions.setStudentResult(team, student, date, axis, points).estimateGas(
-      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': 3}
+      {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
     )
 
     transaction = KorpusToken_Deposit.functions.setStudentResult(team, student, date, axis, points).buildTransaction(
@@ -363,7 +363,7 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
           'from': account.address,
           'gas': estimateGas,
           'gasPrice': w3.toWei('35', 'gwei'),
-          'chainId': 3
+          'chainId': chain_id
       }
     )
     signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
