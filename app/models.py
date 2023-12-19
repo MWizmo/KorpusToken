@@ -48,6 +48,10 @@ class User(UserMixin, db.Model):
         return User.check_chieftain(self.id)
 
     @property
+    def is_developer(self):
+        return User.check_developer(self.id)
+
+    @property
     def is_admin(self):
         return User.check_admin(self.id)
 
@@ -121,6 +125,14 @@ class User(UserMixin, db.Model):
         statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
             if status.status_id == 7:
+                return True
+        return False
+
+    @staticmethod
+    def check_developer(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 11:
                 return True
         return False
 
