@@ -342,6 +342,12 @@ def mint_KTI(amount, receiver, private_key):
   else:
     return "Число токенов должно быть больше нуля.", True
 
+
+def convert_marks_to_ktd_balance(student, points):
+    student.ktd_balance += points
+    db.session.commit()
+
+
 def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)

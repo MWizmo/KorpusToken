@@ -1118,12 +1118,13 @@ def write_voting_progress():
         team = Teams.query.filter_by(id=user_data[1].team_id).first()
         cur_date = datetime.datetime.now()
         date = int(str(cur_date.year) + str(cur_date.month) + str(cur_date.day))
-        token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
-                                              date=date,
-                                              axis=user_data[3].name,
-                                              points=user_data[2].mark,
-                                              private_key=os.environ.get(
-                                                  'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        token_utils.convert_marks_to_ktd_balance(user_data[0], points=user_data[2].mark)
+        # token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
+        #                                       date=date,
+        #                                       axis=user_data[3].name,
+        #                                       points=user_data[2].mark,
+        #                                       private_key=os.environ.get(
+        #                                           'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.get(cur_id).status = 'Emission'
     db.session.commit()
     return redirect('/questionnaire_progress')

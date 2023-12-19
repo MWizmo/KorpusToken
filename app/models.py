@@ -2,7 +2,7 @@
 import datetime
 
 # import jdcal
-from app import db, login, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI
+from app import db, login, w3, kti_address, ktd_address, contract_address, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -159,15 +159,17 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def get_ktd_balance(current_user_id):
-      file = open("app/static/ABI/KTD_ABI.json", "r")
-      Korpus_KTI = w3.eth.contract(
-        # вводим его адрес и ABI
-        Web3.toChecksumAddress(ktd_address),
-        abi=file.read()
-      )
-      file.close()
-      
-      return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
+        user = User.query.filter_by(id=current_user_id).first()
+        return user.ktd_balance * KT_BITS_IN_KT
+      # file = open("app/static/ABI/KTD_ABI.json", "r")
+      # Korpus_KTI = w3.eth.contract(
+      #   # вводим его адрес и ABI
+      #   Web3.toChecksumAddress(ktd_address),
+      #   abi=file.read()
+      # )
+      # file.close()
+      #
+      # return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
 
     @staticmethod
     def get_ktd_price(current_user_id):
@@ -241,7 +243,7 @@ class User(UserMixin, db.Model):
                  work_exp, sex, name, surname,
                  phone=None, country=None, city=None,
                  description=None, work_experience_in_ms=0,
-                 birthdate=None, token=None):
+                 birthdate=None, token=None, ktd_balance=0.0):
         self.name = name
         self.surname = surname
         self.email = email
@@ -260,6 +262,7 @@ class User(UserMixin, db.Model):
         self.sex = sex
         self.private_key = private_key
         self.token = token
+        self.ktd_balance = ktd_balance
 
     def __repr__(self):
         return '<User: {}>'.format(self.login)
@@ -325,6 +328,7 @@ class User(UserMixin, db.Model):
     work_experience_in_ms = db.Column(db.BigInteger)
     jobs = db.relationship("WorkExperience", cascade="all,delete")
     skills = db.relationship("Skill", cascade="all,delete")
+    ktd_balance = db.Column(db.Float)
 
 
 class Teams(db.Model):
