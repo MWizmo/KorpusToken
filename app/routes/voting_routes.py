@@ -651,7 +651,7 @@ def finish_assessment():
         return render_template('gryazniy_vzlomshik.html',
                                access=get_access(current_user))
 
-    cur_voting = VotingTable.query.filter_by(status='Active').first()
+    cur_voting = VotingTable.query.filter_by(status='Fixed').first()
     voting_id = cur_voting.id
     filename = 'results_' + str(voting_id) + '.csv'
     with open(os.path.join(app.root_path + '/results', filename), 'w') as output:
@@ -673,7 +673,7 @@ def finish_assessment():
                     res.append(1)
             writer.writerow(res)
     if cur_voting:
-        q = QuestionnaireTable.query.filter_by(status='Ready for assessment').first()
+        q = QuestionnaireTable.query.filter_by(status='Fixed').first()
         q.status = 'Finished'
         cur_voting.status = 'Fixed'
         db.session.commit()
