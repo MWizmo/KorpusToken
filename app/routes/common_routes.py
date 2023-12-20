@@ -1108,7 +1108,7 @@ def add_to_blockchain():
 @app.route('/write_voting_progress')
 @login_required
 def write_voting_progress():
-    cur_id = VotingTable.current_fixed_voting_id()
+    cur_id = VotingTable.current_fixed2_voting_id()
     voting_info = VotingInfo.query.filter_by(voting_id=cur_id).all()
     users_info = [(User.query.filter_by(id=info.cadet_id).first(),
                    Membership.query.filter_by(user_id=info.cadet_id).first(),
