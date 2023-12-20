@@ -568,6 +568,14 @@ class VotingTable(db.Model):
             return 0
 
     @staticmethod
+    def current_fixed2_voting_id():
+        a = VotingTable.query.filter_by(status='Fixed2').all()
+        if a:
+            return a[-1].id
+        else:
+            return 0
+
+    @staticmethod
     def current_emission_voting_id():
         a = VotingTable.query.filter_by(status='Emission').all()
         if a:

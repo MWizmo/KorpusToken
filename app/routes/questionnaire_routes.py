@@ -488,6 +488,22 @@ def questionnaire_progress():
         criterions = [c.name for c in Criterion.query.all()]
         return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки', fixed_id=cur_id,
                                access=get_access(current_user), criterions=criterions, user_info=user_info)
+    elif VotingTable.current_fixed2_voting_id():
+        cur_id = VotingTable.current_fixed2_voting_id()
+        filename = 'results_' + str(cur_id) + '.csv'
+        # if os.path.isfile(os.path.join(app.root_path + '/results', filename)):
+        user_info = list()
+        with open(os.path.join(app.root_path + '/results', filename)) as file:
+            reader = csv.reader(file)
+            next(reader)
+            for row in reader:
+                user_marks = row[0].split(';')
+                user_marks.append(sum(int(item) for item in row[0].split(';')[1:]))
+                user_info.append(user_marks)
+        user_info.sort(key=lambda i: i[-1], reverse=True)
+        criterions = [c.name for c in Criterion.query.all()]
+        return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки', fixed2_id=cur_id,
+                               access=get_access(current_user), criterions=criterions, user_info=user_info)
     elif VotingTable.current_emission_voting_id():
         cur_id = VotingTable.current_emission_voting_id()
         return render_template('questionnaire/questionnaire_progress.html', title='Прогресс оценки', emission_id=cur_id,

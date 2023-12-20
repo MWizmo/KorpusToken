@@ -99,6 +99,35 @@
                         </tbody>
                     </table>
 
+            {% elif fixed2_id %}
+                <h2>Результаты оценки вклада зафиксированы атаманами<br>Вот ее результаты</h2>
+                    <br><br>
+                    {% if current_user.is_chieftain %}
+                        <div class="">
+                            <a class='nav__link border' href="{{ url_for('add_to_blockchain') }}">Записать результаты в блокчейн</a>
+                        </div>
+                    {% endif %}<br><br>
+                    <table class="result_table" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                {% for c in criterions %}
+                                    <td>{{c}}</td>
+                                {% endfor %}
+                                <td>Сумма</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in user_info %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{cell}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
             {% elif emission_id %}
                 <h2>Результаты оценки вклада записаны в блокчейн<br><br>Ожидаем эмиссии токенов</h2>
             {% elif active_id %}

@@ -676,7 +676,7 @@ def finish_assessment():
         q = QuestionnaireTable.query.filter_by(status='Fixed').first()
         if q:
             q.status = 'Finished'
-        cur_voting.status = 'Fixed'
+        cur_voting.status = 'Fixed2'
         db.session.commit()
         log('Закрыл оценку')
 
