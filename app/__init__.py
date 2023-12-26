@@ -20,9 +20,9 @@ infura_url = "https://polygon-mumbai.infura.io/v3/35b77298442b49168bbe5a150071dd
 chain_id = 80001
 w3 = Web3(Web3.HTTPProvider(infura_url))
 
-kti_address = '0x91f0ca3505c2b1d449b2cee338723bf5ea5a09da'
-ktd_address = '0xc408983fc1765c41acc42adc18d543929b11b217'
-contract_address = '0x14c843383d841a0c93f075c5a78115d2b897aba1'
+kti_address = '0x19ca99BAD51E8F14F175584F5D7DA4fad17C0979'
+ktd_address = '0xC758669070C6e91132917a16c9C0E9D11E9ca552'
+contract_address = '0x1927f1090F020f922b4F28b98a73ea74cA96B3eA'
 ETH_IN_WEI = 1000000000000000000
 KT_BITS_IN_KT = 1000000000000000000
 

@@ -12,7 +12,7 @@
   <p style="text-align: center; width: 100%"><i id="flash_msg">{{ messages[0] }}</i></p>
   {% endif %} {% endwith %}
   {% with messages = get_flashed_messages(category_filter=["success"]) %} {% if messages %}
-  <p style="text-align: center; width: 100%"><i id="flash_msg">Ссылка на etherscan: <a href="https://mumbai.polygonscan.com/tx/{{messages[0]}}" target="_blank">{{ messages[0] }}</a></i></p>
+  <p style="text-align: center; width: 100%"><i id="flash_msg">Ссылка на polygonscan: <a href="https://mumbai.polygonscan.com/tx/{{messages[0]}}" target="_blank">{{ messages[0] }}</a></i></p>
   {% endif %} {% endwith %}
 
   {{ form.csrf_token() }} {{ form.hidden_tag() }}

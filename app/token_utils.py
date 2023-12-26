@@ -343,11 +343,6 @@ def mint_KTI(amount, receiver, private_key):
     return "Число токенов должно быть больше нуля.", True
 
 
-def convert_marks_to_ktd_balance(student, points):
-    student.ktd_balance += points
-    db.session.commit()
-
-
 def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
@@ -381,6 +376,113 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     except Exception:
       return 'Некорректный адрес.', True
 
+def increase_token_balance(address, amount):
+    w3 = Web3(Web3.HTTPProvider(infura_url))
+    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
+                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    account = w3.eth.account.privateKeyToAccount(private_key)
+    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    file = open("app/static/ABI/Contract_ABI.json", "r")
+    KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+    )
+    file.close()
+
+    estimateGas = KorpusContract.functions.increaseVirtualBalance(address, amount).estimateGas(
+        {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
+    )
+
+    transaction = KorpusContract.functions.increaseVirtualBalance(address, amount).buildTransaction(
+        {
+            'nonce': nonce,
+            'from': account.address,
+            'gas': estimateGas,
+            'gasPrice': w3.toWei('35', 'gwei'),
+            'chainId': chain_id
+        }
+    )
+    signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+    try:
+        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        return transaction_hash, False
+    except Exception:
+        return 'Некорректный адрес.', True
+
+def decrease_token_balance(address, amount):
+    w3 = Web3(Web3.HTTPProvider(infura_url))
+    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
+                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    account = w3.eth.account.privateKeyToAccount(private_key)
+    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    file = open("app/static/ABI/Contract_ABI.json", "r")
+    KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+    )
+    file.close()
+
+    estimateGas = KorpusContract.functions.decreaseVirtualBalance(address, amount).estimateGas(
+        {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
+    )
+
+    transaction = KorpusContract.functions.decreaseVirtualBalance(address, amount).buildTransaction(
+        {
+            'nonce': nonce,
+            'from': account.address,
+            'gas': estimateGas,
+            'gasPrice': w3.toWei('35', 'gwei'),
+            'chainId': chain_id
+        }
+    )
+    signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+    try:
+        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        return transaction_hash, False
+    except Exception:
+        return 'Некорректный адрес.', True
+
+
+def output_token(address, amount):
+    w3 = Web3(Web3.HTTPProvider(infura_url))
+    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
+                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    account = w3.eth.account.privateKeyToAccount(private_key)
+    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    file = open("app/static/ABI/Contract_ABI.json", "r")
+    KorpusContract = w3.eth.contract(
+        Web3.toChecksumAddress(contract_address),
+        abi=file.read()
+    )
+    file.close()
+
+    estimateGas = KorpusContract.functions.outputVirtualBalance(address, amount).estimateGas(
+        {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('35', 'gwei'), 'chainId': chain_id}
+    )
+
+    transaction = KorpusContract.functions.outputVirtualBalance(address, amount).buildTransaction(
+        {
+            'nonce': nonce,
+            'from': account.address,
+            'gas': estimateGas,
+            'gasPrice': w3.toWei('35', 'gwei'),
+            'chainId': chain_id
+        }
+    )
+    signed_txn = w3.eth.account.signTransaction(transaction, private_key=account.privateKey)
+    try:
+        txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        return transaction_hash, False
+    except Exception:
+        return 'Некорректный адрес.', True
+
+
 def set_token_price():
     private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
     last_exchange_rate = TokenExchangeRate.query.order_by(TokenExchangeRate.date.desc()).first()
@@ -393,23 +495,3 @@ def set_token_price():
         token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=str(new_exchange_rate), is_default_calculation_method=True)
         db.session.add(token_exchange_rate)
         db.session.commit()
-
-def make_payment(address, price, private_key):
-    admin_private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
-
-    allowing_transfer_hex, is_allowing_failed = set_KTD_seller(address, price, admin_private_key)
-
-    if is_allowing_failed:
-      return 'Не удалось получить разрешение на перевод токенов', True
-
-    transaction_hex, is_transfer_failed = transfer_KTD(price, Web3.toChecksumAddress(contract_address), private_key)
-
-    if is_transfer_failed:
-      return 'Не удалось перевести токены', True
-
-    set_KTD_seller(address, 0, admin_private_key)
-
-    return transaction_hex, False
-
-def take_TKD(balance, private_key):
-    return transfer_KTD(balance, admin_wallet_address, private_key)

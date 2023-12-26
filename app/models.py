@@ -161,15 +161,19 @@ class User(UserMixin, db.Model):
     def get_ktd_balance(current_user_id):
         user = User.query.filter_by(id=current_user_id).first()
         return user.ktd_balance * KT_BITS_IN_KT
-      # file = open("app/static/ABI/KTD_ABI.json", "r")
-      # Korpus_KTI = w3.eth.contract(
-      #   # вводим его адрес и ABI
-      #   Web3.toChecksumAddress(ktd_address),
-      #   abi=file.read()
-      # )
-      # file.close()
-      #
-      # return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
+
+
+    @staticmethod
+    def get_real_ktd_balance(current_user_id):
+        file = open("app/static/ABI/KTD_ABI.json", "r")
+        Korpus_KTI = w3.eth.contract(
+          Web3.toChecksumAddress(ktd_address),
+          abi=file.read()
+        )
+        file.close()
+
+        return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
+
 
     @staticmethod
     def get_ktd_price(current_user_id):
