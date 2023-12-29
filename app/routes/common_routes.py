@@ -850,9 +850,11 @@ def make_tokens_distribution():
     else:
         voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
     criterions = [c.name for c in Criterion.query.all()]
-    users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id), user)
-             for user in User.query.all()
-             if User.check_can_be_marked(user.id)]
+    # users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id), user)
+    #          for user in User.query.all()
+    #          if User.check_can_be_marked(user.id)]
+    users = [(user.id, user.name + ' ' + user.surname, user)
+             for user in User.query.all() if User.check_can_be_marked(user.id)]
     marks_counter = 0
     for user in users:
         res = [user[1]]
@@ -871,11 +873,11 @@ def make_tokens_distribution():
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
         mint_amount = int(ktd_in_mark * marks)
-        transaction_hash, is_error = token_utils.increase_token_balance(user[2], mint_amount * KT_BITS_IN_KT)
-        if is_error:
-            print('Error in txn: ' + transaction_hash)
-        print('addr', user[2])
-        user[3].ktd_balance += mint_amount
+        # transaction_hash, is_error = token_utils.increase_token_balance(user[2], mint_amount * KT_BITS_IN_KT)
+        # if is_error:
+        #     print('Error in txn: ' + transaction_hash)
+        # print('addr', user[2])
+        user[2].ktd_balance += mint_amount
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
     db.session.commit()
     return redirect(url_for('emission'))
