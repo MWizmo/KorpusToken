@@ -11,16 +11,16 @@
     <h1 class="resume-title" style="text-transform: none">
       Резюме участников Корпуса
     </h1>
-    <h3 class="resume-mini-title" style="text-transform: none">
+    <h3 class="standard-mini-title" style="text-transform: none">
       Введите название должности, искомого навыка или места работы.
     </h3>
-    <div class="resumes-search">
+    <div class="standard-search">
       <input
         type="text"
-        class="resumes-search-input"
+        class="standard-search-input"
         id="search-resumes-input"
       />
-      <button class="resumes-search-button" id="resumes-search-button">
+      <button class="standard-search-button" id="resumes-search-button">
         <svg
           width="20"
           height="20"
@@ -35,18 +35,18 @@
         </svg>
       </button>
     </div>
-    <div class="resumes-result-text" id="resumes-result-text"></div>
+    <div class="standard-result-text" id="resumes-result-text"></div>
     <div class="resumes-root">
       <div class="resumes-cards" id="resumes-cards-container"></div>
-      <div class="resumes-filters">
-        <div class="resumes-filter">
-          <div class="resumes-filter-title">Опыт работы</div>
+      <div class="standard-filters">
+        <div class="standard-filter">
+          <div class="standard-filter-title">Опыт работы</div>
           <div class="resumes-filter-control">
             <input
               type="checkbox"
               name="work-exp-filter"
               id="no-work-exp"
-              class="resume-radio-input"
+              class="standard-radio-input"
               checked
             />
             <label for="no-work-exp">Нет опыта</label>
@@ -56,7 +56,7 @@
               type="checkbox"
               name="work-exp-filter"
               id="work-exp-one-to-three"
-              class="resume-radio-input"
+              class="standard-radio-input"
               checked
             />
             <label for="work-exp-one-to-three">От 1 до 3 лет</label>
@@ -66,7 +66,7 @@
               type="checkbox"
               name="work-exp-filter"
               id="work-exp-three-to-six"
-              class="resume-radio-input"
+              class="standard-radio-input"
               checked
             />
             <label for="work-exp-three-to-six">От 3 до 6 лет</label>
@@ -76,21 +76,21 @@
               type="checkbox"
               name="work-exp-filter"
               id="work-exp-more-then-six"
-              class="resume-radio-input"
+              class="standard-radio-input"
               checked
             />
             <label for="work-exp-more-then-six">От 6 лет</label>
           </div>
         </div>
-        <div class="resumes-filter">
-          <div class="resumes-filter-title">Пол</div>
+        <div class="standard-filter">
+          <div class="standard-filter-title">Пол</div>
           <div class="resumes-filter-control">
             <div class="resumes-filter-control">
               <input
                 type="checkbox"
                 name="sex-filter"
                 id="male-filter"
-                class="resume-radio-input"
+                class="standard-radio-input"
                 checked
               />
               <label for="male-filter">Мужской</label>
@@ -100,46 +100,46 @@
                 type="checkbox"
                 name="sex-filter"
                 id="female-filter"
-                class="resume-radio-input"
+                class="standard-radio-input"
                 checked
               />
               <label for="female-filter">Женский</label>
             </div>
           </div>
         </div>
-        <div class="resumes-filter">
-          <div class="resumes-filter-title">Возраст в годах</div>
-          <div class="resumes-age-filter-control">
-            <div class="resume-age-filter-group">
-              <div class="resume-age-filter-label">От</div>
+        <div class="standard-filter">
+          <div class="standard-filter-title">Возраст в годах</div>
+          <div class="standard-age-filter-control">
+            <div class="standard-age-filter-group">
+              <div class="standard-age-filter-label">От</div>
               <input
                 type="number"
                 min="1"
                 max="99"
-                class="resume-age-filter-input"
+                class="standard-age-filter-input"
                 id="age-low-border"
               />
             </div>
-            <div class="resume-age-filter-group">
-              <div class="resume-age-filter-label">До</div>
+            <div class="standard-age-filter-group">
+              <div class="standard-age-filter-label">До</div>
               <input
                 type="number"
                 min="1"
                 max="99"
-                class="resume-age-filter-input"
+                class="standard-age-filter-input"
                 id="age-high-border"
               />
             </div>
           </div>
         </div>
-        <div class="resumes-filter">
-          <div class="resumes-filter-title">Город</div>
+        <div class="standard-filter">
+          <div class="standard-filter-title">Город</div>
           <div class="resumes-filter-control">
             <div class="resumes-filter-control">
               <select
                 type="text"
                 id="resumes-city-filter"
-                class="resume-input resumes-city-input"
+                class="standard-input standard-city-input"
                 style="width: 11.2rem"
               >
                 <option value="" selected></option>

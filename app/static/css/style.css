@@ -1140,7 +1140,7 @@ img {
   margin-bottom: 2.5rem;
 }
 
-.resume-form-control {
+.standard-form-control {
   margin: 1.5rem 0;
   width: 55rem;
   display: flex;
@@ -1150,7 +1150,7 @@ img {
   font-weight: 400;
 }
 
-.resume-input {
+.standard-input {
   border: 1px solid black;
   border-radius: 0.4rem;
   height: 1.5rem;
@@ -1158,13 +1158,13 @@ img {
   padding-left: 0.3rem;
 }
 
-.resume-radio-group {
+.standard-radio-group {
   display: flex;
   justify-content: space-between;
   width: 15rem;
 }
 
-.resume-textarea {
+.standard-textarea {
   border: 1px solid black;
   border-radius: 0.4rem;
   width: 25rem;
@@ -1174,22 +1174,22 @@ img {
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-textarea::placeholder {
+.standard-textarea::placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-textarea:-ms-input-placeholder {
+.standard-textarea:-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-textarea::-ms-input-placeholder {
+.standard-textarea::-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-textarea-form-control {
+.standard-textarea-form-control {
   margin: 1.5rem 0;
   width: 55rem;
   display: flex;
@@ -1198,13 +1198,13 @@ img {
   font-weight: 400;
 }
 
-.resume-button-container {
+.standard-button-container {
   width: 100%;
   display: flex;
   justify-content: end;
 }
 
-.resume-black-button {
+.standard-black-button {
   background-color: black;
   font-family: 'Decima Mono Cyr';
   font-weight: 300;
@@ -1215,15 +1215,27 @@ img {
   height: 1.7rem;
 }
 
-.resume-black-button:hover {
+.standard-outline-button {
+  background-color: white;
+  font-family: 'Decima Mono Cyr';
+  font-weight: 300;
+  border-radius: 0.5rem;
+  border: 1px solid black;
+  color: black;
+  width: 15rem;
+  height: 1.7rem;
   cursor: pointer;
 }
 
-.resume-date-input {
+.standard-black-button:hover {
+  cursor: pointer;
+}
+
+.standard-date-input {
   display: flex;
 }
 
-.resume-birthday-input {
+.standard-birthday-input {
   width: 4rem;
   border: 1px solid black;
   border-radius: 0.4rem 0 0 0.4rem;
@@ -1234,22 +1246,22 @@ img {
   color: #c4c4c4;
 }
 
-.resume-birthday-input::placeholder {
+.standard-birthday-input::placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-birthday-input:-ms-input-placeholder {
+.standard-birthday-input:-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-birthday-input::-ms-input-placeholder {
+.standard-birthday-input::-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-birthmonth-input {
+.standard-birthmonth-input {
   width: 6rem;
   height: 1.85rem;
   -webkit-appearance: none;
@@ -1266,7 +1278,7 @@ img {
   text-align: center;
 }
 
-.resume-birthyear-input {
+.standard-birthyear-input {
   width: 4rem;
   border: 1px solid black;
   border-radius: 0 0.4rem 0.4rem 0;
@@ -1277,26 +1289,26 @@ img {
   color: #c4c4c4;
 }
 
-.resume-radio-input:checked {
+.standard-radio-input:checked {
   filter: brightness(0);
 }
 
-.resume-birthyear-input::placeholder {
+.standard-birthyear-input::placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-birthyear-input:-ms-input-placeholder {
+.standard-birthyear-input:-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-birthyear-input::-ms-input-placeholder {
+.standard-birthyear-input::-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-citizenship-input {
+.standard-citizenship-input {
   width: 15rem;
   height: 1.6rem;
   -webkit-appearance: none;
@@ -1342,14 +1354,14 @@ img {
   height: 0.9rem;
 }
 
-.resume-language-container {
+.standard-language-container {
   display: flex;
   justify-content: space-between;
   margin: 0.5rem 0;
   width: 20rem;
 }
 
-.resume-language-content-container {
+.standard-language-content-container {
   display: flex;
 }
 
@@ -1360,7 +1372,7 @@ img {
   margin-top: 1rem;
 }
 
-.resume-language-name-input {
+.standard-language-name-input {
   width: 7rem;
   border: 1px solid black;
   border-radius: 0.4rem 0 0 0.4rem;
@@ -1389,7 +1401,7 @@ img {
   appearance: none;
 }
 
-.resume-modal-layout {
+.standard-modal-layout {
   position: fixed;
   background-color: rgba(0, 0, 0, 0.7);
   top: 0;
@@ -1405,7 +1417,7 @@ img {
   align-items: center;
 }
 
-.resume-modal {
+.standard-modal {
   padding: 1rem 1.5rem;
   width: 55rem;
   background-color: white;
@@ -1413,44 +1425,44 @@ img {
   z-index: 999;
 }
 
-.resume-modal-title {
+.standard-modal-title {
   font-size: 1.4rem;
   font-weight: 400;
   margin-bottom: 1.5rem;
 }
 
-.resume-modal-input {
+.standard-modal-input {
   width: 15rem;
   height: 1.5rem;
   border: 1px solid black;
   padding: 0.2rem 0.5rem;
 }
 
-.resume-modal-input::placeholder {
+.standard-modal-input::placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-input:-ms-input-placeholder {
+.standard-modal-input:-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-input::-ms-input-placeholder {
+.standard-modal-input::-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-description {
+.standard-modal-description {
   margin: 1.5rem 0;
 }
 
-.resume-add-input-group {
+.standard-add-input-group {
   display: flex;
   align-items: center;
 }
 
-.resume-add-input-group > .plus-icon {
+.standard-add-input-group > .plus-icon {
   position: relative;
   right: 1.5rem;
 }
@@ -1481,33 +1493,34 @@ img {
   font-size: 0.8rem;
 }
 
-.resume-modal-button-container {
+.standard-modal-button-container {
   display: flex;
   width: 100%;
   justify-content: end;
+  gap: 1rem;
 }
 
-.resume-disabled-modal {
+.standard-disabled-modal {
   display: none;
   opacity: 0;
 }
 
-.resume-disabled-modal-layout {
-  display: 0;
+.standard-disabled-modal-layout {
+  display: none;
   opacity: 0;
   pointer-events: none;
 }
 
-.resume-bold-text {
+.standard-bold-text {
   font-weight: 700;
 }
 
-.resume-modal-form-group {
+.standard-modal-form-group {
   margin: 1rem 0;
   display: flex;
 }
 
-.resume-modal-month-input {
+.standard-modal-month-input {
   width: 5rem;
   height: 1.65rem;
   -webkit-appearance: none;
@@ -1525,7 +1538,7 @@ img {
   text-align: center;
 }
 
-.resume-modal-year-input {
+.standard-modal-year-input {
   width: 3.5rem;
   border: 1px solid black;
   border-radius: 0 0.4rem 0.4rem 0;
@@ -1536,22 +1549,22 @@ img {
   color: #c4c4c4;
 }
 
-.resume-modal-year-input::placeholder {
+.standard-modal-year-input::placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-year-input:-ms-input-placeholder {
+.standard-modal-year-input:-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-year-input::-ms-input-placeholder {
+.standard-modal-year-input::-ms-input-placeholder {
   color: #c4c4c4;
   font-family: 'Decima Mono Cyr';
 }
 
-.resume-modal-radio-group {
+.standard-modal-radio-group {
   margin-top: 1rem;
   display: flex;
   align-items: center;
@@ -1561,19 +1574,19 @@ input[type='radio'] {
   margin: 0;
 }
 
-.resume-modal-radio-label {
+.standard-modal-radio-label {
   margin-left: 0.5rem;
 }
 
-.resume-hidden-group {
+.standard-hidden-group {
   display: none;
 }
 
-.resume-mb-1 {
+.standard-mb-1 {
   margin-bottom: 1rem;
 }
 
-.resume-mini-title {
+.standard-mini-title {
   margin-top: 1.5rem;
   font-size: 1.5rem;
   font-weight: 400;
@@ -1585,12 +1598,12 @@ input[type='radio'] {
     padding: 4rem 2rem;
   }
 
-  .resume-form-control {
+  .standard-form-control {
     width: 100%;
     font-size: 2.5rem;
   }
 
-  .resume-textarea-form-control {
+  .standard-textarea-form-control {
     width: 100%;
     font-size: 2.5rem;
   }
@@ -1603,7 +1616,7 @@ input[type='radio'] {
     font-size: 2.5rem;
   }
 
-  .resume-input {
+  .standard-input {
     width: 25rem;
     height: 3rem;
     font-size: 2rem;
@@ -1611,30 +1624,30 @@ input[type='radio'] {
     padding: 0 1rem;
   }
 
-  .resume-birthday-input {
+  .standard-birthday-input {
     width: 7rem;
     height: 3rem;
     font-size: 1.5rem;
   }
 
-  .resume-birthmonth-input {
+  .standard-birthmonth-input {
     width: 9rem;
     height: 3.32rem;
     font-size: 1.5rem;
   }
 
-  .resume-birthyear-input {
+  .standard-birthyear-input {
     width: 10rem;
     height: 3rem;
     font-size: 1.5rem;
   }
 
-  .resume-radio-group {
+  .standard-radio-group {
     width: 27rem;
     font-size: 1.5rem;
   }
 
-  .resume-citizenship-input {
+  .standard-citizenship-input {
     width: 27rem;
     height: 3rem;
     font-size: 2rem;
@@ -1653,22 +1666,22 @@ input[type='radio'] {
     width: 2rem;
   }
 
-  .resume-black-button {
+  .standard-black-button {
     width: 27rem;
     height: 3rem;
     font-size: 1.5rem;
   }
 
-  .resume-textarea {
+  .standard-textarea {
     width: 40rem;
     font-size: 1.5rem;
   }
 
-  .resume-language-container {
+  .standard-language-container {
     width: 27rem;
   }
 
-  .resume-language-name-input {
+  .standard-language-name-input {
     width: 10rem;
     height: 3rem;
     font-size: 1.2rem;
@@ -1690,15 +1703,15 @@ input[type='radio'] {
     height: 2rem;
   }
 
-  .resume-modal {
+  .standard-modal {
     font-size: 2rem;
   }
 
-  .resume-modal-title {
+  .standard-modal-title {
     font-size: 2.5rem;
   }
 
-  .resume-modal-input {
+  .standard-modal-input {
     width: 25rem;
     height: 2.8rem;
     font-size: 1.7rem;
@@ -1716,26 +1729,26 @@ input[type='radio'] {
     right: 2rem;
   }
 
-  .resume-modal-month-input {
+  .standard-modal-month-input {
     width: 10rem;
     height: 3rem;
     font-size: 1.7rem;
   }
 
-  .resume-modal-year-input {
+  .standard-modal-year-input {
     width: 10rem;
     height: 2.65rem;
     font-size: 1.7rem;
   }
 }
 
-.resumes-search {
+.standard-search {
   display: flex;
   align-items: center;
   margin-top: 1rem;
 }
 
-.resumes-search-input {
+.standard-search-input {
   padding: 0 0.5rem;
   width: 52rem;
   height: 2.2rem;
@@ -1744,7 +1757,7 @@ input[type='radio'] {
   font-family: 'Decima Mono Cyr';
 }
 
-.resumes-search-button {
+.standard-search-button {
   border-left: 0;
   border-top: 1px solid black;
   border-right: 1px solid black;
@@ -1754,7 +1767,7 @@ input[type='radio'] {
   cursor: pointer;
 }
 
-.resumes-search-button:hover {
+.standard-search-button:hover {
   background: white;
 }
 
@@ -1801,13 +1814,13 @@ input[type='radio'] {
   margin-bottom: 0.2rem;
 }
 
-.resumes-pagination-block {
+.standard-pagination-block {
   margin-top: 2.5rem;
   display: flex;
   align-items: center;
 }
 
-.resumes-page-button {
+.standard-page-button {
   padding: 0.3rem 0.7rem;
   margin: 0.2rem;
   border: 1px solid black;
@@ -1817,37 +1830,37 @@ input[type='radio'] {
   cursor: pointer;
 }
 
-.resumes-dots {
+.standard-dots {
   font-weight: 700;
   padding-top: 1rem;
   padding-left: 0.2rem;
   padding-right: 0.2rem;
 }
 
-.resumes-filters {
+.standard-filters {
   margin-left: 3.5rem;
 }
 
-.resumes-filter-title {
+.standard-filter-title {
   font-weight: 400;
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
 }
 
-.resumes-filter {
+.standard-filter {
   margin-bottom: 1rem;
 }
 
-.resumes-age-filter-control {
+.standard-age-filter-control {
   display: flex;
 }
 
-.resume-age-filter-group {
+.standard-age-filter-group {
   display: flex;
   position: relative;
 }
 
-.resume-age-filter-label {
+.standard-age-filter-label {
   position: absolute;
   left: 0.5rem;
   top: 0.1rem;
@@ -1856,7 +1869,7 @@ input[type='radio'] {
   font-family: 0.9rem;
 }
 
-.resume-age-filter-input {
+.standard-age-filter-input {
   padding-left: 2rem;
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
@@ -1876,7 +1889,7 @@ input[type='radio'] {
   border-radius: 0 0.3rem 0.3rem 0;
 }
 
-.resumes-city-input {
+.standard-city-input {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -1894,7 +1907,7 @@ input[type='radio'] {
   background-position-y: 7px;
 }
 
-.resumes-result-text {
+.standard-result-text {
   font-size: 1.5rem;
   font-weight: 400;
   font-family: 'Decima Mono Cyr';
@@ -2238,4 +2251,13 @@ select {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.invalid {
+  border: 1px solid red
+}
+
+.disabled {
+  opacity: 0.8;
+  cursor: default;
 }

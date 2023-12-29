@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block content %}
+<div class="nav_href" style="margin-left: 10%;margin-top:5vh; margin-bottom:0;">
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">вывод токенов</a>
+    </div>
+<div class="small_card_container">
+  <div class="small_card_flex" style="flex-direction: column">
+    <p class="eth_text">Доступный для вывода баланс</p>
+    <p class="eth_text green" id="ktd_balance">{{ ktd_balance }}</p>
+    <form action="" method="post" novalidate class="form" style="height: auto">
+      {% with messages = get_flashed_messages(category_filter=["restore"]) %} {%
+      if messages %}
+      <p><i>{{ messages[0] }}</i></p>
+      {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
+      <p style="width: 100%;">
+        <span class="eth_text" style="margin-left: 30%;">{{ form.amount.label }}</span> <br />
+				<div class="dark_block" style="width: 60%; margin-left: 20%">
+					{{ form.amount(size=256, id="ktd_amount", class_="eth_input", style="margin-top: 2vh" ) }}
+				</div>
+        {% for error in
+        form.amount.errors %}
+        <span style="color: red"> {{error}} </span>
+        {% endfor %}
+      </p>
+      <div
+        class="standard-modal-layout standard-disabled-modal-layout"
+        id="confirmation-modal-layout"
+      >
+        <div class="standard-modal standard-disabled-modal" id="confirmation-modal">
+          <h4 class="standard-modal-title" style="text-transform: none">Подтверждение действия</h4>
+          <div class="standard-modal-form-group">
+              <span>
+                  После подтверждения на адрес <span id="eth_address">{{ current_address }}</span> будет отправлено <span id="ktd_total">0</span> токенов вклада. Удостоверьтесь что вы верно указали адрес кошелька и количество токенов, после подтверждения, мы не сможем отменить транзакцию.
+              </span>
+          </div>
+          <div class="standard-modal-button-container">
+            <button class="standard-outline-button" type="button" id="cancel-button">
+              Отменить
+            </button>
+            {{ form.submit(class_="submit", id="output-button") }}
+          </div>
+        </div>
+      </div>
+      <p><button class="eth_button" type="button" id="output_btn" style="margin-left:25%; width:50%;" disabled>Вывести</button></p>
+      <p><button class="eth_button" type="button" onclick="history.back();" style="margin-left:25%; width:50%;">Назад</button> </p>
+    </form>
+  </div>
+</div>
+
+<script>
+    'use strict';
+
+    const ktdAmountInput = document.querySelector('#ktd_amount');
+    const ktdBalanceBlock = document.querySelector('#ktd_balance');
+    const outputButton = document.querySelector('#output_btn');
+
+    ktdAmountInput.addEventListener('input', (event) => {
+        const isSufficientBalance = +event.target.value > 0 && +ktdBalanceBlock.textContent >= +event.target.value;
+        outputButton.disabled = !isSufficientBalance;
+        if (!isSufficientBalance) {
+            outputButton.classList.add('disabled');
+            ktdAmountInput.classList.add('invalid');
+        } else {
+            outputButton.classList.remove('disabled');
+            ktdAmountInput.classList.remove('invalid');
+        }
+    });
+
+    window.addEventListener("pageshow", () => {
+      ktdAmountInput.value = '';
+    });
+
+    const ktdTotalSpan = document.querySelector('#ktd_total');
+    const confirmationModalLayout = document.querySelector('#confirmation-modal-layout');
+    const confirmationModal = document.querySelector('#confirmation-modal');
+
+    outputButton.addEventListener('click', () => {
+        ktdTotalSpan.textContent = ktdAmountInput.value;
+        confirmationModalLayout.classList.remove('standard-disabled-modal-layout');
+        confirmationModal.classList.remove('standard-disabled-modal');
+    });
+
+    const cancelButton = document.querySelector('#cancel-button');
+    cancelButton.addEventListener('click', () => {
+        confirmationModalLayout.classList.add('standard-disabled-modal-layout');
+        confirmationModal.classList.add('standard-disabled-modal');
+    });
+</script>
+{% endblock %}

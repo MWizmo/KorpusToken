@@ -13,28 +13,28 @@
         </h3>
 
         {% if user.phone %}
-          <div class="resume-form-control">
+          <div class="standard-form-control">
             <span>Номер телефона</span>
             <span class="resume-span">{{ user.phone }}</span>
           </div>
         {% endif %}
 
         {% if user.tg_nickname %}
-          <div class="resume-form-control">
+          <div class="standard-form-control">
             <span>Профиль Telegram</span>
             <span class="resume-span">{{ user.tg_nickname }}</span>
           </div>
         {% endif %}
 
         {% if user.country %}
-          <div class="resume-form-control">
+          <div class="standard-form-control">
             <span>Страна проживания</span>
             <span class="resume-span">{{ user.country }}</span>
           </div>
         {% endif %}
 
         {% if user.city %}
-          <div class="resume-form-control">
+          <div class="standard-form-control">
             <span>Город проживания</span>
             <span class="resume-span">{{ user.city }}</span>
           </div>
@@ -48,28 +48,28 @@
       </h3>
 
       {% if user.birthdate %}
-        <div class="resume-form-control">
+        <div class="standard-form-control">
           <span>Дата рождения</span>
           <span class="resume-span">{{ user.birthdate.strftime('%d.%m.%Y') if user.birthdate }}</span>
         </div>
       {% endif %}
 
       {% if user.sex %}
-        <div class="resume-form-control">
+        <div class="standard-form-control">
           <span>Пол</span>
           <span class="resume-span">{{ 'Мужской' if user.sex == 'male' else 'Женский' }}</span>
         </div>
       {% endif %}
 
       {% if user.citizenship %}
-        <div class="resume-form-control">
+        <div class="standard-form-control">
           <span>Гражданство</span>
           <span class="resume-span">{{ user.citizenship if user.citizenship }}</span>
         </div>
       {% endif %}
 
       {% if skills|length > 0 %}
-        <div class="resume-textarea-form-control">
+        <div class="standard-textarea-form-control">
           <span>Навыки</span>
           <div class="resume-skills-container" id="resume-skills-container">
             {% for skill in skills %}
@@ -93,7 +93,7 @@
       {% endif %}
 
       {% if work_experience|length > 0 %}
-        <div class="resume-textarea-form-control">
+        <div class="standard-textarea-form-control">
           <span>Опыт работы</span>
           <div id="resume-work-exps-container">
             {% for job in work_experience %}
@@ -115,12 +115,12 @@
       {% endif %}
 
       {% if user_languages|length > 0 %}
-        <div class="resume-textarea-form-control">
+        <div class="standard-textarea-form-control">
           <span>Владение языками</span>
           <div>
             {% for user_language in user_languages %}
               <div class="resume-language-view">
-                <div class="resume-language-content-container">
+                <div class="standard-language-content-container">
                   <div class="resume-language-name-view">
                     {{ user_language.name }}
                   </div>
@@ -135,11 +135,11 @@
       {% endif %}
 
       {% if user.description %}
-        <div class="resume-textarea-form-control">
+        <div class="standard-textarea-form-control">
           <span>О себе</span>
           <div
             name="description"
-            class="resume-textarea"
+            class="standard-textarea"
             style="overflow-x: auto"
           >
             {{ user.description }}
@@ -151,16 +151,16 @@
 </div>
 
 <div
-  class="resume-modal-layout resume-disabled-modal-layout"
+  class="standard-modal-layout standard-disabled-modal-layout"
   id="skill-modal-layout"
 >
-  <div class="resume-modal resume-disabled-modal" id="skill-modal">
+  <div class="standard-modal standard-disabled-modal" id="skill-modal">
     <h4
-      class="resume-modal-title"
+      class="standard-modal-title"
       id="resume-skill-title"
       style="text-transform: none"
     ></h4>
-    <div class="resume-modal-description" id="keywords-description-container">
+    <div class="standard-modal-description" id="keywords-description-container">
       Уточняющие слова, которые характеризуют уровень, направление,
       специализацию в рамках указанного навыка.
     </div>
@@ -171,29 +171,29 @@
   </div>
 </div>
 <div
-  class="resume-modal-layout resume-disabled-modal-layout"
+  class="standard-modal-layout standard-disabled-modal-layout"
   id="work-exp-modal-layout"
 >
-  <div class="resume-modal resume-disabled-modal" id="work-exp-modal">
+  <div class="standard-modal standard-disabled-modal" id="work-exp-modal">
     <h4
-      class="resume-modal-title"
+      class="standard-modal-title"
       style="text-transform: none"
       id="resume-work-exp-title"
     ></h4>
     <div>
-      <span class="resume-bold-text">Период работы</span>
-      <div class="resume-modal-form-group" id="resume-work-exp-interval"></div>
+      <span class="standard-bold-text">Период работы</span>
+      <div class="standard-modal-form-group" id="resume-work-exp-interval"></div>
     </div>
     <div>
-      <span class="resume-bold-text">Должность</span>
+      <span class="standard-bold-text">Должность</span>
       <div style="margin: 1rem 0" id="resume-work-exp-position"></div>
     </div>
     <div>
-      <span class="resume-bold-text">Обязанности на рабочем месте</span>
-      <div class="resume-textarea-form-control">
+      <span class="standard-bold-text">Обязанности на рабочем месте</span>
+      <div class="standard-textarea-form-control">
         <div
           id="resume-work-exp-responsibilities"
-          class="resume-textarea"
+          class="standard-textarea"
         ></div>
       </div>
     </div>

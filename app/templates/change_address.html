@@ -1,12 +1,12 @@
 {% extends "base.html" %} {% block content %}
-<div class="nav_href" style="width:10%; margin-top:2vh;margin-left:10%; width:100%;">
+<div class="nav_href" style="margin-left: 10%;margin-top:5vh; margin-bottom:0;">
         <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">сменить адрес кошелька</a>
     </div>
 <div class="small_card_container">
   <div class="small_card_flex" style="flex-direction: column">
     <p class="eth_text">Адрес вашего текущего кошелька ethereum</p>
     <p class="eth_text purple">{{ current_address }}</p>
-    <form action="" method="post" novalidate class="form">
+    <form action="" method="post" novalidate class="form" style="height: auto">
       {% with messages = get_flashed_messages(category_filter=["restore"]) %} {%
       if messages %}
       <p><i>{{ messages[0] }}</i></p>
@@ -18,7 +18,7 @@
 				</div>
         {% for error in
         form.new_private_key.errors %}
-        <span style="color: red"> {{error}} </span>
+        <span style="color: red; display: block; width: 100%; text-align: center;"> {{error}} </span>
         {% endfor %}
       </p>
       <p>{{ form.submit(class_="submit") }}</p>

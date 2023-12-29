@@ -11,68 +11,68 @@
         Контактные данные
       </h3>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="name-input">Имя</label>
         <input
           type="text"
           name="name"
           id="name-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.name }}"
         />
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="surname-input">Фамилия</label>
         <input
           type="text"
           name="surname"
           id="surname-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.surname }}"
         />
       </div>
 
-        <div class="resume-form-control">
+        <div class="standard-form-control">
         <label for="tg-input">Профиль telegram</label>
         <input
           type="text"
           name="tg"
           id="tg-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.tg_nickname}}"
         />
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="phone-input">Номер телефона</label>
         <input
           type="text"
           name="phone"
           id="phone-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.phone or '' }}"
         />
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="country-input">Страна проживания</label>
         <input
           type="text"
           name="country"
           id="country-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.country or '' }}"
         />
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="city-input">Город проживания</label>
         <input
           type="text"
           name="city"
           id="city-input"
-          class="resume-input"
+          class="standard-input"
           value="{{ user.city or '' }}"
         />
       </div>
@@ -83,14 +83,14 @@
         Основная информация
       </h3>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <span>Дата рождения</span>
-        <div class="resume-date-input">
+        <div class="standard-date-input">
           <input
             type="number"
             name="birthday"
             id="birthday-input"
-            class="resume-birthday-input"
+            class="standard-birthday-input"
             min="1"
             max="31"
             placeholder="День"
@@ -99,7 +99,7 @@
           <select
             name="birthmonth"
             id="birthmonth-input"
-            class="resume-birthmonth-input"
+            class="standard-birthmonth-input"
           >
             {% if not user.birthdate %}
             <option value="" disabled selected class="resume-default-option">
@@ -183,7 +183,7 @@
             type="number"
             name="birthyear"
             id="birthyear-input"
-            class="resume-birthyear-input"
+            class="standard-birthyear-input"
             min="1900"
             max="9999"
             placeholder="Год"
@@ -192,16 +192,16 @@
         </div>
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <span>Пол</span>
-        <div class="resume-radio-group">
+        <div class="standard-radio-group">
           <div>
             <label for="sex-male-input">Мужской</label>
             <input
               type="radio"
               name="sex"
               id="sex-male-input"
-              class="resume-radio-input"
+              class="standard-radio-input"
               {% if user.sex == 'male' or not user.sex %}checked{% endif %}
             />
           </div>
@@ -211,19 +211,19 @@
               type="radio"
               name="sex"
               id="sex-female-input"
-              class="resume-radio-input"
+              class="standard-radio-input"
               {% if user.sex == 'female' %}checked{% endif %}
             />
           </div>
         </div>
       </div>
 
-      <div class="resume-form-control">
+      <div class="standard-form-control">
         <label for="citizenshipInput">Гражданство</label>
         <select
           name="citizenship"
           id="citizenship-input"
-          class="resume-citizenship-input"
+          class="standard-citizenship-input"
         >
           {% for citizenship in citizenships %}
           <option value="{{ citizenship.name }}" {% if user.citizenship == citizenship.name %}selected{% endif %}>{{ citizenship.name }}</option>
@@ -231,7 +231,7 @@
         </select>
       </div>
 
-      <div class="resume-textarea-form-control">
+      <div class="standard-textarea-form-control">
         <label for="descriptionInput">Навыки</label>
         <div class="resume-skills-container" id="resume-skills-container">
           {% for skill in skills %}
@@ -277,13 +277,13 @@
             </div>
           </div>
           {% endfor %}
-          <button class="resume-black-button" id="add-skill-button">
+          <button class="standard-black-button" id="add-skill-button">
             Добавить навык
           </button>
         </div>
       </div>
 
-      <div class="resume-textarea-form-control">
+      <div class="standard-textarea-form-control">
         <label for="descriptionInput">Опыт работы</label>
         <div id="resume-work-exps-container">
           {% for job in work_experience %}
@@ -327,21 +327,21 @@
             </div>
           </div>
           {% endfor %}
-          <button class="resume-black-button" id="add-work-exp-button">
+          <button class="standard-black-button" id="add-work-exp-button">
             Добавить опыт работы
           </button>
         </div>
       </div>
 
-      <div class="resume-textarea-form-control">
+      <div class="standard-textarea-form-control">
         <label for="descriptionInput">Владение языками</label>
         <div id="resume-languages-container">
           {% for user_language in user_languages %}
-          <div class="resume-language-container">
-            <div class="resume-language-content-container">
+          <div class="standard-language-container">
+            <div class="standard-language-content-container">
               <select
                 name="languageName[]"
-                class="resume-language-name-input"
+                class="standard-language-name-input"
                 id="edit-language-name_{{ user_language.id }}"
               >
                 <option value="-1" selected>{{ user_language.name }}</option>
@@ -423,19 +423,19 @@
         </div>
       </div>
 
-      <div class="resume-textarea-form-control">
+      <div class="standard-textarea-form-control">
         <label for="description-input">О себе</label>
         <textarea
           name="description"
           id="description-input"
-          class="resume-textarea"
+          class="standard-textarea"
           placeholder="Расскажите о своих качествах, знаниях, увлечениях, которые, как вам кажется, полезно о вас знать"
         >{{ user.description or '' }}</textarea>
       </div>
     </section>
 
-    <div class="resume-button-container">
-      <button class="resume-black-button" id="resume-save-button" type="submit">
+    <div class="standard-button-container">
+      <button class="standard-black-button" id="resume-save-button" type="submit">
         Сохранить
       </button>
     </div>
@@ -443,30 +443,30 @@
 </div>
 
 <div
-  class="resume-modal-layout resume-disabled-modal-layout"
+  class="standard-modal-layout standard-disabled-modal-layout"
   id="add-skill-modal-layout"
 >
-  <div class="resume-modal resume-disabled-modal" id="add-skill-modal">
-    <h4 class="resume-modal-title" style="text-transform: none">
+  <div class="standard-modal standard-disabled-modal" id="add-skill-modal">
+    <h4 class="standard-modal-title" style="text-transform: none">
       Добавление навыка
     </h4>
     <div>
       <label for="skillNameInput">Название навыка</label>
       <input
         type="text"
-        class="resume-modal-input"
+        class="standard-modal-input"
         id="skill-name-input"
         placeholder="Продажи/Web-Дизайн/C++"
       />
     </div>
-    <div class="resume-modal-description">
+    <div class="standard-modal-description">
       Укажите ключевые слова, которые помогут понять уровень, направление,
       специализацию в рамках указанного навыка.
     </div>
-    <div class="resume-add-input-group">
+    <div class="standard-add-input-group">
       <input
         type="text"
-        class="resume-modal-input"
+        class="standard-modal-input"
         id="skill-keyword-input"
         placeholder="Flask"
       />
@@ -501,23 +501,23 @@
       class="resume-skill-specializations-container"
       id="skill-keywords-container"
     ></div>
-    <div class="resume-modal-button-container">
-      <button class="resume-black-button" id="save-skill-button">
+    <div class="standard-modal-button-container">
+      <button class="standard-black-button" id="save-skill-button">
         Сохранить
       </button>
     </div>
   </div>
 </div>
 <div
-  class="resume-modal-layout resume-disabled-modal-layout"
+  class="standard-modal-layout standard-disabled-modal-layout"
   id="add-work-exp-modal-layout"
 >
-  <div class="resume-modal resume-disabled-modal" id="add-work-exp-modal">
-    <h4 class="resume-modal-title" style="text-transform: none">Опыт работы</h4>
+  <div class="standard-modal standard-disabled-modal" id="add-work-exp-modal">
+    <h4 class="standard-modal-title" style="text-transform: none">Опыт работы</h4>
     <div>
-      <span class="resume-bold-text">Начало работы</span>
-      <div class="resume-modal-form-group">
-        <select class="resume-modal-month-input" id="work-start-month-input">
+      <span class="standard-bold-text">Начало работы</span>
+      <div class="standard-modal-form-group">
+        <select class="standard-modal-month-input" id="work-start-month-input">
           <option value="" disabled selected class="resume-default-option">
             Месяц
           </option>
@@ -537,7 +537,7 @@
         <input
           type="number"
           id="work-start-year-input"
-          class="resume-modal-year-input"
+          class="standard-modal-year-input"
           min="1900"
           max="9999"
           placeholder="Год"
@@ -545,19 +545,19 @@
       </div>
     </div>
     <div>
-      <span class="resume-bold-text">Окончание</span>
-      <div class="resume-modal-radio-group" id="is-work-not-ended-group">
+      <span class="standard-bold-text">Окончание</span>
+      <div class="standard-modal-radio-group" id="is-work-not-ended-group">
         <input
           type="checkbox"
           id="is-work-not-ended-input"
-          class="resume-radio-input"
+          class="standard-radio-input"
         />
-        <label for="is-work-not-ended-input" class="resume-modal-radio-label"
+        <label for="is-work-not-ended-input" class="standard-modal-radio-label"
           >По настоящее время</label
         >
       </div>
-      <div class="resume-modal-form-group" id="work-end-group">
-        <select class="resume-modal-month-input" id="work-end-month-input">
+      <div class="standard-modal-form-group" id="work-end-group">
+        <select class="standard-modal-month-input" id="work-end-month-input">
           <option value="" disabled selected class="resume-default-option">
             Месяц
           </option>
@@ -577,7 +577,7 @@
         <input
           type="number"
           id="work-end-year-input"
-          class="resume-modal-year-input"
+          class="standard-modal-year-input"
           min="1900"
           max="9999"
           placeholder="Год"
@@ -585,39 +585,39 @@
       </div>
     </div>
     <div>
-      <span class="resume-bold-text">Место работы</span>
+      <span class="standard-bold-text">Место работы</span>
       <div style="margin: 1rem 0">
         <input
           type="text"
-          class="resume-modal-input"
+          class="standard-modal-input"
           id="place-input"
           placeholder='ООО "Компания мечты"'
         />
       </div>
     </div>
     <div>
-      <span class="resume-bold-text">Должность</span>
+      <span class="standard-bold-text">Должность</span>
       <div style="margin: 1rem 0">
         <input
           type="text"
-          class="resume-modal-input"
+          class="standard-modal-input"
           id="position-input"
           placeholder="Программист"
         />
       </div>
     </div>
     <div>
-      <span class="resume-bold-text">Обязанности на рабочем месте</span>
-      <div class="resume-textarea-form-control">
+      <span class="standard-bold-text">Обязанности на рабочем месте</span>
+      <div class="standard-textarea-form-control">
         <textarea
           id="responsibilities-input"
-          class="resume-textarea"
+          class="standard-textarea"
           placeholder="Делал то-сё, пятое-десятое"
         ></textarea>
       </div>
     </div>
-    <div class="resume-modal-button-container">
-      <button class="resume-black-button" id="save-work-exp-button">
+    <div class="standard-modal-button-container">
+      <button class="standard-black-button" id="save-work-exp-button">
         Сохранить
       </button>
     </div>
@@ -1297,7 +1297,7 @@
   );
 
   const editLanguageNameInputs = document.querySelectorAll(
-    '.resume-language-name-input'
+    '.standard-language-name-input'
   );
 
   editLanguageNameInputs.forEach((input) =>

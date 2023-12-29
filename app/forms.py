@@ -131,9 +131,19 @@ class StartAssessmentForm(FlaskForm):
     month2 = StringField('Укажите, за какой период проводится оценка', validators=[DataRequired()])
     submit = SubmitField('Начать оценку',render_kw={"class": "nav__link border"})
 
+
 class ChangeAddress(FlaskForm):
     new_private_key = StringField('Укажите приватный ключ вашего кошелька ethereum', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%"})
+
+
+class OutputTokens(FlaskForm):
+    amount = StringField('Укажите, какое количество токенов необходимо вывести', validators=[DataRequired()])
+    submit = SubmitField(
+        'Подтвердить',
+        render_kw={"class": "standard-black-button"}
+    )
+
 
 class TransferKtdForm(FlaskForm):
     num = StringField(validators=[DataRequired()])

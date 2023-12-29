@@ -168,7 +168,13 @@ def delete_user():
     uid = request.args.get('uid')
     user = User.query.filter_by(id=current_user.id).first()
     user_balance = User.get_ktd_balance(current_user.id)
-    transaction_hash, is_error = token_utils.take_TKD(user_balance, user.private_key)
+    transaction_hash, is_error = token_utils.decrease_token_balance(
+        user.get_eth_address(),
+        user_balance * KT_BITS_IN_KT
+    )
+    if is_error:
+        print('Error occurred in txn: ' + transaction_hash)
+        return redirect('/delete_user')
     User.query.filter_by(id=uid).delete()
     Membership.query.filter_by(user_id=uid).delete()
     UserStatuses.query.filter_by(user_id=uid).delete()
@@ -329,7 +335,7 @@ def blockchain():
 def change_to_eth():
     exchange_rate_record = EthExchangeRate.query.order_by(EthExchangeRate.date.desc()).first()
     eth_exchange_rate = exchange_rate_record.exchange_rate if exchange_rate_record else 248000
-    ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    ktd_balance = User.get_real_ktd_balance(current_user.id) / KT_BITS_IN_KT
     ktd_eth_price = User.get_ktd_price(current_user.id)
     limit = User.get_KTD_seller_limit(current_user.id) / KT_BITS_IN_KT
     ktd_price = ktd_eth_price * eth_exchange_rate
@@ -384,10 +390,36 @@ def change_address():
                            current_address=current_address)
 
 
+@app.route('/cashout', methods=['GET', 'POST'])
+@login_required
+def cashout():
+    form = OutputTokens()
+
+    user = User.query.filter_by(id=current_user.id).first()
+
+    current_address = user.get_eth_address(current_user_id=current_user.id)
+
+    if form.validate_on_submit():
+        amount = int(float(form.amount.data) * KT_BITS_IN_KT)
+        result, is_error = token_utils.output_token(
+            current_address,
+            amount,
+        )
+        if is_error:
+            print('Error occurred in txn:' + result)
+            return redirect(url_for('cashout'))
+        user.ktd_balance -= amount / KT_BITS_IN_KT
+        db.session.commit()
+
+        return redirect(url_for('cashout'))
+
+    return render_template('cashout.html', title='Вывести токены на кошелёк', form=form,
+                           current_address=current_address, ktd_balance=user.ktd_balance)
+
 @app.route('/transfer_ktd', methods=['GET', 'POST'])
 @login_required
 def transfer_ktd():
-    ktd_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
+    ktd_balance = User.get_real_ktd_balance(current_user.id) / KT_BITS_IN_KT
     user = User.query.filter_by(id=current_user.id).first()
     form = TransferKtdForm()
     if form.validate_on_submit():
@@ -429,7 +461,7 @@ def manage_ktd():
         address = form.address.data
         num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
         message, is_error = token_utils.set_KTD_seller(address, num, os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+            'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
         if is_error:
             flash(message, 'error')
         else:
@@ -454,7 +486,7 @@ def manage_kti():
         address = form.address.data
         num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
         message, is_error = token_utils.set_KTI_buyer(address, num, os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+            'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
         if is_error:
             flash(message, 'error')
         else:
@@ -522,7 +554,7 @@ def token_exchange_rate_by_default():
     n = current_month - start_month
     price = int(start_price * math.pow(1.05, n - 1))
     private_key = os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+        'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
     ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
     kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
     if (not is_ktd_error) and (not is_kti_error):
@@ -554,9 +586,9 @@ def token_exchange_rate_by_profit():
 
     if new_ktd_price > current_ktd_price:
         print(token_utils.set_KTD_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'))
+            'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'))
         token_utils.set_KTI_price(int(new_ktd_price * ETH_IN_WEI), os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+            'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     return redirect('/emission')
 
 
@@ -577,7 +609,7 @@ def change_token_exchange_rate():
         price = (float(form.price.data.replace(' ', '')) / eth_exchange_rate) * ETH_IN_WEI
 
         private_key = os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+            'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
         ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key)
         kti_message, is_kti_error = token_utils.set_KTI_price(int(price), private_key)
         if (not is_ktd_error) and (not is_kti_error):
@@ -693,7 +725,7 @@ def make_emission():
     contract_checksum_address = Web3.toChecksumAddress(contract_address)
 
     token_utils.mint_KTI(kti_emission, contract_checksum_address, os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.get(VotingTable.current_emission_voting_id()).status = 'Distribution'
     db.session.commit()
     return redirect(url_for('emission'))
@@ -818,8 +850,9 @@ def make_tokens_distribution():
     else:
         voting_id = VotingTable.query.filter_by(status='Finished').all()[-1].id
     criterions = [c.name for c in Criterion.query.all()]
-    users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id)) for user in User.query.all() if
-             User.check_can_be_marked(user.id)]
+    users = [(user.id, user.name + ' ' + user.surname, User.get_eth_address(user.id), user)
+             for user in User.query.all()
+             if User.check_can_be_marked(user.id)]
     marks_counter = 0
     for user in users:
         res = [user[1]]
@@ -832,15 +865,17 @@ def make_tokens_distribution():
                 marks_counter += 1
     ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
     for user in users:
-        res = [user[1]]
         user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
                                                                          Voting.id == VotingInfo.voting_id).filter(
             Voting.voting_id == voting_id, VotingInfo.cadet_id == user[0]).group_by(
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
-        mint_amount = int((ktd_in_mark * marks) * KT_BITS_IN_KT)
-        token_utils.mint_KTD(mint_amount, user[2], os.environ.get(
-            'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        mint_amount = int(ktd_in_mark * marks)
+        transaction_hash, is_error = token_utils.increase_token_balance(user[2], mint_amount * KT_BITS_IN_KT)
+        if is_error:
+            print('Error in txn: ' + transaction_hash)
+        print('addr', user[2])
+        user[3].ktd_balance += mint_amount
     VotingTable.query.filter_by(status='Distribution').first().status = 'Finished'
     db.session.commit()
     return redirect(url_for('emission'))
@@ -933,7 +968,12 @@ def confirm_pay():
     user_address = user.get_eth_address(current_user_id=current_user.id)
     if user_balance < price:
         return redirect(f'/service/{s_id}')
-    result, is_error = token_utils.make_payment(user_address, int(price * KT_BITS_IN_KT), user.private_key)
+    amount = int(price * KT_BITS_IN_KT)
+    result, is_error = token_utils.decrease_token_balance(
+        user_address,
+        amount,
+    )
+    user.ktd_balance -= amount / KT_BITS_IN_KT
     if is_error:
         print(result)
         return redirect(f'/service/{s_id}')
@@ -988,8 +1028,12 @@ def confirm_house_rent():
     if user_balance < house_rent_price:
         return redirect('/house_rent')
 
-    result, is_error = token_utils.rent_house(user_address, int(house_rent_price * KT_BITS_IN_KT), os.environ.get(
-        'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+    amount = int(house_rent_price * KT_BITS_IN_KT)
+    result, is_error = token_utils.decrease_token_balance(
+        user_address,
+        amount,
+    )
+    user.ktd_balance -= amount / KT_BITS_IN_KT
 
     if is_error:
         print(result)
@@ -1050,7 +1094,7 @@ def save_to_blockchain(budget_id):
         return redirect(url_for('home'))
 
     account = w3.eth.account.privateKeyToAccount(
-        os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
 
     budget_records = BudgetRecord.query.filter_by(budget_id=budget_id).all()
 
@@ -1118,13 +1162,12 @@ def write_voting_progress():
         team = Teams.query.filter_by(id=user_data[1].team_id).first()
         cur_date = datetime.datetime.now()
         date = int(str(cur_date.year) + str(cur_date.month) + str(cur_date.day))
-        token_utils.convert_marks_to_ktd_balance(user_data[0], points=user_data[2].mark)
-        # token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
-        #                                       date=date,
-        #                                       axis=user_data[3].name,
-        #                                       points=user_data[2].mark,
-        #                                       private_key=os.environ.get(
-        #                                           'ADMIN_PRIVATE_KEY') or '56bc1794425c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
+        token_utils.save_voting_to_blockchain(team=team.name, student=User.get_full_name(user_data[0].id),
+                                              date=date,
+                                              axis=user_data[3].name,
+                                              points=user_data[2].mark,
+                                              private_key=os.environ.get(
+                                                  'ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66')
     VotingTable.query.get(cur_id).status = 'Emission'
     db.session.commit()
     return redirect('/questionnaire_progress')
