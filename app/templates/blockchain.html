@@ -13,7 +13,7 @@
                 <div class="info_card_text_block">
                     <p class="info_card_text">
                         <b>Баланс токенов вклада:</b>
-                        <span class="info_card_text green"><br/>{{ ktd_balance }}</span>
+                        <span class="info_card_text green"><br/>{{ current_user.ktd_balance }}</span>
                     </p>
                 </div>
                 <div class="info_card_text_block">
@@ -203,7 +203,6 @@
                     Доступ к токенам инвестиций
                 </p>
             </a>
-            {% if current_user.is_accountant %}
             <a
                     href="/emission"
                     class="small_card small_card_special2"
@@ -216,7 +215,6 @@
                     Эмиссия токенов
                 </p>
             </a>
-            {% endif %}
         </div>
         {% else %}
         <div class="small_card_rows">
