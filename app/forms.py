@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
                     DateField, SelectField, TextAreaField, IntegerField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, EqualTo, ValidationError, NumberRange
 from app.models import User, Teams
 from config import Config
 
@@ -155,41 +155,102 @@ class AddBudgetItemForm(FlaskForm):
     cost = StringField(validators=[DataRequired()])
     voting = StringField()
 
+
 class ManageKTIForm(FlaskForm):
     address = StringField(validators=[DataRequired()])
     num = StringField(validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
 
 class ManageKTDForm(FlaskForm):
     address = StringField(validators=[DataRequired()])
     num = StringField(validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
 
+
 class ChangeToEthForm(FlaskForm):
     amount = StringField(validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
 
 class ChangeEthExchangeRate(FlaskForm):
     price = StringField('Напишите актуальную стоимость 1 eth', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
 
+
 class FixProfit(FlaskForm):
     profit = StringField('Введите объём полученных средств в рублях', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
+
 
 class RedTeamForm(FlaskForm):
     title = StringField()
     status = StringField()
 
+
 class AddServiceForm(FlaskForm):
     name = StringField()
     price = StringField()
     unit = StringField()
-    address = StringField()
+    days_to_expire = IntegerField(
+        'Укажите в течение скольких дней услуга активна после оплаты',
+        validators=[DataRequired(), NumberRange(1)],
+        render_kw={"style": "width:30%;", "min": 1, "type": "number"},
+    )
     description = TextAreaField()
+    submit = StringField()
+
+
+class SetupServicePaymentForm(AddServiceForm):
+    name = StringField('Введите название услуги.', render_kw={"class": "width-full"})
+    provider_description = TextAreaField(
+        'Введите описание услуги, которое будет видеть человек, оказывающий услугу. Укажите, на что обращать внимание.',
+        validators=[DataRequired()],
+        render_kw={
+            "class": "width-full",
+            "style": "max-width: 100%; min-height: 7rem;",
+            "placeholder": "Эта страница подтверждает, что указанный человек имеет право на скидку в кафе «Тюльпан».\nСделайте скидку в размере указанной суммы при условии, что она не превышает 10%.\nЕсли указанная на странице сумма превышает 10%, вы вправе отказать в скидке."
+        },
+    )
+    payment_date_label = StringField(
+        'Как обозначить дату оплаты?',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "Дата оплаты"}
+    )
+    receiver_label = StringField(
+        'Как обозначить получателя услуги?',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "Получатель"}
+    )
+    end_date_label = StringField(
+        'Как обозначить дату окончания действия услуги?',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "Действительно до"},
+    )
+    paid_volume_label = StringField(
+        'Как обозначить оплаченный объём услуги?',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "Оплачено"},
+    )
+    contact_label = StringField(
+        'Как обозначить контакт для связи?',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "В спорных случаях, свяжитесь с"},
+    )
+    confirm_button_label = StringField(
+        'Введите текст для кнопки подтверждения',
+        validators=[DataRequired()],
+        render_kw={"class": "width-full", "placeholder": "Услуга оказана"},
+    )
+
+
+class ServiceDone(FlaskForm):
+    pass
+
 
 class PrePayServiceForm(FlaskForm):
     amount = StringField()
+
 
 class ConfirmForm(FlaskForm):
     stub = StringField()

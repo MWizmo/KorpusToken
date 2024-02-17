@@ -658,15 +658,18 @@ class BudgetRecord(db.Model):
     who_added = db.Column(db.String(128))
     budget_id = db.Column(db.Integer)
 
+
 class Profit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     summa = db.Column(db.Float)
 
+
 class EthExchangeRate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime)
     exchange_rate = db.Column(db.Float)
+
 
 class TokenExchangeRate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -674,13 +677,22 @@ class TokenExchangeRate(db.Model):
     exchange_rate_in_wei = db.Column(db.String(256))
     is_default_calculation_method = db.Column(db.Boolean)
 
+
 class KorpusServices(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     price = db.Column(db.Float)
     unit = db.Column(db.String(32))
     description = db.Column(db.Text)
-    address = db.Column(db.String(128))
+    creator_id = db.Column(db.Integer)
+    days_to_expire = db.Column(db.Integer)
+    provider_description = db.Column(db.Text)
+    payment_date_label = db.Column(db.String(256))
+    receiver_label = db.Column(db.String(256))
+    end_date_label = db.Column(db.String(256))
+    paid_volume_label = db.Column(db.String(256))
+    contact_label = db.Column(db.String(256))
+    confirm_button_label = db.Column(db.Text)
 
 
 class ServicePayments(db.Model):
@@ -691,7 +703,10 @@ class ServicePayments(db.Model):
     code = db.Column(db.String(256))
     transaction_hash = db.Column(db.String(256))
     active = db.Column(db.Boolean)
+    is_done = db.Column(db.Boolean)
     date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+
 
 class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -700,11 +715,13 @@ class Skill(db.Model):
     user = db.relationship("User", cascade='all,delete')
     keywords = db.relationship("SkillKeyword", cascade="all,delete")
 
+
 class SkillKeyword(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(32))
     skill_id = db.Column(db.Integer, db.ForeignKey('skill.id', ondelete='cascade'))
     skill = db.relationship("Skill", cascade='all,delete')
+
 
 class WorkExperience(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -716,7 +733,8 @@ class WorkExperience(db.Model):
     responsibilities = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'))
     user = db.relationship("User", cascade='all,delete')
-    
+
+
 class Language(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
+      <meta charset="UTF-8" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='images/favicon.jpg') }}"
+      type="image/jpg"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/menu_style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='fonts/decima/stylesheet.css') }}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <title>{{ title }}</title>
+  </head>
+  <body style="display: flex; flex-grow: 1; flex-direction: column">
+    <nav class="home-nav" style="position: static; z-index: 0;">
+      <div class="header-container">
+        <a href="/" class="logo_href width-full">
+          <div class="home_header_logo_block">
+            <img
+              class="logo_img centered block"
+              src="{{ url_for('static', filename='images/logo_white.png') }}"
+            />
+          </div>
+        </a>
+      </div>
+    </nav>
+    <div class="width-full qr_page_layout" style="flex-grow: 1; background: #F5F5F5;">
+        <div style="height: 100%; display: flex;flex-direction: column" class="qr_page_container">
+            <div class="service_page_content" style="width: auto; margin-bottom: 1rem; margin-top: 3.5rem; flex: 1; display: flex; justify-content: center; align-items: center">
+                <span style="font-size: 5em">Invalid code</span>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
