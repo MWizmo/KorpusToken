@@ -692,7 +692,7 @@ class KorpusServices(db.Model):
     end_date_label = db.Column(db.String(256))
     paid_volume_label = db.Column(db.String(256))
     contact_label = db.Column(db.String(256))
-    confirm_button_label = db.Column(db.Text)
+    confirm_button_label = db.Column(db.String(256))
 
 
 class ServicePayments(db.Model):
