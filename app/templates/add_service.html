@@ -23,17 +23,18 @@
                 <input style="width:30%;" name="price" required>
             </p>
             <p>
-                Укажите адрес etherium кошелька для приёма платежей. Если услугу оказывает сообщество Корпус, то оставьте поле пустым, адрес кошелька сообщества будет автоматически подставлен.
-                <br><input style="width:100%;" name="address">
+                <span>{{ form.days_to_expire.label }}</span><br>
+                {{ form.days_to_expire() }}
             </p>
             <p>
-                Дайте подробное описание услуги или укажите ссылки, по которым можно подробно ознакомиться с услугой. Укажите также способ предоставления вам кода, подтверждающего оплату.<br>
+                Дайте подробное описание услуги или укажите ссылки, по которым можно подробно ознакомиться с услугой.<br>
                 <textarea name="description" style="width:100%; min-height:10vh;"></textarea>
             </p>
         </div>
         <div class="service_page_buttons_container">
-            <button class="service_page_button" onclick="document.location.href='/services';" type="button">Отменить</button>
-            <button class="service_page_button" type="submit">Подтвердить</button>
+            <button class="service_page_button" onclick="document.location.href='/services';" type="button">Отмена</button>
+            <button class="service_page_button" type="submit" name="submit" value="next">Далее</button>
+            <button class="service_page_button" type="submit" name="submit" value="preview">Превью страницы</button>
         </div>
     </div>
 </form>

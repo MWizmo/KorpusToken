@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block content %}
+<form class="service_page_container" method="post">
+    <div class="service_page_content">
+        <div class="service_page_title" style="margin-bottom: 5rem">
+            После оплаты услуги, пользователь получит QR-код.
+            При сканировании QR-кода будет открываться страница, подтверждающая оплату. Поля ниже нужны для настройки этой страницы.
+            Вы можете оставить их заполненными по умолчанию или ввести свои значения. Это особенно актуально, если оказывать услугу будете не вы, тем более если это будет иностранец.
+        </div>
+        <div class="service_page_text">
+            {{ form.hidden_tag() }}
+            <p>
+                <span>{{ form.name.label }}</span>
+                {{ form.name() }}
+            </p>
+            <p>
+                <span>{{ form.provider_description.label }}</span>
+                {{ form.provider_description() }}
+            </p>
+            <p>
+                <span>{{ form.payment_date_label.label }}</span>
+                {{ form.payment_date_label() }}
+            </p>
+            <p>
+                <span>{{ form.receiver_label.label }}</span>
+                {{ form.receiver_label() }}
+            </p>
+            <p>
+                <span>{{ form.end_date_label.label }}</span>
+                {{ form.end_date_label() }}
+            </p>
+            <p>
+                <span>{{ form.paid_volume_label.label }}</span>
+                {{ form.paid_volume_label() }}
+            </p>
+            <p>
+                <span>{{ form.contact_label.label }}</span>
+                {{ form.contact_label() }}
+            </p>
+            <p>
+                <span>{{ form.confirm_button_label.label }}</span>
+                {{ form.confirm_button_label() }}
+            </p>
+            <p style="display: none">
+                {{ form.price() }}
+            </p>
+            <p style="display: none">
+                {{ form.unit() }}
+            </p>
+            <p style="display: none">
+                {{ form.description() }}
+            </p>
+            <p style="display: none">
+                {{ form.days_to_expire() }}
+            </p>
+        </div>
+        <div class="service_page_buttons_container" style="justify-content: end; width: 100%; gap: 3rem; margin-top: 2rem">
+            <button class="service_page_button" type="button" onclick="window.history.back();">Назад</button>
+            <button class="service_page_button" type="submit">Превью страницы</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block content %}
+<form method="post">
+    <div style="padding: 0 5rem;">
+        {{ form.hidden_tag() }}
+        <p style="display: none">
+            {{ form.name() }}
+        </p>
+        <p style="display: none">
+            {{ form.provider_description() }}
+        </p>
+        <p style="display: none">
+            {{ form.payment_date_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.receiver_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.end_date_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.paid_volume_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.contact_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.confirm_button_label() }}
+        </p>
+        <p style="display: none">
+            {{ form.price() }}
+        </p>
+        <p style="display: none">
+            {{ form.unit() }}
+        </p>
+        <p style="display: none">
+            {{ form.description() }}
+        </p>
+        <p style="display: none">
+            {{ form.days_to_expire() }}
+        </p>
+        <div style="width: 75vw; height: 70vh; border: 0.5rem solid black; display: flex; flex-direction: column; margin: 1.5rem auto">
+            {% include "service_payment_qr.html" %}
+        </div>
+        <div class="service_page_buttons_container" style="justify-content: end; width: 100%; gap: 3rem; margin-top: 2rem;">
+            <button class="service_page_button" type="button" onclick="window.history.back();">Назад</button>
+            <button class="service_page_button" type="submit" name="submit" value="save">Сохранить</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

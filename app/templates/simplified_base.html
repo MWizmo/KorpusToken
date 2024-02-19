@@ -1,0 +1,39 @@
+{% if not is_preview %}
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+          <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
+          <meta charset="UTF-8" />
+        <link
+          rel="shortcut icon"
+          href="{{ url_for('static', filename='images/favicon.jpg') }}"
+          type="image/jpg"
+        />
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="{{ url_for('static', filename='css/style.css') }}"
+        />
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="{{ url_for('static', filename='css/menu_style.css') }}"
+        />
+        <link
+          href="https://fonts.googleapis.com/css?family=Monofett|Monoton|Montserrat|Share+Tech+Mono&display=swap&subset=cyrillic-ext"
+          rel="stylesheet"
+        />
+        <link
+          href="{{ url_for('static', filename='fonts/decima/stylesheet.css') }}"
+          rel="stylesheet"
+          type="text/css"
+        />
+        <title>{{ title }}</title>
+      </head>
+      <body style="display: flex; flex-grow: 1; flex-direction: column">
+        {% endif %}
+        {% block content %} {% endblock %}
+        {% if not is_preview %}
+      </body>
+    </html>
+{% endif %}

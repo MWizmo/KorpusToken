@@ -7,20 +7,27 @@
 
 {% block content %}
 <div class="nav_href" style="margin-top:2vh; margin-left:10%;">
-        <a href="/">главная</a> - <a href="/community">сообщество</a> - <a href="/services">услуги</a> - <a class="cur_href" href="">информация об услуге</a>
+        {% if not is_preview %}
+            <a href="/">главная</a> - <a href="/community">сообщество</a> - <a href="/services">услуги</a> - <a class="cur_href" href="">информация об услуге</a>
+        {% else %}
+            <span>Превью услуги</span>
+        {% endif %}
     </div>
 <form class="service_page_container" method="post">
     {{ form.hidden_tag() }}
-    <div class="service_page_content" ng-app="app" ng-controller="ctrl" ng-init="init({{service.price}});" ng-cloak>
+    <div class="service_page_content" ng-app="app" ng-controller="ctrl" ng-init="init({{service['price']}});" ng-cloak>
         <div class="service_page_title">
-            Услуга: &ldquo;{{service.name}}&rdquo;
+            Услуга: &ldquo;{{service['name']}}&rdquo;
         </div>
         <div class="service_page_text">
             <p>
-                <b>Стоимость</b>: {{service.price}} Токенов Вклада за 1 {{service.unit}}
+                <b>Стоимость</b>: {{service['price']}} Токенов Вклада за 1 {{service['unit']}}
             </p>
             <p>
-                <b>Описание</b>: {{service.description}}
+                <b>Описание</b>: {{service['description']}}
+            </p>
+            <p>
+                <b>Срок действия услуги</b>: {{service['days_to_expire']}} {{ days_to_expire_label }} после оплаты
             </p>
             <p>
                 Какое количество хотите оплатить?<br>
@@ -31,8 +38,13 @@
             {% endraw %}
         </div>
         <div class="service_page_buttons_container">
-            <button class="service_page_button" type="submit" id="button" disabled>Подтвердить</button>
+            <button class="service_page_button" type="{{ 'button' if is_preview else 'submit' }}" id="button" disabled>Подтвердить</button>
         </div>
+        {% if is_preview %}
+            <div class="service_page_buttons_container" style="margin-top: 2rem">
+                <button class="service_page_button" type="button" onclick="window.history.back();">Назад</button>
+            </div>
+        {% endif %}
     </div>
 </form>
 {% endblock %}
