@@ -31,11 +31,17 @@
                     <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
                     <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
                 </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"></td>
-                    <td class="account_table_td" style="text-align:right;"><label style="font-size:2.5vh">Запомнить меня<input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember"></label></td>
-                </tr>
+
             </table>
+            <div style="display:flex;flex-direction:row;justify-content:space-between;padding-left:20%;">
+                    <div class="account_table_td">
+                        <a style="font-size:2.5vh;width:50%;color:black;text-decoration:none;" href="/forgot_password">Забыли&nbsp;пароль?</a>
+                    </div>
+                    <div class="account_table_td" style="text-align:right;display:flex;flex-direction:row;width: 50%;">
+                        <label style="font-size:2.5vh">Запомнить&nbsp;меня</label>
+                    <input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember">
+                    </div>
+            </div>
             {% if err %}
             <p style="font-size:2.5vh; color: red; text-align:center; width: 100%;">Неправильное имя пользователя или пароль</p>
             {% endif %}
