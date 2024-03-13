@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-import datetime, os, requests
-from sqlalchemy import func, or_
+import datetime, os, csv, requests
+from app.routes.questionnaire_routes import get_questionnaire_progress
+from sqlalchemy import func, or_, and_
 from sqlalchemy.sql import text
 from app import app, db, w3, ktd_address, contract_address, chain_id, ETH_IN_WEI, KT_BITS_IN_KT
 from web3.auto import Web3
 from app.scripts.service import get_access, log
-from app.models import (SkillKeyword, QuestionnaireInfo, Questionnaire, Membership, UserStatuses, Statuses, Axis,
-                        Criterion, Voting, VotingInfo, TeamRoles, Log, VotingTable, BudgetRecord, Transaction,
-                        EthExchangeRate, TokenExchangeRate, Profit, KorpusServices, ServicePayments, Budget, Skill,
-                        WorkExperience, Language)
-from flask import render_template, redirect, url_for, request, jsonify, flash
+from app.utils import get_numeral_label
+from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
+    UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
+    VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
+    Profit, KorpusServices, ServicePayments, Budget, Skill, WorkExperience, Language
+from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
 from flask_login import current_user, login_user, logout_user, login_required
@@ -19,9 +21,7 @@ import json
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import html
-import telebot
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
-from itsdangerous import URLSafeTimedSerializer
+from secrets import token_urlsafe
 
 
 @app.route('/')
@@ -72,56 +72,6 @@ def login():
             next_page = url_for('home')
         log('Вход в систему')
         return redirect(next_page)
-
-
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'GET':
-        return render_template('forgot_password.html', title='Восстановление пароля')
-    else:
-        tg_login = request.values.get('login')
-        if 't.me' in tg_login:
-            tg_login = tg_login.split('/')[-1]
-        elif tg_login.startswith('@'):
-            tg_login = tg_login[1:]
-        user = User.query.filter_by(tg_nickname=tg_login).first()
-        print(tg_login, user)
-        if user:
-            bot_token = '573817226:AAGQM1FP1qznVJ137fKX_wy94ntb6q5bQVg'
-            bot = telebot.TeleBot(bot_token)
-            keyboard = InlineKeyboardMarkup()
-            serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-            token = serializer.dumps(user.tg_nickname, salt=app.config["SECRET_KEY"])
-            keyboard.add(InlineKeyboardButton(text='Сброс', url=f'https://lk.korpus.io/reset_password/{token}'))
-            bot.send_message(user.chat_id, 'Для сброса пароля нажмите на кнопку ниже (действительно в течение часа)', reply_markup=keyboard)
-            return render_template('forgot_password2.html', title='Восстановление пароля')
-        else:
-            return render_template('forgot_password.html', title='Восстановление пароля', error=True)
-
-
-@app.route('/reset_password/<token>')
-def reset_password(token):
-    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-    try:
-        tg_nickname = serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=60 * 60)
-    except Exception:
-        return render_template('forgot_password2.html', err=True, title='Восстановление пароля')
-    user = User.query.filter_by(tg_nickname=tg_nickname).first()
-    return render_template('new_password.html', user_id=user.id, title='Восстановление пароля')
-
-
-@app.route('/reset_password', methods=['POST'])
-def reset_password2():
-    pass1 = request.values.get('password1')
-    pass2 = request.values.get('password2')
-    user_id = request.values.get('user_id')
-    if pass1 != pass2:
-        return render_template('new_password.html', user_id=user_id, title='Восстановление пароля', err=True)
-    else:
-        user = User.query.get(int(user_id))
-        user.set_password(pass2)
-        db.session.commit()
-        return render_template('password_changed.html', title='Восстановление пароля')
 
 
 @app.route('/restore_password', methods=['GET', 'POST'])
@@ -970,7 +920,16 @@ def service_info(service_id):
                                    price=float(form2.stub.data), service=service)
         return render_template('service_pay.html', title=service.name, service=service,
                                price=int(form.amount.data) * service.price, user_balance=user_balance, form=form2)
-    return render_template('service_info.html', title=service.name, service=service, form=form)
+    return render_template(
+        'service_info.html',
+        title=service.name,
+        service=vars(service),
+        days_to_expire_label=get_numeral_label(
+            service.days_to_expire,
+            {'nominative': 'день', 'genitive_singular': 'дня', 'genitive_plural': 'дней'},
+        ),
+        form=form
+    )
 
 
 @app.route('/add_service', methods=['GET', 'POST'])
@@ -978,13 +937,147 @@ def service_info(service_id):
 def add_service():
     form = AddServiceForm()
     if form.validate_on_submit():
-        service = KorpusServices(name=form.name.data, price=form.price.data.replace(' ',''),
-                                 unit=form.unit.data.lower(),address=form.address.data,
-                                 description=form.description.data)
-        db.session.add(service)
-        db.session.commit()
+        name = form.name.data
+        price = form.price.data.replace(' ', '')
+        unit = form.unit.data.lower()
+        description = form.description.data
+        days_to_expire = form.days_to_expire.data
+        service = {
+            'price': price,
+            'name': name,
+            'unit': unit,
+            'description': description,
+            'days_to_expire': days_to_expire
+        }
+
+        if form.submit.data == "preview":
+            return render_template(
+                'service_info.html',
+                title='Превью услуги',
+                service=service,
+                days_to_expire_label=get_numeral_label(
+                    days_to_expire,
+                    {'nominative': 'день', 'genitive_singular': 'дня', 'genitive_plural': 'дней'},
+                ),
+                form=PrePayServiceForm(),
+                is_preview=True,
+            )
+        if form.submit.data == "next":
+            return redirect('setup_service_payment', code=307)
         return redirect('/services')
     return render_template('add_service.html', title='Добавить услугу', form=form)
+
+
+@app.route('/setup_service_payment', methods=['GET', 'POST'])
+@login_required
+def setup_service_payment():
+    form = SetupServicePaymentForm()
+
+    if form.validate_on_submit():
+        if form.submit.data == "save":
+            service = KorpusServices(
+                name=form.name.data,
+                price=form.price.data,
+                unit=form.unit.data,
+                description=form.description.data,
+                days_to_expire=form.days_to_expire.data,
+                provider_description=form.provider_description.data,
+                payment_date_label=form.payment_date_label.data,
+                receiver_label=form.receiver_label.data,
+                end_date_label=form.end_date_label.data,
+                paid_volume_label=form.paid_volume_label.data,
+                contact_label=form.contact_label.data,
+                confirm_button_label=form.confirm_button_label.data,
+                creator_id=current_user.id,
+            )
+            db.session.add(service)
+            db.session.commit()
+
+            return redirect('services')
+
+        return redirect('preview_service_payment', code=307)
+
+    if form.is_submitted():
+        return render_template('setup_service_payment.html', title='Редактирование страницы', form=form)
+
+    return redirect('add_service')
+
+
+@app.route('/preview_service_payment', methods=['GET', 'POST'])
+@login_required
+def preview_service_payment():
+    form = SetupServicePaymentForm()
+
+    if form.validate_on_submit():
+        if form.submit.data == "save":
+            return redirect('setup_service_payment', code=307)
+
+        return render_template(
+            'preview_service_payment.html',
+            title='Превью страницы',
+            name=form.name.data,
+            description=form.description.data,
+            payment_date_label=form.payment_date_label.data,
+            payment_date="<дата оплаты>",
+            receiver_label=form.receiver_label.data,
+            receiver_name="<имя покупателя>",
+            end_date_label=form.end_date_label.data,
+            end_date="<дата окончания>",
+            paid_volume_label=form.paid_volume_label.data,
+            confirm_button_label=form.confirm_button_label.data,
+            amount="<оплаченный объём услуги>",
+            unit=form.unit.data,
+            contact_label=form.contact_label.data,
+            creator_tg_nickname=f"@{current_user.tg_nickname}",
+            is_preview=True,
+            form=form,
+        )
+
+    return redirect('setup_service_payment')
+
+
+@app.route('/service_payment_qr/<code>', methods=['GET', 'POST'])
+def service_payment_qr(code):
+    form = ServiceDone()
+
+    payment = ServicePayments.query.filter_by(code=code).first()
+    if not payment:
+        return render_template('service_payment_invalid.html', title='Недействительный код')
+    if payment.is_done:
+        return render_template('service_payment_done.html', title='Услуга оказана')
+
+    service = KorpusServices.query.filter_by(id=payment.service_id).first()
+    if not payment.active or payment.end_date < datetime.date.today() or not service:
+        return render_template('service_payment_invalid.html', title='Недействительный код')
+
+    user = User.query.filter_by(id=payment.user_id).first()
+    service_creator = User.query.filter_by(id=service.creator_id).first()
+
+    if form.is_submitted():
+        payment.is_done = True
+        payment.active = False
+        db.session.commit()
+
+        return redirect(f'/service_payment_qr/{payment.code}')
+
+    return render_template(
+        'service_payment_qr.html',
+        title='QR',
+        name=service.name,
+        description=service.description,
+        payment_date_label=service.payment_date_label,
+        payment_date=payment.date,
+        receiver_label=service.receiver_label,
+        receiver_name=user.name if user else '-',
+        end_date_label=service.end_date_label,
+        end_date=payment.end_date,
+        paid_volume_label=service.paid_volume_label,
+        amount=payment.paid_amount,
+        unit=service.unit,
+        contact_label=service.contact_label,
+        creator_tg_nickname=f"@{service_creator.tg_nickname}" if service_creator else '-',
+        confirm_button_label=service.confirm_button_label
+    )
 
 
 @app.route('/house_rent', methods=['GET'])
@@ -1031,10 +1124,16 @@ def confirm_pay():
         print(result)
         return redirect(f'/service/{s_id}')
     # На выходе - промокод
-    payments = ServicePayments.query.all()
-    code = result #f'{len(payments) + 1}'
+    code = token_urlsafe(24)
+    while True:
+        existing_payment = ServicePayments.query.filter_by(code=code).first()
+        if not existing_payment:
+            break
+        code = token_urlsafe(24)
+    date = datetime.datetime.now()
+    end_date = date + datetime.timedelta(days=service.days_to_expire)
     payment = ServicePayments(service_id=s_id, user_id=current_user.id, paid_amount=price / service.price, active=True,
-                              code=code, date=datetime.datetime.now(), transaction_hash='')
+                              code=code, date=date, end_date=end_date, transaction_hash=result)
     db.session.add(payment)
     db.session.commit()
     requests.post('https://bot.eos.korpus.io/promocode', data={'user_id': current_user.id, 'code': code})
@@ -1065,7 +1164,7 @@ def check_code():
         payment.active = False
         db.session.commit()
         return render_template('check_code.html', title='Проверить код', form=form, message='Промокод активирован')
-    return render_template('check_code.html', title='Проверить код', form=form)
+    return render_template('check_code.html', title='Проверить код', is_done=False, form=form)
 
 
 @app.route('/confirm_house_rent', methods=['GET'])

@@ -1,7 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=PT+Mono&display=swap');
 
+html {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   margin: 0;
+  height: 100%;
   font-family: 'Share Tech Mono', monospace;
 
   font-size: 15px;
@@ -696,6 +702,14 @@ img {
   height: 100%;
 }
 
+.centered {
+  margin: 0 auto;
+}
+
+.block {
+  display: block;
+}
+
 .profile_nav_div {
   display: flex;
   flex-direction: row;
@@ -1033,7 +1047,7 @@ img {
 
 .service_page_buttons_container {
   display: flex;
-  width: 30rem;
+  width: 100%;
   justify-content: space-between;
 }
 
@@ -2260,4 +2274,27 @@ select {
 .disabled {
   opacity: 0.8;
   cursor: default;
+}
+
+.width-full {
+  width: 100%;
+}
+
+.qr_page_layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.qr_page_container {
+  background: white;
+  width: 50rem;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 25%);
+  padding: 0 1.5rem 2rem 1.5rem;
+}
+
+.qr_page_name {
+  text-align: center;
+  font-size: 2.3em;
 }
