@@ -22,6 +22,9 @@ from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import html
 from secrets import token_urlsafe
+import telebot
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from itsdangerous import URLSafeTimedSerializer
 
 
 @app.route('/')
@@ -72,6 +75,57 @@ def login():
             next_page = url_for('home')
         log('Вход в систему')
         return redirect(next_page)
+
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'GET':
+        return render_template('forgot_password.html', title='Восстановление пароля')
+    else:
+        tg_login = request.values.get('login')
+        if 't.me' in tg_login:
+            tg_login = tg_login.split('/')[-1]
+        elif tg_login.startswith('@'):
+            tg_login = tg_login[1:]
+        user = User.query.filter_by(tg_nickname=tg_login).first()
+        print(tg_login, user)
+        if user:
+            bot_token = '573817226:AAGQM1FP1qznVJ137fKX_wy94ntb6q5bQVg'
+            bot = telebot.TeleBot(bot_token)
+            keyboard = InlineKeyboardMarkup()
+            serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+            token = serializer.dumps(user.tg_nickname, salt=app.config["SECRET_KEY"])
+            keyboard.add(InlineKeyboardButton(text='Сброс', url=f'https://lk.korpus.io/reset_password/{token}'))
+            bot.send_message(user.chat_id, 'Для сброса пароля нажмите на кнопку ниже (действительно в течение часа)', reply_markup=keyboard)
+            return render_template('forgot_password2.html', title='Восстановление пароля')
+        else:
+            return render_template('forgot_password.html', title='Восстановление пароля', error=True)
+
+
+@app.route('/reset_password/<token>')
+def reset_password(token):
+    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+    try:
+        tg_nickname = serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=60 * 60)
+    except Exception:
+        return render_template('forgot_password2.html', err=True, title='Восстановление пароля')
+    user = User.query.filter_by(tg_nickname=tg_nickname).first()
+    return render_template('new_password.html', user_id=user.id, title='Восстановление пароля')
+
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password2():
+    pass1 = request.values.get('password1')
+    pass2 = request.values.get('password2')
+    user_id = request.values.get('user_id')
+    if pass1 != pass2:
+        return render_template('new_password.html', user_id=user_id, title='Восстановление пароля', err=True)
+    else:
+        user = User.query.get(int(user_id))
+        user.set_password(pass2)
+        db.session.commit()
+        return render_template('password_changed.html', title='Восстановление пароля')
 
 
 @app.route('/restore_password', methods=['GET', 'POST'])
