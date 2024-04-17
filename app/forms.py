@@ -197,50 +197,87 @@ class AddServiceForm(FlaskForm):
         validators=[DataRequired(), NumberRange(1)],
         render_kw={"style": "width:30%;", "min": 1, "type": "number"},
     )
+    service_provider = StringField(
+        'Укажите лицо, которое будет оказывать услугу. Т.е. это тот человек, к кому придут покупатели (Имя Фамилия, @тгник)',
+        validators=[DataRequired()],
+        render_kw={"style": "width:30%;"},
+    )
     description = TextAreaField()
     submit = StringField()
 
 
 class SetupServicePaymentForm(AddServiceForm):
     name = StringField('Введите название услуги.', render_kw={"class": "width-full"})
+    provider_description_placeholder = "Эта страница подтверждает, что указанный человек имеет право на скидку в кафе «Тюльпан».\nСделайте скидку в размере указанной суммы при условии, что она не превышает 10%.\nЕсли указанная на странице сумма превышает 10%, вы вправе отказать в скидке."
     provider_description = TextAreaField(
         'Введите описание услуги, которое будет видеть человек, оказывающий услугу. Укажите, на что обращать внимание.',
         validators=[DataRequired()],
         render_kw={
             "class": "width-full",
             "style": "max-width: 100%; min-height: 7rem;",
-            "placeholder": "Эта страница подтверждает, что указанный человек имеет право на скидку в кафе «Тюльпан».\nСделайте скидку в размере указанной суммы при условии, что она не превышает 10%.\nЕсли указанная на странице сумма превышает 10%, вы вправе отказать в скидке."
+            "placeholder": provider_description_placeholder
         },
+        default=provider_description_placeholder
     )
+    payment_date_label_placeholder = "Дата оплаты"
     payment_date_label = StringField(
         'Как обозначить дату оплаты?',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "Дата оплаты"}
+        render_kw={
+            "class": "width-full",
+            "placeholder": payment_date_label_placeholder,
+            "value": payment_date_label_placeholder
+        }
     )
+    receiver_label_placeholder="Получатель"
     receiver_label = StringField(
         'Как обозначить получателя услуги?',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "Получатель"}
+        render_kw={
+            "class": "width-full",
+            "placeholder": receiver_label_placeholder,
+            "value": receiver_label_placeholder
+        }
     )
+    end_date_label_placeholder="Действительно до"
     end_date_label = StringField(
         'Как обозначить дату окончания действия услуги?',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "Действительно до"},
+        render_kw={
+            "class": "width-full",
+            "placeholder": end_date_label_placeholder,
+            "value": end_date_label_placeholder
+        },
     )
+    paid_volume_label_placeholder = "Оплачено"
     paid_volume_label = StringField(
         'Как обозначить оплаченный объём услуги?',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "Оплачено"},
+        render_kw={
+            "class": "width-full",
+            "placeholder": paid_volume_label_placeholder,
+            "value": paid_volume_label_placeholder
+        },
     )
+    contact_label_placeholder="В спорных случаях, свяжитесь с"
     contact_label = StringField(
         'Как обозначить контакт для связи?',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "В спорных случаях, свяжитесь с"},
+        render_kw={
+            "class": "width-full",
+            "placeholder": contact_label_placeholder,
+            "value": contact_label_placeholder
+        },
     )
+    confirm_button_label_placeholder = "Услуга оказана"
     confirm_button_label = StringField(
         'Введите текст для кнопки подтверждения',
         validators=[DataRequired()],
-        render_kw={"class": "width-full", "placeholder": "Услуга оказана"},
+        render_kw={
+            "class": "width-full",
+            "placeholder": confirm_button_label_placeholder,
+            "value": confirm_button_label_placeholder
+        },
     )
 
 
@@ -250,6 +287,7 @@ class ServiceDone(FlaskForm):
 
 class PrePayServiceForm(FlaskForm):
     amount = StringField()
+    submit = StringField()
 
 
 class ConfirmForm(FlaskForm):

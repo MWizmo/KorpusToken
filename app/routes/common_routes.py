@@ -965,6 +965,12 @@ def change_service(service_id):
 def service_info(service_id):
     service = KorpusServices.query.get(service_id)
     form = PrePayServiceForm()
+
+    if form.submit() and form.submit.data == "delete" and service.creator_id == current_user.id:
+        KorpusServices.query.filter_by(id=service_id).delete()
+        db.session.commit()
+        return redirect('/services')
+
     if form.validate_on_submit():
         user_balance = User.get_ktd_balance(current_user.id) / KT_BITS_IN_KT
         form2 = ConfirmForm()
@@ -996,12 +1002,14 @@ def add_service():
         unit = form.unit.data.lower()
         description = form.description.data
         days_to_expire = form.days_to_expire.data
+        service_provider = form.service_provider.data
         service = {
             'price': price,
             'name': name,
             'unit': unit,
             'description': description,
-            'days_to_expire': days_to_expire
+            'days_to_expire': days_to_expire,
+            'service_provider': service_provider
         }
 
         if form.submit.data == "preview":
@@ -1014,11 +1022,13 @@ def add_service():
                     {'nominative': 'день', 'genitive_singular': 'дня', 'genitive_plural': 'дней'},
                 ),
                 form=PrePayServiceForm(),
-                is_preview=True,
+                is_preview=True
             )
         if form.submit.data == "next":
             return redirect('setup_service_payment', code=307)
         return redirect('/services')
+    form.service_provider.data = f"{current_user.name} {current_user.surname}, @{current_user.tg_nickname}"
+
     return render_template('add_service.html', title='Добавить услугу', form=form)
 
 
@@ -1042,6 +1052,7 @@ def setup_service_payment():
                 paid_volume_label=form.paid_volume_label.data,
                 contact_label=form.contact_label.data,
                 confirm_button_label=form.confirm_button_label.data,
+                service_provider=form.service_provider.data,
                 creator_id=current_user.id,
             )
             db.session.add(service)
@@ -1079,6 +1090,7 @@ def preview_service_payment():
             end_date="<дата окончания>",
             paid_volume_label=form.paid_volume_label.data,
             confirm_button_label=form.confirm_button_label.data,
+            service_provider=form.service_provider.data,
             amount="<оплаченный объём услуги>",
             unit=form.unit.data,
             contact_label=form.contact_label.data,
