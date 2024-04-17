@@ -27,6 +27,10 @@
                 {{ form.days_to_expire() }}
             </p>
             <p>
+                <span>{{ form.service_provider.label }}</span><br>
+                {{ form.service_provider() }}
+            </p>
+            <p>
                 Дайте подробное описание услуги или укажите ссылки, по которым можно подробно ознакомиться с услугой.<br>
                 <textarea name="description" style="width:100%; min-height:10vh;"></textarea>
             </p>

@@ -788,8 +788,8 @@
   const addSkillModal = document.querySelector('#add-skill-modal');
 
   const toggleSkillModal = () => {
-    addSkillModalLayout.classList.toggle('resume-disabled-modal-layout');
-    addSkillModal.classList.toggle('resume-disabled-modal');
+    addSkillModalLayout.classList.toggle('standard-disabled-modal-layout');
+    addSkillModal.classList.toggle('standard-disabled-modal');
   };
 
   addSkillModalLayout.addEventListener('click', (event) => {
@@ -906,7 +906,7 @@
     });
 
     const addSkillButton = document.createElement('button');
-    addSkillButton.classList.add('resume-black-button');
+    addSkillButton.classList.add('standard-black-button');
     addSkillButton.id = 'add-skill-button';
     addSkillButton.textContent = 'Добавить навык';
     addSkillButton.addEventListener('click', toggleSkillModal);
@@ -963,8 +963,8 @@
   const addWorkExpModal = document.querySelector('#add-work-exp-modal');
 
   const toggleWorkExpModal = () => {
-    addWorkExpModalLayout.classList.toggle('resume-disabled-modal-layout');
-    addWorkExpModal.classList.toggle('resume-disabled-modal');
+    addWorkExpModalLayout.classList.toggle('standard-disabled-modal-layout');
+    addWorkExpModal.classList.toggle('standard-disabled-modal');
   };
 
   addWorkExpModalLayout.addEventListener('click', (event) => {
@@ -1058,7 +1058,7 @@
     });
 
     const addWorkExpButton = document.createElement('button');
-    addWorkExpButton.classList.add('resume-black-button');
+    addWorkExpButton.classList.add('standard-black-button');
     addWorkExpButton.id = 'add-work-exp-button';
     addWorkExpButton.textContent = 'Добавить опыт работы';
     addWorkExpButton.addEventListener('click', toggleWorkExpModal);
@@ -1203,7 +1203,7 @@
     languages.forEach((language) => {
       const languageNameSelect = document.createElement('select');
       languageNameSelect.name = 'languageName[]';
-      languageNameSelect.classList.add('resume-language-name-input');
+      languageNameSelect.classList.add('standard-language-name-input');
       languageNameSelect.id = `edit-language-name_${language.id}`;
 
       const defaultNameOption = document.createElement('option');
@@ -1256,7 +1256,7 @@
       );
 
       const cardContent = document.createElement('div');
-      cardContent.classList.add('resume-language-content-container');
+      cardContent.classList.add('standard-language-content-container');
       cardContent.appendChild(languageNameSelect);
       cardContent.appendChild(languageLevelSelect);
 
@@ -1269,7 +1269,7 @@
       );
 
       const cardContainer = document.createElement('div');
-      cardContainer.classList.add('resume-language-container');
+      cardContainer.classList.add('standard-language-container');
       cardContainer.appendChild(cardContent);
       cardContainer.appendChild(removeLanguageButtonContainer);
 

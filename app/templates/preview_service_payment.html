@@ -38,6 +38,9 @@
         <p style="display: none">
             {{ form.days_to_expire() }}
         </p>
+        <p style="display: none">
+            {{ form.service_provider() }}
+        </p>
         <div style="width: 75vw; height: 70vh; border: 0.5rem solid black; display: flex; flex-direction: column; margin: 1.5rem auto">
             {% include "service_payment_qr.html" %}
         </div>

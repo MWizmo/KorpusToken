@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 
-RUN pip install -U numpy==1.19.5
+RUN python -m pip install -U numpy==1.19.5 telebot --no-build-isolation
 
 RUN pip install --no-cache-dir -r requirements.txt
 

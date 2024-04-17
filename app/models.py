@@ -686,6 +686,7 @@ class KorpusServices(db.Model):
     description = db.Column(db.Text)
     creator_id = db.Column(db.Integer)
     days_to_expire = db.Column(db.Integer)
+    service_provider = db.Column(db.String(256))
     provider_description = db.Column(db.Text)
     payment_date_label = db.Column(db.String(256))
     receiver_label = db.Column(db.String(256))

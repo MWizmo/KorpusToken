@@ -33,12 +33,19 @@
                 Какое количество хотите оплатить?<br>
                 <input style="width:20%;" name="amount" required ng-model="amount" ng-change="change_amount();">
             </p>
-            {% raw %}
-            <p>Сумма к оплате: <span class="service_page_tokens">{{res}}</span> Токенов Вклада</p>
-            {% endraw %}
+            <div class="service_summary">
+                {% raw %}
+                <p>Сумма к оплате: <span class="service_page_tokens">{{res}}</span> Токенов Вклада</p>
+                {% endraw %}
+                <p>Услугу предоставляет: {{ service['service_provider'] }}</p>
+            </div>
         </div>
         <div class="service_page_buttons_container">
             <button class="service_page_button" type="{{ 'button' if is_preview else 'submit' }}" id="button" disabled>Подтвердить</button>
+
+            {% if current_user.id == service['creator_id'] %}
+                <button class="service_page_button"  type="button" id="delete">Удалить услугу</button>
+            {% endif %}
         </div>
         {% if is_preview %}
             <div class="service_page_buttons_container" style="margin-top: 2rem">
@@ -47,4 +54,44 @@
         {% endif %}
     </div>
 </form>
+<form method="post">
+    <div
+        class="standard-modal-layout standard-disabled-modal-layout"
+        id="confirmation-modal-layout"
+    >
+        <div class="standard-modal standard-disabled-modal" id="confirmation-modal">
+             <div class="standard-modal-form-group">
+                <span class="centered" style="padding: 2rem 0">
+                    Вы уверены?
+                </span>
+             </div>
+             <div class="flex-between">
+                <button class="standard-black-button" type="submit" name="submit" value="delete">Подтвердить</button>
+                <button class="standard-outline-button" type="button" id="cancel-button">
+                    Отменить
+                </button>
+             </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    'use strict';
+
+    const deleteButton = document.querySelector('#delete');
+
+    const confirmationModalLayout = document.querySelector('#confirmation-modal-layout');
+    const confirmationModal = document.querySelector('#confirmation-modal');
+
+    deleteButton.addEventListener('click', () => {
+        confirmationModalLayout.classList.remove('standard-disabled-modal-layout');
+        confirmationModal.classList.remove('standard-disabled-modal');
+    });
+
+    const cancelButton = document.querySelector('#cancel-button');
+    cancelButton.addEventListener('click', () => {
+        confirmationModalLayout.classList.add('standard-disabled-modal-layout');
+        confirmationModal.classList.add('standard-disabled-modal');
+    });
+</script>
 {% endblock %}
