@@ -152,10 +152,14 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def get_eth_balance(current_user_id):
-      user = User.query.filter_by(id=current_user_id).first()
-      balance = w3.eth.getBalance(User.get_eth_address(current_user_id)) / ETH_IN_WEI
+        try:
+            user = User.query.filter_by(id=current_user_id).first()
+            balance = w3.eth.getBalance(User.get_eth_address(current_user_id)) / ETH_IN_WEI
 
-      return balance
+            return balance
+        except Exception as e:
+            print(e)
+            return 0
 
     @staticmethod
     def get_ktd_balance(current_user_id):
@@ -174,20 +178,23 @@ class User(UserMixin, db.Model):
 
         return Korpus_KTI.functions.balanceOf(User.get_eth_address(current_user_id)).call()
 
-
     @staticmethod
     def get_ktd_price(current_user_id):
-      file = open("app/static/ABI/Contract_ABI.json", "r")
-      KorpusContract = w3.eth.contract(
-        # вводим его адрес и ABI
-        Web3.toChecksumAddress(contract_address),
-        abi=file.read()
-      )
-      file.close()
+        try:
+            file = open("app/static/ABI/Contract_ABI.json", "r")
+            KorpusContract = w3.eth.contract(
+                # вводим его адрес и ABI
+                Web3.toChecksumAddress(contract_address),
+                abi=file.read()
+            )
+            file.close()
 
-      sellPrice = KorpusContract.functions.getSellPriceKTD().call()
-      
-      return sellPrice / ETH_IN_WEI
+            sellPrice = KorpusContract.functions.getSellPriceKTD().call()
+
+            return sellPrice / ETH_IN_WEI
+        except Exception as e:
+            print(e)
+            return 0
 
     @staticmethod
     def get_KTD_seller_limit(current_user_id):
@@ -204,16 +211,20 @@ class User(UserMixin, db.Model):
       
     @staticmethod
     def get_kti_price(current_user_id):
-      file = open("app/static/ABI/Contract_ABI.json", "r")
-      KorpusContract = w3.eth.contract(
-        Web3.toChecksumAddress(contract_address),
-        abi=file.read()
-      )
-      file.close()
+        try:
+            file = open("app/static/ABI/Contract_ABI.json", "r")
+            KorpusContract = w3.eth.contract(
+                Web3.toChecksumAddress(contract_address),
+                abi=file.read()
+            )
+            file.close()
 
-      buyPrice = KorpusContract.functions.getBuyPriceKTI().call()
-      
-      return buyPrice / ETH_IN_WEI
+            buyPrice = KorpusContract.functions.getBuyPriceKTI().call()
+
+            return buyPrice / ETH_IN_WEI
+        except Exception as e:
+            print(e)
+            return 0
 
     @staticmethod
     def has_access_to_sell(current_user_id):
