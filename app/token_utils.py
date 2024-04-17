@@ -39,14 +39,18 @@ def transfer_KTD(num, address, private_key):
         return "Недопустимый адрес или недостаточно токенов.", True
 
 def get_main_contract_KTI_balance():
-    file = open("app/static/ABI/KTI_ABI.json", "r")
-    Korpus_KTI = w3.eth.contract(
-      Web3.toChecksumAddress(kti_address),
-      abi=file.read()
-    )
-    file.close()
+    try:
+        file = open("app/static/ABI/KTI_ABI.json", "r")
+        Korpus_KTI = w3.eth.contract(
+            Web3.toChecksumAddress(kti_address),
+            abi=file.read()
+        )
+        file.close()
 
-    return Korpus_KTI.functions.balanceOf(Web3.toChecksumAddress(contract_address)).call()
+        return Korpus_KTI.functions.balanceOf(Web3.toChecksumAddress(contract_address)).call()
+    except Exception as e:
+        print(e)
+        return 0
 
 def get_main_contract_KTD_balance():
     file = open("app/static/ABI/KTD_ABI.json", "r")
