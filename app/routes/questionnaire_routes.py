@@ -210,7 +210,14 @@ def questionnaire_team():
     teammates = []
     # lst_teammates_bd = Membership.query.filter_by(
     #     team_id=Membership.query.filter_by(user_id=current_user.id).first().team_id)
-    teams = Membership.query.filter_by(user_id=current_user.id).all()
+    pre_teams = Membership.query.filter_by(user_id=current_user.id).all()
+    pre_teams_ids = []
+    teams = []
+    for team in pre_teams:
+        members = Membership.query.filter_by(team_id=team.team_id).all()
+        if len(members) > 1 and team.team_id not in pre_teams_ids:
+            teams.append(team)
+            pre_teams_ids.append(team.team_id)
     teams_for_voting = [team.id for team in Teams.get_teams_for_voting()]
     teams_id = [Teams.query.filter(Teams.id == t.team_id, Teams.id.in_(teams_for_voting)).first() for t in teams]
     teams_id = [t.id for t in teams_id if t]
