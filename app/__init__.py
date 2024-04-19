@@ -16,13 +16,13 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
-infura_url = "https://polygon-mumbai.infura.io/v3/35b77298442b49168bbe5a150071dd9f"
-chain_id = 80001
+infura_url = "https://polygon-amoy.infura.io/v3/35b77298442b49168bbe5a150071dd9f"
+chain_id = 80002
 w3 = Web3(Web3.HTTPProvider(infura_url))
 
-kti_address = '0x19ca99BAD51E8F14F175584F5D7DA4fad17C0979'
-ktd_address = '0xC758669070C6e91132917a16c9C0E9D11E9ca552'
-contract_address = '0x1927f1090F020f922b4F28b98a73ea74cA96B3eA'
+kti_address = '0x0E67be48db95B6BA01265eCF67C2D2a453ff485c'
+ktd_address = '0x69084e921F355b70336698A4Bd04cAb9E2A5541A'
+contract_address = '0xceb8E63CF6E7AD8680Ccb6B13685E65755c3C8cC'
 ETH_IN_WEI = 1000000000000000000
 KT_BITS_IN_KT = 1000000000000000000
 
