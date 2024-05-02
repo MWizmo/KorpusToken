@@ -59,18 +59,17 @@
         class="standard-modal-layout standard-disabled-modal-layout"
         id="confirmation-modal-layout"
     >
-        <div class="standard-modal standard-disabled-modal" id="confirmation-modal">
-             <div class="standard-modal-form-group">
-                <span class="centered" style="padding: 2rem 0">
-                    Вы уверены?
-                </span>
-             </div>
-             <div class="flex-between">
-                <button class="standard-black-button" type="submit" name="submit" value="delete">Подтвердить</button>
-                <button class="standard-outline-button" type="button" id="cancel-button">
-                    Отменить
-                </button>
-             </div>
+        <div class="standard-modal standard-disabled-modal service_page_remove_modal" id="confirmation-modal">
+            <h4 class="standard-modal-title" style="text-transform: none">Вы уверены, что хотите удалить услугу?</h4>
+            <div class="standard-modal-form-group">
+                <span>Вся подробная информация об услуге будет безвозвратно удалена</span>
+            </div>
+            <div class="flex-between">
+               <button class="standard-black-button" type="submit" name="submit" value="delete">Подтвердить</button>
+               <button class="standard-black-button" type="button" id="cancel-button">
+                   Отменить
+               </button>
+            </div>
         </div>
     </div>
 </form>

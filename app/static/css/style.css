@@ -1219,14 +1219,19 @@ img {
 }
 
 .standard-black-button {
-  background-color: black;
-  font-family: 'Decima Mono Cyr';
-  font-weight: 300;
-  border-radius: 0.5rem;
-  border: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: white;
-  width: 15rem;
-  height: 1.7rem;
+  background-color: black;
+  border: 1.5px solid white;
+  box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.25);
+  border-radius: 7px;
+  width: 12rem;
+  height: 2.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .standard-outline-button {
@@ -1417,14 +1422,13 @@ img {
 
 .standard-modal-layout {
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.7);
-  top: 0;
+  background-color: rgba(217, 217, 217, 0.7);
   right: 0;
   bottom: 0;
   left: 0;
   z-index: 998;
   width: 100%;
-  height: 100%;
+  height: 90vh;
   transition: all 0.3s;
   display: flex;
   justify-content: center;
@@ -1432,15 +1436,20 @@ img {
 }
 
 .standard-modal {
+  color: black;
   padding: 1rem 1.5rem;
-  width: 55rem;
   background-color: white;
-  font-family: 'Decima Mono Cyr';
+  font-family: 'PT Mono';
+  font-weight: 400;
+  font-size: 1.1em;
   z-index: 999;
+  border: 1.5px solid black;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.25);
 }
 
 .standard-modal-title {
-  font-size: 1.4rem;
+  font-size: 1.2em;
   font-weight: 400;
   margin-bottom: 1.5rem;
 }
@@ -2306,6 +2315,11 @@ select {
   gap: 5rem;
 }
 
+.service_page_remove_modal {
+  max-width: 30rem;
+  margin: 1rem;
+}
+
 .flex-between {
   display: flex;
   width: 100%;
@@ -2318,5 +2332,9 @@ select {
     flex-direction: column;
     align-items: start;
     gap: 0;
+  }
+
+  .service_page_remove_modal {
+    max-width: 100%;
   }
 }
