@@ -25,11 +25,20 @@
             <table class="account_table">
                 <tr class="account_row">
                     <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
+                    <td class="account_table_td">
+                        <label for="login" style="display: flex">
+                            <input required class="account_input width-full" name="login" id="login" placeholder="Ivan">
+                        </label>
+                    </td>
                 </tr>
                 <tr class="account_row">
                     <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
-                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
+                    <td class="account_table_td">
+                        <label for="password" style="position: relative; display: flex; align-items: center">
+                            <input type="password" class="account_input width-full" name="password" id="password">
+                            <img id="toggle-password" src="{{url_for('static', filename='icons/eye.svg')}}" alt="Show or hide password" style="position: absolute; right: 0.5rem; cursor: pointer;">
+                        </label>
+                    </td>
                 </tr>
 
             </table>
@@ -52,5 +61,15 @@
         </div>
     </form>
 </div>
+<script>
+    'use strict';
+
+    const togglePasswordButton = document.querySelector('#toggle-password');
+    const passwordInput = document.querySelector('#password');
+
+    togglePasswordButton.addEventListener('click', () => {
+        passwordInput.setAttribute('type', passwordInput.getAttribute('type') === 'password' ? 'text' : 'password');
+    });
+</script>
 </body>
 </html>
