@@ -2,8 +2,9 @@
     position: absolute;
     top:0;
     left:0;
+    bottom: 0;
     width: 100vw;
-    /*height: 100vh;*/
+    height: 100vh;
 }
 
 .reg_logo{
@@ -40,22 +41,24 @@
 }
 
 .personal_area_form{
-    padding: 30px;
+    padding: 3.5rem 30px 0 30px;
     background: rgba(0, 0, 0, 0.01);
     box-shadow: 0px 0px 40px rgba(47, 42, 111, 0.25);
     backdrop-filter: blur(35px);
     border-radius: 20px;
+    min-height: 20rem;
 }
 
 .personal_area_h{
-    font-family: Roboto-Bold;
-    font-size: 4vh;
+    font-family: Roboto-Bold, Roboto, monospace;
+    font-size: 4.5vh;
     line-height:0;
     text-transform: none;
 }
 
 .personal_area_p{
     font-size: 3vh;
+    font-family: Roboto-Bold, Roboto, monospace;
 }
 
 .title_flex{
@@ -115,6 +118,7 @@
 
 .account_table_label{
     width: 20%;
+    font-family: Roboto, monospace;
 }
 
 .account_table_td{

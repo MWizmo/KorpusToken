@@ -25,11 +25,20 @@
             <table class="account_table">
                 <tr class="account_row">
                     <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
+                    <td class="account_table_td">
+                        <label for="login" style="display: flex">
+                            <input required class="account_input width-full" name="login" id="login" placeholder="Ivan">
+                        </label>
+                    </td>
                 </tr>
                 <tr class="account_row">
                     <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
-                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
+                    <td class="account_table_td">
+                        <label for="password" style="position: relative; display: flex; align-items: center">
+                            <input type="password" class="account_input width-full" name="password" id="password">
+                            <img id="toggle-password" src="{{url_for('static', filename='icons/eye.svg')}}" alt="Show or hide password" style="position: absolute; right: 0.5rem; cursor: pointer;">
+                        </label>
+                    </td>
                 </tr>
 
             </table>
@@ -37,7 +46,7 @@
                     <div class="account_table_td">
                         <a style="font-size:2.5vh;width:50%;color:black;text-decoration:none;" href="/forgot_password">Забыли&nbsp;пароль?</a>
                     </div>
-                    <div class="account_table_td" style="text-align:right;display:flex;flex-direction:row;width: 50%;">
+                    <div class="account_table_td" style="text-align:right;display:flex;align-items: center;flex-direction:row;width: 50%;">
                         <label style="font-size:2.5vh">Запомнить&nbsp;меня</label>
                     <input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember">
                     </div>
@@ -47,10 +56,20 @@
             {% endif %}
         </div>
         <div class="button_row">
-            <button class="account_button" type="button" onclick="document.location.href='/signup';">Еще не зарегистрирован</button>
+            <button class="account_button" type="button" onclick="document.location.href='/signup';">Ещё не зарегистрирован</button>
             <button class="account_button" type="submit">Вход</button>
         </div>
     </form>
 </div>
+<script>
+    'use strict';
+
+    const togglePasswordButton = document.querySelector('#toggle-password');
+    const passwordInput = document.querySelector('#password');
+
+    togglePasswordButton.addEventListener('click', () => {
+        passwordInput.setAttribute('type', passwordInput.getAttribute('type') === 'password' ? 'text' : 'password');
+    });
+</script>
 </body>
 </html>
