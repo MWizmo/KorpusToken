@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
@@ -13,51 +14,57 @@
     <title> KorpusToken </title>
     {% endif %}
 </head>
-<body>
-<img class="body_back" src="{{url_for('static', filename='images/login_body_back.png')}}">
-<img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+<body class="login_background">
+<div class="logo_container">
+    <img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+</div>
 <div class="profile_body">
     <form class="personal_area_div account_form" style="margin-top:12vh;" method="post" action="/login">
-        <div class="personal_area_form">
-            <div class="title_flex">
-                <h4 class="personal_area_h">Авторизация</h4>
-            </div>
-            <table class="account_table">
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
-                    <td class="account_table_td">
-                        <label for="login" style="display: flex">
-                            <input required class="account_input width-full" name="login" id="login" placeholder="Ivan">
-                        </label>
-                    </td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
-                    <td class="account_table_td">
-                        <label for="password" style="position: relative; display: flex; align-items: center">
-                            <input type="password" class="account_input width-full" name="password" id="password">
-                            <img id="toggle-password" src="{{url_for('static', filename='icons/eye.svg')}}" alt="Show or hide password" style="position: absolute; right: 0.5rem; cursor: pointer;">
-                        </label>
-                    </td>
-                </tr>
+        <div class="personal_area_form_container">
+            <div class="personal_area_form">
+                <div class="title_flex">
+                    <h4 class="personal_area_h">Авторизация</h4>
+                </div>
+                <table class="account_table">
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
+                        <td class="account_table_td">
+                            <label for="login" style="display: flex">
+                                <input required class="account_input width-full" name="login" id="login" placeholder="Ivan">
+                            </label>
+                        </td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
+                        <td class="account_table_td">
+                            <label for="password" style="position: relative; display: flex; align-items: center">
+                                <input type="password" class="account_input width-full" name="password" id="password">
+                                <img id="toggle-password" src="{{url_for('static', filename='icons/eye.svg')}}" alt="Show or hide password" style="position: absolute; right: 0.5rem; cursor: pointer;">
+                            </label>
+                        </td>
+                    </tr>
 
-            </table>
-            <div style="display:flex;flex-direction:row;justify-content:space-between;padding-left:20%;">
-                    <div class="account_table_td">
-                        <a style="font-size:2.5vh;width:50%;color:black;text-decoration:none;" href="/forgot_password">Забыли&nbsp;пароль?</a>
-                    </div>
-                    <div class="account_table_td" style="text-align:right;display:flex;align-items: center;flex-direction:row;width: 50%;">
-                        <label style="font-size:2.5vh">Запомнить&nbsp;меня</label>
-                    <input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember">
-                    </div>
+                </table>
+                <div style="display:flex;flex-direction:row;justify-content:space-between;padding-left:20%;" id="remember-me-container">
+                        <div class="account_table_td" id="forgot-password-xl">
+                            <a style="font-size:2.5vh;width:50%;color:black;text-decoration:none;" href="/forgot_password">Забыли&nbsp;пароль?</a>
+                        </div>
+                        <div class="account_table_td" style="text-align:right;display:flex;align-items: center;flex-direction:row;width: 50%;" id="remember-me">
+                            <label style="font-size:2.5vh">Запомнить&nbsp;меня</label>
+                        <input style="width: 2.5vh;height: 2vh;margin-left: 5%;margin-right: 5%;" type="checkbox" name="remember" id="remember-me-checkbox">
+                        </div>
+                </div>
+                {% if err %}
+                <p style="font-size:2.5vh; color: red; text-align:center; width: 100%;">Неправильное имя пользователя или пароль</p>
+                {% endif %}
             </div>
-            {% if err %}
-            <p style="font-size:2.5vh; color: red; text-align:center; width: 100%;">Неправильное имя пользователя или пароль</p>
-            {% endif %}
         </div>
         <div class="button_row">
-            <button class="account_button" type="button" onclick="document.location.href='/signup';">Ещё не зарегистрирован</button>
+            <button class="account_button" id="account_sign_up_button" type="button" onclick="document.location.href='/signup';">Ещё не зарегистрирован</button>
             <button class="account_button" type="submit">Вход</button>
+            <div id="forgot-password-sm">
+                <a style="font-size:2.5vh;width:50%;color:black;text-decoration:none;" href="/forgot_password">Забыли&nbsp;пароль?</a>
+            </div>
         </div>
     </form>
 </div>
