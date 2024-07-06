@@ -370,6 +370,9 @@ def get_questionnaire_progress():
     not_participated_self_surnames = [User.query.filter_by(id=user).first().surname
                                       for user in questionnaire['participaters_self_ids']
                                       if user not in questionnaire['participated_self']]
+    not_participated_self_tg_nicknames = [User.query.filter_by(id=user).first().tg_nickname
+                                          for user in questionnaire['participaters_self_ids']
+                                          if user not in questionnaire['participated_self']]
     # not_participated_self_statuses = [Statuses.query.filter_by(
     #     id=UserStatuses.query.filter_by(
     #         user_id=user).first().status_id).first().status
@@ -396,7 +399,8 @@ def get_questionnaire_progress():
 
     for i in range(len(not_participated_self_ids)):
         not_participated_self_info.append([not_participated_self_ids[i], not_participated_self_names[i],
-                                           not_participated_self_surnames[i], not_participated_self_teams[i]])
+                                           not_participated_self_surnames[i], not_participated_self_teams[i],
+                                           not_participated_self_tg_nicknames[i]])
 
     not_participated_team_ids = [user for user in questionnaire['participaters_team_ids']
                                  if user not in questionnaire['participated_team']]
@@ -406,6 +410,9 @@ def get_questionnaire_progress():
     not_participated_team_surnames = [User.query.filter_by(id=user).first().surname
                                       for user in questionnaire['participaters_team_ids']
                                       if user not in questionnaire['participated_team']]
+    not_participated_team_tg_nicknames = [User.query.filter_by(id=user).first().tg_nickname
+                                          for user in questionnaire['participaters_team_ids']
+                                          if user not in questionnaire['participated_team']]
     not_participated_team_teams = []
     for user in questionnaire['participaters_team_ids']:
         if user not in questionnaire['participated_team']:
@@ -428,7 +435,8 @@ def get_questionnaire_progress():
 
     for i in range(len(not_participated_team_ids)):
         not_participated_team_info.append([not_participated_team_ids[i], not_participated_team_names[i],
-                                           not_participated_team_surnames[i], not_participated_team_teams[i]])
+                                           not_participated_team_surnames[i], not_participated_team_teams[i],
+                                           not_participated_team_tg_nicknames[i]])
     counter = len(TopCadetsVoting.query.all())
     return counter, questionnaire, not_participated_team_info, not_participated_self_info
 
