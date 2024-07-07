@@ -283,6 +283,10 @@ h6 {
   width: 650px;
 }
 
+.voting_progress_table .th {
+  height: 1rem;
+}
+
 .th {
   border: 1px solid black;
 }
