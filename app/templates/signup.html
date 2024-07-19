@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.jpg') }}" type="image/jpg">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
@@ -17,41 +18,44 @@
     <title> KorpusToken </title>
     {% endif %}
 </head>
-<body>
-<img class="body_back" src="{{url_for('static', filename='images/reg_korpus_back.png')}}">
-<img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+<body class="login_background">
+<div class="logo_container">
+    <img class="reg_logo" src="{{url_for('static', filename='images/logo_korpus_reg.png')}}">
+</div>
 <div class="profile_body">
     <form class="personal_area_div account_form" method="post" action="/signup">
-        <div class="personal_area_form">
-            <div class="title_flex">
-                <h4 class="personal_area_h">Регистрация</h4>
+        <div class="personal_area_form_container">
+            <div class="personal_area_form">
+                <div class="title_flex">
+                    <h4 class="personal_area_h">Регистрация</h4>
+                </div>
+                <table class="account_table">
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Имя</label></td>
+                        <td class="account_table_td"><input required class="account_input account_table_input" name="first_name" placeholder="Иван"></td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Фамилия</label></td>
+                        <td class="account_table_td"><input required class="account_input account_table_input" name="surname" placeholder="Иванов"></td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
+                        <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Тг ник</label></td>
+                        <td class="account_table_td"><input required class="account_input account_table_input" name="tlg" placeholder="@ivan_ivan"></td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
+                        <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
+                    </tr>
+                    <tr class="account_row">
+                        <td class="account_table_label account_table_td"><label class="personal_area_p">Повтор</label></td>
+                        <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="repeat"></td>
+                    </tr>
+                </table>
             </div>
-            <table class="account_table">
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Имя</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="first_name" placeholder="Иван"></td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Фамилия</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="surname" placeholder="Иванов"></td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Логин</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="login" placeholder="Ivan"></td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Tlg ник</label></td>
-                    <td class="account_table_td"><input required class="account_input account_table_input" name="tlg" placeholder="@ivan_ivan"></td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Пароль</label></td>
-                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="password"></td>
-                </tr>
-                <tr class="account_row">
-                    <td class="account_table_label account_table_td"><label class="personal_area_p">Повторить</label></td>
-                    <td class="account_table_td"><input type="password" required class="account_input account_table_input" name="repeat"></td>
-                </tr>
-            </table>
         </div>
         {% if for_partner %}
         <input name="is_partner" value="1" type="hidden">
@@ -59,8 +63,7 @@
         <input name="is_partner" value="0" type="hidden">
         {% endif %}
         <div class="button_row">
-            <button class="account_button" type="button" onclick="document.location.href='/login';">К авторизации</button>
-            <button class="account_button" type="submit">Зарегистрироваться</button>
+            <button class="account_button" type="submit">Далее</button>
         </div>
     </form>
 </div>

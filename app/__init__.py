@@ -52,6 +52,7 @@ job_defaults = {
 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults)
 scheduler.start()
-if len(scheduler.get_jobs()) == 0:
+if len(scheduler.get_jobs()) < 2:
     scheduler.add_job(func=token_utils.set_token_price, max_instances=1, trigger='cron', day='1')
+    scheduler.add_job(func=models.User.remove_rejected_users, max_instances=1, trigger='cron', day="*")
 atexit.register(lambda: scheduler.shutdown())
