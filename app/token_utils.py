@@ -382,8 +382,7 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
 
 def increase_token_balance(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
-    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
-                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -417,8 +416,7 @@ def increase_token_balance(address, amount):
 
 def decrease_token_balance(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
-    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
-                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -453,8 +451,7 @@ def decrease_token_balance(address, amount):
 
 def output_token(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
-    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or \
-                  '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
     nonce = w3.eth.getTransactionCount(account.address, "pending")
     file = open("app/static/ABI/Contract_ABI.json", "r")
@@ -488,7 +485,7 @@ def output_token(address, amount):
 
 
 def set_token_price():
-    private_key = os.environ.get('ADMIN_PRIVATE_KEY') or '56bc1794435c17242faddf14c51c2385537e4b1a047c9c49c46d5eddaff61a66'
+    private_key = os.environ['ADMIN_PRIVATE_KEY']
     last_exchange_rate = TokenExchangeRate.query.order_by(TokenExchangeRate.date.desc()).first()
     if not last_exchange_rate.is_default_calculation_method:
         return
