@@ -283,7 +283,7 @@ class User(UserMixin, db.Model):
                  phone=None, country=None, city=None,
                  description=None, work_experience_in_ms=0,
                  birthdate=None, token=None, ktd_balance=0.0,
-                 registration_state=1, registration_rejected_at=None):
+                 registration_state=1, registration_rejected_at=None, registration_requested_at=None):
         self.name = name
         self.surname = surname
         self.email = email
@@ -305,6 +305,7 @@ class User(UserMixin, db.Model):
         self.ktd_balance = ktd_balance
         self.registration_state = registration_state
         self.registration_rejected_at = registration_rejected_at
+        self.registration_requested_at = registration_requested_at
 
     def __repr__(self):
         return '<User: {}>'.format(self.login)
@@ -373,6 +374,7 @@ class User(UserMixin, db.Model):
     ktd_balance = db.Column(db.Float)
     registration_state = db.Column(db.Integer)
     registration_rejected_at = db.Column(db.DateTime)
+    registration_requested_at = db.Column(db.DateTime)
 
 
 class Teams(db.Model):
