@@ -421,7 +421,7 @@ def change_to_eth():
         db.session.add(transaction)
         db.session.commit()
         flash(message, 'success')
-    return render_template('change_to_eth.html', title='Обменять на eth',
+    return render_template('change_to_eth.html', title='Обменять на POL',
                            ktd_balance=ktd_balance, ktd_price=ktd_price, form=form,
                            has_access_to_sell=has_access_to_sell, ktd_eth_price=ktd_eth_price,
                            limit=limit)
@@ -705,7 +705,7 @@ def change_eth_exchange_rate():
 
         return redirect(url_for('emission'))
 
-    return render_template('change_eth_exchange_rate.html', title='Изменить курс eth', form=form,
+    return render_template('change_eth_exchange_rate.html', title='Изменить курс POL', form=form,
                            exchange_rate=exchange_rate)
 
 
