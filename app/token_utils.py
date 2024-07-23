@@ -9,7 +9,7 @@ import os
 def transfer_KTD(num, address, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
         Web3.toChecksumAddress(ktd_address),
@@ -85,7 +85,7 @@ def get_KTD_total(ktd_address):
 def set_KTI_buyer(address, limit, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -116,7 +116,7 @@ def set_KTI_buyer(address, limit, private_key):
 def set_KTD_seller(address, limit, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -152,7 +152,7 @@ def sell_KTD(amount, private_key):
     if value > 0:
         w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(private_key)
-        nonce = w3.eth.getTransactionCount(account.address, "pending")
+        nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
         file = open("app/static/ABI/KTD_ABI.json", "r")
         KorpusToken_Deposit = w3.eth.contract(
             Web3.toChecksumAddress(ktd_address),
@@ -182,7 +182,7 @@ def sell_KTD(amount, private_key):
                 abi=file.read()
             )
             file.close()
-            nonce = w3.eth.getTransactionCount(account.address, "pending")
+            nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
             estimateGas = KorpusContract.functions.sellKTD(value).estimateGas(
                 {'nonce': nonce, 'from': account.address, 'gasPrice': w3.toWei('50', 'gwei'), 'chainId': chain_id})
             transaction = KorpusContract.functions.sellKTD(value).buildTransaction(
@@ -208,7 +208,7 @@ def sell_KTD(amount, private_key):
 def set_KTD_price(price, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -242,7 +242,7 @@ def set_KTD_price(price, private_key):
 def set_KTI_price(price, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -277,7 +277,7 @@ def mint_KTD(amount, receiver, private_key):
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
       Web3.toChecksumAddress(ktd_address),
@@ -314,7 +314,7 @@ def mint_KTI(amount, receiver, private_key):
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/KTI_ABI.json", "r")
     KorpusToken_Investment = w3.eth.contract(
       Web3.toChecksumAddress(kti_address),
@@ -350,7 +350,7 @@ def mint_KTI(amount, receiver, private_key):
 def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
       Web3.toChecksumAddress(ktd_address),
@@ -384,7 +384,7 @@ def increase_token_balance(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -418,7 +418,7 @@ def decrease_token_balance(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -453,7 +453,7 @@ def output_token(address, amount):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending")
+    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
