@@ -1502,7 +1502,7 @@ def add_status():
     status_id = int(data['status_id'])
     new_status = UserStatuses(user_id=user_id, status_id=status_id)
     db.session.add(new_status)
-    if status_id == 11:
+    if status_id == 12:
         waiting_user = User.query.filter_by(registration_state=1).order_by(User.registration_requested_at).first()
         if waiting_user:
             manager = User.query.filter_by(id=user_id).first()

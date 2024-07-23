@@ -43,7 +43,7 @@ class User(UserMixin, db.Model):
     def check_community_manager(current_user_id):
         statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
         for status in statuses:
-            if status.status_id == 9:
+            if status.status_id == 12:
                 return True
         return False
 
