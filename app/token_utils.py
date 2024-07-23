@@ -6,10 +6,10 @@ import datetime
 
 import os
 
-def transfer_KTD(num, address, private_key):
+def transfer_KTD(num, address, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
         Web3.toChecksumAddress(ktd_address),
@@ -82,10 +82,10 @@ def get_KTD_total(ktd_address):
 
     return Korpus_KTD.functions.totalSupply().call()
 
-def set_KTI_buyer(address, limit, private_key):
+def set_KTI_buyer(address, limit, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -113,10 +113,10 @@ def set_KTI_buyer(address, limit, private_key):
     except Exception:
         return "Недопустимый адрес или недостаточно средств.", True
 
-def set_KTD_seller(address, limit, private_key):
+def set_KTD_seller(address, limit, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -144,7 +144,7 @@ def set_KTD_seller(address, limit, private_key):
     except Exception:
         return "Недопустимый адрес или недостаточно средств.", True
 
-def sell_KTD(amount, private_key):
+def sell_KTD(amount, private_key, default_nonce=None):
     try:
         value = int(amount)
     except ValueError:
@@ -152,7 +152,7 @@ def sell_KTD(amount, private_key):
     if value > 0:
         w3 = Web3(Web3.HTTPProvider(infura_url))
         account = w3.eth.account.privateKeyToAccount(private_key)
-        nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+        nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
         file = open("app/static/ABI/KTD_ABI.json", "r")
         KorpusToken_Deposit = w3.eth.contract(
             Web3.toChecksumAddress(ktd_address),
@@ -205,10 +205,10 @@ def sell_KTD(amount, private_key):
     else:
         return "Число токенов не должно быть меньше или равно нулю.", True
 
-def set_KTD_price(price, private_key):
+def set_KTD_price(price, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -239,10 +239,10 @@ def set_KTD_price(price, private_key):
         eth_error = "Недопустимый адрес, цена или недостаточно средств."
         return eth_error, True
 
-def set_KTI_price(price, private_key):
+def set_KTI_price(price, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -273,11 +273,11 @@ def set_KTI_price(price, private_key):
         eth_error = "Недопустимый адрес, цена или недостаточно средств."
         return eth_error, True
 
-def mint_KTD(amount, receiver, private_key):
+def mint_KTD(amount, receiver, private_key, default_nonce=None):
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
       Web3.toChecksumAddress(ktd_address),
@@ -309,12 +309,12 @@ def mint_KTD(amount, receiver, private_key):
   else:
     return "Число токенов должно быть больше нуля.", True
 
-def mint_KTI(amount, receiver, private_key):
+def mint_KTI(amount, receiver, private_key, default_nonce=None):
   print(private_key)
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/KTI_ABI.json", "r")
     KorpusToken_Investment = w3.eth.contract(
       Web3.toChecksumAddress(kti_address),
@@ -347,10 +347,10 @@ def mint_KTI(amount, receiver, private_key):
     return "Число токенов должно быть больше нуля.", True
 
 
-def save_voting_to_blockchain(team, student, date, axis, points, private_key):
+def save_voting_to_blockchain(team, student, date, axis, points, private_key, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/KTD_ABI.json", "r")
     KorpusToken_Deposit = w3.eth.contract(
       Web3.toChecksumAddress(ktd_address),
@@ -380,11 +380,11 @@ def save_voting_to_blockchain(team, student, date, axis, points, private_key):
     except Exception:
       return 'Некорректный адрес.', True
 
-def increase_token_balance(address, amount):
+def increase_token_balance(address, amount, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -414,11 +414,11 @@ def increase_token_balance(address, amount):
     except Exception:
         return 'Некорректный адрес.', True
 
-def decrease_token_balance(address, amount):
+def decrease_token_balance(address, amount, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -449,11 +449,11 @@ def decrease_token_balance(address, amount):
         return 'Некорректный адрес.', True
 
 
-def output_token(address, amount):
+def output_token(address, amount, default_nonce=None):
     w3 = Web3(Web3.HTTPProvider(infura_url))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     account = w3.eth.account.privateKeyToAccount(private_key)
-    nonce = w3.eth.getTransactionCount(account.address, "pending") + 1
+    nonce = default_nonce or (w3.eth.getTransactionCount(account.address, "pending") + 1)
     file = open("app/static/ABI/Contract_ABI.json", "r")
     KorpusContract = w3.eth.contract(
         Web3.toChecksumAddress(contract_address),
@@ -484,14 +484,21 @@ def output_token(address, amount):
         return 'Некорректный адрес.', True
 
 
+def get_nonce(private_key):
+    account = w3.eth.account.privateKeyToAccount(private_key)
+
+    return w3.eth.getTransactionCount(account.address, "pending") + 1
+
+
 def set_token_price():
     private_key = os.environ['ADMIN_PRIVATE_KEY']
     last_exchange_rate = TokenExchangeRate.query.order_by(TokenExchangeRate.date.desc()).first()
     if not last_exchange_rate.is_default_calculation_method:
         return
     new_exchange_rate = int(int(last_exchange_rate.exchange_rate_in_wei) * 1.05)
-    ktd_message, is_ktd_error = set_KTD_price(new_exchange_rate, private_key)
-    kti_message, is_kti_error = set_KTI_price(new_exchange_rate, private_key)
+    nonce = get_nonce(private_key)
+    ktd_message, is_ktd_error = set_KTD_price(new_exchange_rate, private_key, default_nonce=nonce)
+    kti_message, is_kti_error = set_KTI_price(new_exchange_rate, private_key, default_nonce=(nonce + 1)
     if (not is_ktd_error) and (not is_kti_error):
         token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=str(new_exchange_rate), is_default_calculation_method=True)
         db.session.add(token_exchange_rate)

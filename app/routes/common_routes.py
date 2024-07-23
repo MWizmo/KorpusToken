@@ -608,8 +608,9 @@ def token_exchange_rate_by_default():
     n = current_month - start_month
     price = int(start_price * math.pow(1.05, n - 1))
     private_key = os.environ['ADMIN_PRIVATE_KEY']
-    ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key)
-    kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key)
+    nonce = token_utils.get_nonce(private_key)
+    ktd_message, is_ktd_error = token_utils.set_KTD_price(price, private_key, default_nonce=nonce)
+    kti_message, is_kti_error = token_utils.set_KTI_price(price, private_key, default_nonce=(nonce + 1))
     if (not is_ktd_error) and (not is_kti_error):
         token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price,
                                                 is_default_calculation_method=True)
@@ -659,8 +660,9 @@ def change_token_exchange_rate():
         price = (float(form.price.data.replace(' ', '')) / eth_exchange_rate) * ETH_IN_WEI
 
         private_key = os.environ['ADMIN_PRIVATE_KEY']
-        ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key)
-        kti_message, is_kti_error = token_utils.set_KTI_price(int(price), private_key)
+        nonce = token_utils.get_nonce(private_key)
+        ktd_message, is_ktd_error = token_utils.set_KTD_price(int(price), private_key, default_nonce=nonce)
+        kti_message, is_kti_error = token_utils.set_KTI_price(int(price), private_key, default_nonce=(nonce + 1))
         if (not is_ktd_error) and (not is_kti_error):
             token_exchange_rate = TokenExchangeRate(date=datetime.datetime.now(), exchange_rate_in_wei=price,
                                                     is_default_calculation_method=False)
@@ -914,6 +916,7 @@ def make_tokens_distribution():
             if float(mark[0]) == 1.0:
                 marks_counter += 1
     ktd_in_mark = ktd_emission / marks_counter if marks_counter >= 0 else 0
+    nonce = token_utils.get_nonce(os.environ["ADMIN_PRIVATE_KEY"])
     for user in users:
         user_res = db.session.query(func.avg(VotingInfo.mark)).outerjoin(Voting,
                                                                          Voting.id == VotingInfo.voting_id).filter(
@@ -921,7 +924,8 @@ def make_tokens_distribution():
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
         mint_amount = int(ktd_in_mark * marks)
-        transaction_hash, is_error = token_utils.increase_token_balance(user[2], mint_amount * KT_BITS_IN_KT)
+        transaction_hash, is_error = token_utils.increase_token_balance(user[2], mint_amount * KT_BITS_IN_KT, default_nonce=nonce)
+        nonce += 1
         if is_error:
             print('Error in txn: ' + transaction_hash)
         user[2].ktd_balance += mint_amount
@@ -1367,6 +1371,7 @@ def write_voting_progress():
                    Membership.query.filter_by(user_id=info.cadet_id).first(),
                    info,
                    Axis.query.filter_by(id=info.criterion_id).first()) for info in voting_info]
+    nonce = token_utils.get_nonce(os.environ['ADMIN_PRIVATE_KEY'])
     for user_data in users_info:
         team = Teams.query.filter_by(id=user_data[1].team_id).first()
         cur_date = datetime.datetime.now()
@@ -1375,7 +1380,8 @@ def write_voting_progress():
                                               date=date,
                                               axis=user_data[3].name,
                                               points=user_data[2].mark,
-                                              private_key=os.environ['ADMIN_PRIVATE_KEY'])
+                                              private_key=os.environ['ADMIN_PRIVATE_KEY'], nonce=nonce)
+        nonce += 1
     VotingTable.query.get(cur_id).status = 'Emission'
     db.session.commit()
     return redirect('/questionnaire_progress')
