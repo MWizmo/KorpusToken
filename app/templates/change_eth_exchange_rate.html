@@ -1,18 +1,18 @@
 {% extends "base.html" %} {% block content %}
 <div class="nav_href" style="margin-top:2vh;margin-left:10%;">
-        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a href="/emission">эмиссия токенов</a> - <a class="cur_href" href="">изменить курс eth</a>
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a href="/emission">эмиссия токенов</a> - <a class="cur_href" href="">изменить курс POL</a>
     </div>
 <div class="small_card_container" style="min-height:80vh;">
   <div class="small_card_flex" style="flex-direction: column">
     <p class="eth_text">Текущий зафиксированный курс ethereum</p>
-    <p class="eth_text purple">1 eth = {{ exchange_rate }}р</p>
+    <p class="eth_text purple">1 POL = {{ exchange_rate }}р</p>
     <form action="" method="post" novalidate class="form">
       {% with messages = get_flashed_messages(category_filter=["restore"]) %} {%
       if messages %}
       <p><i>{{ messages[0] }}</i></p>
       {% endif %} {% endwith %} {{ form.csrf_token() }} {{ form.hidden_tag() }}
       <p style="width: 100%;">
-        <span class="eth_text" style="margin-left: 35%;">Напишите актуальную стоимость 1 eth</span> <br />
+        <span class="eth_text" style="margin-left: 35%;">Напишите актуальную стоимость 1 POL</span> <br />
 				<div class="dark_block" style="width: 60%; margin-left: 20%">
 					{{ form.price(size=256, class_="eth_input", style="margin-top: 2vh" ) }}
 				</div>

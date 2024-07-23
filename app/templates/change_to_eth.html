@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block content %}
 <div class="nav_href" style="margin-top:2vh;margin-left:10%; ">
-        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">обменять на eth</a>
+        <a href="/">главная</a> - <a href="/blockchain">блокчейн</a> - <a class="cur_href" href="">обменять на POL</a>
     </div>
 {% if has_access_to_sell %}
 <form action="" method="post" novalidate class="form small_card_container">
@@ -35,7 +35,7 @@
       </div>
       <div class="dark_block">
         <p class="info_card_text"><b>Вы получите:</b></p>
-        <p class="info_card_text blue" id="total">0 eth</p>
+        <p class="info_card_text blue" id="total">0 POL</p>
       </div>
       {{ form.submit(class_="submit") }}
       <p>
@@ -91,14 +91,14 @@
     }
 
     if (amount === 0) {
-      output.textContent = '0 eth';
+      output.textContent = '0 POL';
 
       return submit.setAttribute('disabled', 'disabled');
     }
 
     submit.removeAttribute('disabled');
 
-    output.textContent = `${amount * price.textContent} eth`;
+    output.textContent = `${amount * price.textContent} POL`;
   });
 
   submit.setAttribute('disabled', 'disabled');

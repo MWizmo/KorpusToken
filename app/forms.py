@@ -174,7 +174,7 @@ class ChangeToEthForm(FlaskForm):
 
 
 class ChangeEthExchangeRate(FlaskForm):
-    price = StringField('Напишите актуальную стоимость 1 eth', validators=[DataRequired()])
+    price = StringField('Напишите актуальную стоимость 1 POL', validators=[DataRequired()])
     submit = SubmitField('Подтвердить', render_kw={"class": "eth_button", "style": "width: 50%; margin-left: 25%; margin-top: 2rem"})
 
 
