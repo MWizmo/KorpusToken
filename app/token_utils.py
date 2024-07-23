@@ -487,7 +487,7 @@ def output_token(address, amount, default_nonce=None):
 def get_nonce(private_key):
     account = w3.eth.account.privateKeyToAccount(private_key)
 
-    return w3.eth.getTransactionCount(account.address, "pending") + 1
+    return w3.eth.getTransactionCount(account.address) + 1
 
 
 def set_token_price():
