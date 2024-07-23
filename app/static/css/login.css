@@ -33,7 +33,6 @@
     z-index:1;
     top:0;
     left:0;
-    overflow:hidden;
 }
 
 .personal_area_div{
@@ -221,15 +220,11 @@
 
     .button_row {
         margin: 0 2rem 2rem 2rem;
-        height: 20%;
+        min-height: 20%;
         flex-direction: column;
         justify-content: initial;
-        gap: 2rem;
+        gap: 1.3rem;
         width: initial;
-    }
-
-    #account_sign_up_button {
-        display: none;
     }
 
     .account_button {
@@ -286,6 +281,10 @@
     .passwords_not_match {
         padding: 0;
         margin: 0;
+    }
+
+    .account_table_label{
+        width: 100%;
     }
 }
 

@@ -39,6 +39,22 @@ class User(UserMixin, db.Model):
           return True
       return False
 
+    @staticmethod
+    def check_community_manager(current_user_id):
+        statuses = UserStatuses.query.filter_by(user_id=current_user_id).all()
+        for status in statuses:
+            if status.status_id == 12:
+                return True
+        return False
+
+    @staticmethod
+    def remove_rejected_users():
+        User.query.filter(
+            User.registration_state == 3,
+            User.registration_rejected_at <= (datetime.datetime.now() - datetime.timedelta(days=1))
+        ).delete()
+        db.session.commit()
+
     @property
     def is_accountant(self):
       return User.check_accountant(self.id)
@@ -54,6 +70,14 @@ class User(UserMixin, db.Model):
     @property
     def is_admin(self):
         return User.check_admin(self.id)
+
+    @property
+    def is_community_manager(self):
+        return User.check_community_manager(self.id)
+
+    @property
+    def is_full_registered(self):
+        return self.registration_state is None or self.registration_state == 2
 
     @property
     def is_dealer(self):
@@ -208,7 +232,7 @@ class User(UserMixin, db.Model):
 
       return KorpusContract.functions.sellersLimits(seller_address).call()
 
-      
+
     @staticmethod
     def get_kti_price(current_user_id):
         try:
@@ -258,7 +282,8 @@ class User(UserMixin, db.Model):
                  work_exp, sex, name, surname,
                  phone=None, country=None, city=None,
                  description=None, work_experience_in_ms=0,
-                 birthdate=None, token=None, ktd_balance=0.0):
+                 birthdate=None, token=None, ktd_balance=0.0,
+                 registration_state=1, registration_rejected_at=None):
         self.name = name
         self.surname = surname
         self.email = email
@@ -278,6 +303,8 @@ class User(UserMixin, db.Model):
         self.private_key = private_key
         self.token = token
         self.ktd_balance = ktd_balance
+        self.registration_state = registration_state
+        self.registration_rejected_at = registration_rejected_at
 
     def __repr__(self):
         return '<User: {}>'.format(self.login)
@@ -344,6 +371,8 @@ class User(UserMixin, db.Model):
     jobs = db.relationship("WorkExperience", cascade="all,delete")
     skills = db.relationship("Skill", cascade="all,delete")
     ktd_balance = db.Column(db.Float)
+    registration_state = db.Column(db.Integer)
+    registration_rejected_at = db.Column(db.DateTime)
 
 
 class Teams(db.Model):
@@ -753,3 +782,10 @@ class Language(db.Model):
     level = db.Column(db.String(32))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='cascade'))
     user = db.relationship("User", cascade='all,delete')
+
+
+class UserRegistrationMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer)
+    message_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)

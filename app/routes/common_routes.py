@@ -10,7 +10,7 @@ from app.utils import get_numeral_label
 from app.models import SkillKeyword, User, Questions, QuestionnaireInfo, Questionnaire, QuestionnaireTable, Membership, \
     UserStatuses, Statuses, Axis, Criterion, Voting, VotingInfo, TeamRoles, Log, TopCadetsScore, TopCadetsVoting, \
     VotingTable, WeeklyVoting, WeeklyVotingMembers, BudgetRecord, Transaction, EthExchangeRate, TokenExchangeRate, \
-    Profit, KorpusServices, ServicePayments, Budget, Skill, WorkExperience, Language
+    Profit, KorpusServices, ServicePayments, UserRegistrationMessage, Budget, Skill, WorkExperience, Language
 from flask import render_template, redirect, url_for, request, jsonify, send_file, flash
 from werkzeug.urls import url_parse
 from app.forms import *
@@ -26,6 +26,9 @@ import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from itsdangerous import URLSafeTimedSerializer
 
+
+bot_token = '573817226:AAGQM1FP1qznVJ137fKX_wy94ntb6q5bQVg'
+bot = telebot.TeleBot(bot_token)
 
 @app.route('/')
 @app.route('/home')
@@ -67,7 +70,7 @@ def login():
     else:
         values = request.values
         user = User.query.filter_by(login=values['login']).first()
-        if user is None or not user.check_password(values['password']):
+        if user is None or not user.check_password(values['password']) or not user.is_full_registered:
             return render_template('login.html', tittle='Авторизация', err=True)
         login_user(user, remember='remember' in values)
         next_page = request.args.get('next')
@@ -91,8 +94,6 @@ def forgot_password():
         user = User.query.filter_by(tg_nickname=tg_login).first()
         print(tg_login, user)
         if user:
-            bot_token = '573817226:AAGQM1FP1qznVJ137fKX_wy94ntb6q5bQVg'
-            bot = telebot.TeleBot(bot_token)
             keyboard = InlineKeyboardMarkup()
             serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
             token = serializer.dumps(user.tg_nickname, salt=app.config["SECRET_KEY"])
@@ -1501,6 +1502,26 @@ def add_status():
     status_id = int(data['status_id'])
     new_status = UserStatuses(user_id=user_id, status_id=status_id)
     db.session.add(new_status)
+    if status_id == 12:
+        waiting_user = User.query.filter_by(registration_state=1).order_by(User.registration_requested_at).first()
+        if waiting_user:
+            manager = User.query.filter_by(id=user_id).first()
+            keyboard = InlineKeyboardMarkup()
+            keyboard.add(InlineKeyboardButton(text='Одобрить', callback_data=f'accept-registration_{waiting_user.tg_id}'))
+            keyboard.add(InlineKeyboardButton(text='Отклонить', callback_data=f'reject-registration_{waiting_user.tg_id}'))
+            with open(r'/home/snapper/KorpusToken/app/static/user_photos/user' + str(waiting_user.id) + '.jpg', 'rb') as photo:
+                res = bot.send_photo(
+                    manager.chat_id,
+                    photo,
+                    caption=f"{waiting_user.name} {waiting_user.surname} оставил заявку на регистрацию.",
+                    reply_markup=keyboard,
+                )
+                message_record = UserRegistrationMessage(
+                    chat_id=manager.chat_id,
+                    message_id=res.message_id,
+                    user_id=waiting_user.id
+                )
+                db.session.add(message_record)
     db.session.commit()
     log('Добавление статуса с id {} пользователю с id {}'.format(status_id, user_id))
     return jsonify({'response': 'ok'})
