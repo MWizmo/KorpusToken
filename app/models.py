@@ -283,7 +283,7 @@ class User(UserMixin, db.Model):
                  phone=None, country=None, city=None,
                  description=None, work_experience_in_ms=0,
                  birthdate=None, token=None, ktd_balance=0.0,
-                 registration_state=1, registration_rejected_at=None, registration_requested_at=None):
+                 registration_state=None, registration_rejected_at=None, registration_requested_at=None):
         self.name = name
         self.surname = surname
         self.email = email
