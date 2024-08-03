@@ -17,12 +17,12 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 infura_url = os.environ['INFURA_URL']
-chain_id = 137
+chain_id = 80002
 w3 = Web3(Web3.HTTPProvider(infura_url))
 
-kti_address = '0x1DDEaf555aE89DD3b763d0767417492f4C6e44d3'
-ktd_address = '0x464eF99eA4ba177C4B9ef723E47e41C2c8391e3d'
-contract_address = '0xA41eDdde60D37aDe67a375182C4503fcaBF2Bc4e'
+kti_address = '0x0E67be48db95B6BA01265eCF67C2D2a453ff485c'
+ktd_address = '0x69084e921F355b70336698A4Bd04cAb9E2A5541A'
+contract_address = '0xceb8E63CF6E7AD8680Ccb6B13685E65755c3C8cC'
 ETH_IN_WEI = 1e18
 KT_BITS_IN_KT = 1e18
 
