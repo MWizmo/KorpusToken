@@ -19,9 +19,9 @@ infura_url = os.environ['INFURA_URL']
 chain_id = 80002
 w3 = Web3(Web3.HTTPProvider(infura_url))
 
-kti_address = '0x0E67be48db95B6BA01265eCF67C2D2a453ff485c'
-ktd_address = '0x69084e921F355b70336698A4Bd04cAb9E2A5541A'
-contract_address = '0xceb8E63CF6E7AD8680Ccb6B13685E65755c3C8cC'
+kti_address = '0x157121dc6a6F7f805d3902DD251F19693f629C2B'
+ktd_address = '0x7979BfC57D3eFBef2ba19A1DB5e7d83e09Cacd57'
+contract_address = '0x7b29Ba4eCc4E8A3c5E45879dd6A443e27327B3C3'
 ETH_IN_WEI = 1e18
 KT_BITS_IN_KT = 1e18
 
