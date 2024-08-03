@@ -6,7 +6,6 @@ from flask_login import LoginManager
 from flask_admin import Admin
 from web3.auto import Web3
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 import os
 import atexit
 
@@ -41,18 +40,13 @@ admin.add_view(ProfitRecordView(models.Profit, db.session, name='Зафикси�
 admin.add_view(AllBudgetRecordsView(models.BudgetRecord, db.session, name='Все записи', endpoint='all_budget_records'))
 admin.add_view(CurrentBudgetView(models.BudgetRecord, db.session, name='Текущий бюджет', endpoint='current_budget'))
 
-jobstores = {
-    'default': SQLAlchemyJobStore(url=Config.SQLALCHEMY_DATABASE_URI)
-}
-
 job_defaults = {
     'coalesce': False,
     'max_instances': 1
 }
 
-scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults)
+scheduler = BackgroundScheduler(job_defaults=job_defaults)
 scheduler.start()
-if len(scheduler.get_jobs()) < 2:
-    scheduler.add_job(func=token_utils.set_token_price, max_instances=1, trigger='cron', day='1')
-    scheduler.add_job(func=models.User.remove_rejected_users, max_instances=1, trigger='cron', day="*")
+scheduler.add_job(func=token_utils.set_token_price, max_instances=1, trigger='cron', day='1')
+scheduler.add_job(func=models.User.remove_rejected_users, max_instances=1, trigger='cron', day="*")
 atexit.register(lambda: scheduler.shutdown())
