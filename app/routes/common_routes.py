@@ -226,7 +226,7 @@ def delete_user():
     user_balance = User.get_ktd_balance(current_user.id)
     transaction_hash, is_error = token_utils.decrease_token_balance(
         user.get_eth_address(),
-        user_balance * KT_BITS_IN_KT
+        int(user_balance * KT_BITS_IN_KT)
     )
     if is_error:
         print('Error occurred in txn: ' + transaction_hash)
@@ -924,7 +924,7 @@ def make_tokens_distribution():
             VotingInfo.criterion_id).all()
         marks = sum([int(current_res[0]) for current_res in user_res])
         mint_amount = int(ktd_in_mark * marks)
-        transaction_hash, is_error = token_utils.increase_token_balance(User.get_eth_address(user[0]), mint_amount * KT_BITS_IN_KT, default_nonce=nonce)
+        transaction_hash, is_error = token_utils.increase_token_balance(User.get_eth_address(user[0]), int(mint_amount * KT_BITS_IN_KT), default_nonce=nonce)
         nonce += 1
         if is_error:
             print('Error in txn: ' + transaction_hash)
