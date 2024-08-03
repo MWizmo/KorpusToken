@@ -310,7 +310,6 @@ def mint_KTD(amount, receiver, private_key, default_nonce=None):
     return "Число токенов должно быть больше нуля.", True
 
 def mint_KTI(amount, receiver, private_key, default_nonce=None):
-  print(private_key)
   if amount > 0:
     w3 = Web3(Web3.HTTPProvider(infura_url))
     account = w3.eth.account.privateKeyToAccount(private_key)
