@@ -20,16 +20,16 @@
       <div class="info_card_text_block">
         <p class="info_card_text green">
           <b
-            >Курс токена вклада: 1 KT = {{ exchange_rate * ktd_price }}р = {{
-            ktd_price }} POL</b
+            >Курс токена вклада: 1 KT = {{ "{:0.2f}".format(exchange_rate * ktd_price) }}р = {{
+            "{:g}".format(ktd_price) }} POL</b
           >
         </p>
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text red">
           <b
-            >Курс токена инвестиций: 1 KT = {{ exchange_rate * kti_price }}р =
-            {{ kti_price }} POL</b
+            >Курс токена инвестиций: 1 KT = {{ "{:0.2f}".format(exchange_rate * kti_price) }}р =
+            {{ "{:g}".format(kti_price) }} POL</b
           >
         </p>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text">
-          Баллов всего получено = <b>{{ total_score }}</b>
+          Баллов всего получено = <b>{{ "{:g}".format(total_score) }}</b>
         </p>
       </div>
       <div class="info_card_text_block">
@@ -135,7 +135,7 @@
           {% if total_score == 0 %}
           <b class="green">0 токенов вклада</b>
           {% else %}
-          <b class="green">{{ ktd_emission / total_score }} токенов вклада</b>
+          <b class="green">{{ "{:g}".format(ktd_emission / total_score) }} токенов вклада</b>
           {% endif %}
         </p>
       </div>
@@ -174,12 +174,12 @@
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text red">
-          <b>{{ kti_emission }} токенов инвестиций</b>
+          <b>{{ "{:g}".format(kti_emission) }} токенов инвестиций</b>
         </p>
       </div>
       <div class="info_card_text_block">
         <p class="info_card_text green">
-          <b>{{ ktd_emission }} токенов вклада</b>
+          <b>{{ "{:g}".format(ktd_emission) }} токенов вклада</b>
         </p>
       </div>
       <div class="small_card_flex">

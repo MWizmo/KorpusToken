@@ -13,14 +13,14 @@
                 <div class="info_card_text_block">
                     <p class="info_card_text">
                         <b>Баланс токенов вклада:</b>
-                        <span class="info_card_text green"><br/>{{ current_user.ktd_balance }}</span>
+                        <span class="info_card_text green"><br/>{{ "{:g}".format(current_user.ktd_balance) }}</span>
                     </p>
                 </div>
                 <div class="info_card_text_block">
                     <p class="info_card_text">
                         <b>Курс токена вклада:</b>
                         <span class="info_card_text green"
-                        ><br/>1 КТ = {{ ktd_price }}р</span
+                        ><br/>1 КТ = {{ "{:0.2f}".format(ktd_price) }}р</span
                         >
                     </p>
                 </div>
@@ -40,7 +40,7 @@
                     <p class="info_card_text">
                         <b>Курс токена инвестиций:</b>
                         <span class="info_card_text red"
-                        ><br/>1 КТ = {{ kti_price }}р</span
+                        ><br/>1 КТ = {{ "{:0.2f}".format(kti_price) }}р</span
                         >
                     </p>
                 </div>
@@ -50,7 +50,7 @@
                 <div class="info_card_text_block">
                     <p class="info_card_text">
                         <b>Количество эфира на вашем аккаунте: </b>
-                        <span class="info_card_text blue"><br/>{{ eth_balance }} POL</span>
+                        <span class="info_card_text blue"><br/>{{ "{:g}".format(eth_balance) }} POL</span>
                     </p>
                 </div>
             </div>
@@ -75,11 +75,11 @@
             <div class="info_card" style="min-width: 33%">
                 <div class="info_card_text_block">
                     <p class="info_card_text"><b>Баланс токенов вклада:</b></p>
-                    <p class="info_card_text green">{{ ktd_balance }}</p>
+                    <p class="info_card_text green">{{ "{:g}".format(ktd_balance) }}</p>
                 </div>
                 <div class="info_card_text_block">
                     <p class="info_card_text"><b>Курс токена вклада:</b></p>
-                    <p class="info_card_text green">1 КТ = {{ ktd_price }}р</p>
+                    <p class="info_card_text green">1 КТ = {{ "{:0.2f}".format(ktd_price) }}р</p>
                 </div>
             </div>
             {% if not current_user.is_partner %}
@@ -90,7 +90,7 @@
                 <div class="info_card_text_block">
                     <p class="info_card_text">
                         <b>Количество эфира на вашем аккаунте: </b>
-                        <span class="info_card_text blue"><br/>{{ eth_balance }} POL</span>
+                        <span class="info_card_text blue"><br/>{{ "{:g}".format(eth_balance) }} POL</span>
                     </p>
                 </div>
             </div>
