@@ -400,16 +400,16 @@ def change_to_eth():
     form = ChangeToEthForm()
 
     if form.validate_on_submit():
-        if ktd_balance < float(form.amount.data.replace(' ', '')):
+        if ktd_balance < float(form.amount.data.replace(' ', '').replace(',', '.')):
             flash('Недостаточно токенов.', 'error')
             return redirect('change_to_eth')
-        if limit < float(form.amount.data.replace(' ', '')):
+        if limit < float(form.amount.data.replace(' ', '').replace(',', '.')):
             flash('Превышен лимит продажи токенов.', 'error')
             return redirect('change_to_eth')
-        transaction = Transaction(type='Продажа токена', summa=float(form.amount.data.replace(' ', '')),
+        transaction = Transaction(type='Продажа токена', summa=float(form.amount.data.replace(' ', '').replace(',', '.')),
                                   receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                   status='Успешно')
-        message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '')) * KT_BITS_IN_KT),
+        message, is_error = token_utils.sell_KTD(int(float(form.amount.data.replace(' ', '').replace(',', '.')) * KT_BITS_IN_KT),
                                                  user.private_key)
 
         if is_error:
@@ -456,7 +456,7 @@ def cashout():
     current_address = user.get_eth_address(current_user_id=current_user.id)
 
     if form.validate_on_submit():
-        amount = int(float(form.amount.data) * KT_BITS_IN_KT)
+        amount = int(float(form.amount.data.replace(',', '.')) * KT_BITS_IN_KT)
         result, is_error = token_utils.output_token(
             current_address,
             amount,
@@ -479,10 +479,10 @@ def transfer_ktd():
     user = User.query.filter_by(id=current_user.id).first()
     form = TransferKtdForm()
     if form.validate_on_submit():
-        transaction = Transaction(type='Перевод токенов', summa=float(form.num.data.replace(' ', '')),
+        transaction = Transaction(type='Перевод токенов', summa=float(form.num.data.replace(' ', '').replace(',', '.')),
                                   receiver=User.get_full_name(user.id), date=datetime.datetime.now(),
                                   status='Успешно')
-        num = int(float(form.num.data) * KT_BITS_IN_KT)
+        num = int(float(form.num.data.replace(' ', '').replace(",", ".")) * KT_BITS_IN_KT)
         address = form.address.data
         message, is_error = token_utils.transfer_KTD(num, address, user.private_key)
         if is_error:
@@ -515,7 +515,7 @@ def manage_ktd():
 
     if form.validate_on_submit():
         address = form.address.data
-        num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
+        num = int(float(form.num.data.replace(' ', '').replace(',', '.')) * KT_BITS_IN_KT)
         message, is_error = token_utils.set_KTD_seller(address, num, os.environ['ADMIN_PRIVATE_KEY'])
         if is_error:
             flash(message, 'error')
@@ -539,7 +539,7 @@ def manage_kti():
 
     if form.validate_on_submit():
         address = form.address.data
-        num = int(float(form.num.data.replace(' ', '')) * KT_BITS_IN_KT)
+        num = int(float(form.num.data.replace(' ', '').replace(',', '.')) * KT_BITS_IN_KT)
         message, is_error = token_utils.set_KTI_buyer(address, num, os.environ['ADMIN_PRIVATE_KEY'])
         if is_error:
             flash(message, 'error')
@@ -657,7 +657,7 @@ def change_token_exchange_rate():
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-        price = (float(form.price.data.replace(' ', '')) / eth_exchange_rate) * ETH_IN_WEI
+        price = (float(form.price.data.replace(' ', '').replace(',', '.')) / eth_exchange_rate) * ETH_IN_WEI
 
         private_key = os.environ['ADMIN_PRIVATE_KEY']
         nonce = token_utils.get_nonce(private_key)
@@ -692,7 +692,7 @@ def change_eth_exchange_rate():
     form = ChangeEthExchangeRate()
 
     if form.validate_on_submit():
-        price = float(form.price.data.replace(' ', ''))
+        price = float(form.price.data.replace(' ', '').replace(',', '.'))
         eth_exchange_rate = EthExchangeRate(date=datetime.datetime.now(), exchange_rate=price)
 
         db.session.add(eth_exchange_rate)
@@ -713,7 +713,7 @@ def fix_profit():
     form = FixProfit()
 
     if form.validate_on_submit():
-        profit = float(form.profit.data.replace(' ', ''))
+        profit = float(form.profit.data.replace(' ', '').replace(',', '.'))
         profit_record = Profit(date=datetime.datetime.now(), summa=profit)
 
         db.session.add(profit_record)
@@ -1267,7 +1267,7 @@ def add_budget_item(budget_id):
                                                           item=form.item.data).first()
     #votings = VotingTable.query.filter_by(status='Fixed').all()
     if form.validate_on_submit():
-        summa = round(float(form.cost.data.replace(' ', '')), 2)
+        summa = round(float(form.cost.data.replace(' ', '').replace(',', '.')), 2)
         who_added = f'{User.get_full_name(current_user.id)}'
         #voting_id = int(form.voting.data)
         bud_date = datetime.datetime.now().date()
